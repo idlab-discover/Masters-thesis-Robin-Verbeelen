@@ -2,6 +2,8 @@
 
 Template for a masters thesis at Ghent University Faculty of Engineering and Architecture (UGent FEA).
 
+test
+
 ## Features
 
 - Modern LaTex without warnings
