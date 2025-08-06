@@ -1,349 +1,349 @@
-% \chapter{Performance Analysis}
-% \label{chap:performance-analysis}
+\chapter{Performance Analysis}
+\label{chap:performance-analysis}
 
-% \section{Introduction}
-% \label{sec:perf-intro}
+\section{Introduction}
+\label{sec:perf-intro}
 
-% % TODO: Write brief intro explaining:
-% % - Purpose of performance evaluation 
-% % - Focus on WAMR vs Wasmtime comparison
-% % - Native as baseline reference
-% % - Overview of what will be analyzed (timing, memory, correctness)
+% TODO: Write brief intro explaining:
+% - Purpose of performance evaluation 
+% - Focus on WAMR vs Wasmtime comparison
+% - Native as baseline reference
+% - Overview of what will be analyzed (timing, memory, correctness)
 
-% \section{Experimental Setup}
-% \label{sec:experimental-setup}
+\section{Experimental Setup}
+\label{sec:experimental-setup}
 
-% \subsection{Hardware Configuration}
-% \label{subsec:hardware-config}
+\subsection{Hardware Configuration}
+\label{subsec:hardware-config}
 
-% % TODO: Describe your Pi + Arduino setup
-% % - Raspberry Pi specifications (model, OS, architecture)
-% % - Arduino Uno specifications
-% % - I2C connection between Pi and Arduino
-% % - Physical wiring diagram (reference to figure if you make one)
-% % - Why Arduino was chosen for I2C communication
+% TODO: Describe your Pi + Arduino setup
+% - Raspberry Pi specifications (model, OS, architecture)
+% - Arduino Uno specifications
+% - I2C connection between Pi and Arduino
+% - Physical wiring diagram (reference to figure if you make one)
+% - Why Arduino was chosen for I2C communication
 
-% The experimental setup consists of a Raspberry Pi connected to an Arduino Uno via I2C communication.
+The experimental setup consists of a Raspberry Pi connected to an Arduino Uno via I2C communication.
 
-% \textbf{Raspberry Pi Configuration:}
-% % TODO: Fill in your specific Pi details
-% \begin{itemize}
-%     \item Model: [YOUR_PI_MODEL]
-%     \item Architecture: [aarch64-unknown-linux-musl]
-%     \item Operating System: [YOUR_OS_VERSION]
-%     \item I2C Interface: Hardware I2C via GPIO pins [SPECIFY_PINS]
-% \end{itemize}
+\textbf{Raspberry Pi Configuration:}
+% TODO: Fill in your specific Pi details
+\begin{itemize}
+    \item Model: YOUR\_PI\_MODEL
+    \item Architecture: aarch64-unknown-linux-musl
+    \item Operating System: YOUR\_OS\_VERSION
+    \item I2C Interface: Hardware I2C via GPIO pins SPECIFY\_PINS
+\end{itemize}
 
-% \textbf{Arduino Uno Configuration:}
-% % TODO: Fill in Arduino details
-% \begin{itemize}
-%     \item Model: Arduino Uno
-%     \item I2C Address: [YOUR_I2C_ADDRESS] 
-%     \item Serial Monitor: Used for correctness verification
-%     \item Firmware: [DESCRIBE_YOUR_ARDUINO_CODE_BRIEFLY]
-% \end{itemize}
+\textbf{Arduino Uno Configuration:}
+% TODO: Fill in Arduino details
+\begin{itemize}
+    \item Model: Arduino Uno
+    \item I2C Address: [YOUR\_I2C\_ADDRESS] 
+    \item Serial Monitor: Used for correctness verification
+    \item Firmware: [DESCRIBE\_YOUR\_ARDUINO\_CODE\_BRIEFLY]
+\end{itemize}
 
-% % TODO: Add figure of your hardware setup if you have photos
-% % \begin{figure}[htbp]
-% % \centering
-% % \includegraphics[width=0.8\textwidth]{figures/hardware-setup}
-% % \caption{Raspberry Pi and Arduino I2C Test Setup}
-% % \label{fig:hardware-setup}
-% % \end{figure}
+% TODO: Add figure of your hardware setup if you have photos
+% \begin{figure}[htbp]
+% \centering
+% \includegraphics[width=0.8\textwidth]{figures/hardware-setup}
+% \caption{Raspberry Pi and Arduino I2C Test Setup}
+% \label{fig:hardware-setup}
+% \end{figure}
 
-% \subsection{Benchmark Methodology}
-% \label{subsec:benchmark-methodology}
+\subsection{Benchmark Methodology}
+\label{subsec:benchmark-methodology}
 
-% The performance evaluation follows a two-stage approach to ensure both correctness and reliable performance measurements.
+The performance evaluation follows a two-stage approach to ensure both correctness and reliable performance measurements.
 
-% \subsubsection{Stage 1: Correctness Verification}
+\subsubsection{Stage 1: Correctness Verification}
 
-% % TODO: Explain your correctness verification process
-% Before conducting performance measurements, correctness verification is performed:
-% \begin{enumerate}
-%     \item [DESCRIBE_VERIFICATION_PROCESS]
-%     \item Arduino serial monitor output verification
-%     \item [WHAT_DO_YOU_CHECK_SPECIFICALLY?]
-%     \item [HOW_DO_YOU_VERIFY_READ/WRITE_SUCCESS?]
-% \end{enumerate}
+% TODO: Explain your correctness verification process
+Before conducting performance measurements, correctness verification is performed:
+\begin{enumerate}
+    \item [DESCRIBE\_VERIFICATION\_PROCESS]
+    \item Arduino serial monitor output verification
+    \item [WHAT\_DO\_YOU\_CHECK\_SPECIFICALLY?]
+    \item [HOW\_DO\_YOU\_VERIFY\_READ/WRITE\_SUCCESS?]
+\end{enumerate}
 
-% % TODO: Maybe include example serial output or reference to appendix
+% TODO: Maybe include example serial output or reference to appendix
 % \begin{lstlisting}[caption=Example Arduino Serial Output for Verification,label=lst:serial-output]
 % // TODO: Include actual serial output from your Arduino
 % // showing successful I2C communication
 % \end{lstlisting}
 
-% \subsubsection{Stage 2: Performance Measurement}
+\subsubsection{Stage 2: Performance Measurement}
 
-% % TODO: Describe your Criterion benchmark setup
-% After correctness verification, performance measurements are conducted using:
-% \begin{itemize}
-%     \item \textbf{Framework:} Criterion.rs statistical benchmarking
-%     \item \textbf{Output Format:} JSON for automated analysis
-%     \item \textbf{Measurement Types:} [LIST_YOUR_BENCHMARK_CATEGORIES]
-%     \item \textbf{Statistical Method:} [DESCRIBE_CRITERION_SETTINGS]
-% \end{itemize}
+% TODO: Describe your Criterion benchmark setup
+After correctness verification, performance measurements are conducted using:
+\begin{itemize}
+    \item \textbf{Framework:} Criterion.rs statistical benchmarking
+    \item \textbf{Output Format:} JSON for automated analysis
+    \item \textbf{Measurement Types:} [LIST\_YOUR\_BENCHMARK\_CATEGORIES]
+    \item \textbf{Statistical Method:} [DESCRIBE\_CRITERION\_SETTINGS]
+\end{itemize}
 
-% The ``ping-pong'' operation consists of:
-% % TODO: Describe your exact ping-pong implementation
-% \begin{enumerate}
-%     \item Write [X] bytes to I2C address [ADDRESS]: \texttt{[YOUR_DATA_BYTES]}
-%     \item Read [X] bytes from the same I2C address
-%     \item [ANY_VERIFICATION_STEP?]
-% \end{enumerate}
+The ``ping-pong'' operation consists of:
+% TODO: Describe your exact ping-pong implementation
+\begin{enumerate}
+    \item Write [X] bytes to I2C address [ADDRESS]: \texttt{[YOUR\_DATA\_BYTES]}
+    \item Read [X] bytes from the same I2C address
+    \item [ANY\_VERIFICATION\_STEP?]
+\end{enumerate}
 
-% \section{Performance Results}
-% \label{sec:performance-results}
+\section{Performance Results}
+\label{sec:performance-results}
 
-% \subsection{Runtime Setup Performance}
-% \label{subsec:setup-performance}
+\subsection{Runtime Setup Performance}
+\label{subsec:setup-performance}
 
-% % TODO: Present your setup timing results
-% Table~\ref{tab:setup-performance} shows the initialization time for each runtime implementation.
+% TODO: Present your setup timing results
+Table~\ref{tab:setup-performance} shows the initialization time for each runtime implementation.
 
-% \begin{table}[htbp]
+\begin{table}[htbp]
+\centering
+\caption{Runtime Setup Performance Comparison}
+\label{tab:setup-performance}
+\begin{tabular}{lrrr}
+\toprule
+\textbf{Implementation} & \textbf{Mean (ns)} & \textbf{Std Dev (ns)} & \textbf{Relative to Native} \\
+\midrule
+% TODO: Fill in your actual benchmark results
+Native        & [FILL\_NATIVE\_SETUP]    & [FILL\_STD]  & 1.0x \\
+WAMR          & [FILL\_WAMR\_SETUP]      & [FILL\_STD]  & [CALC]x \\
+Wasmtime      & [FILL\_WASMTIME\_SETUP]  & [FILL\_STD]  & [CALC]x \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% TODO: Add your analysis of setup performance
+% Focus on WAMR vs Wasmtime differences
+% Why is Wasmtime so much slower?
+% Implications for embedded usage
+
+\subsection{Execution Performance}
+\label{subsec:execution-performance}
+
+\subsubsection{Cold Execution}
+
+% TODO: Present cold execution results
+Table~\ref{tab:cold-performance} presents the performance of the first execution after runtime setup.
+
+\begin{table}[htbp]
+\centering
+\caption{Cold Execution Performance}
+\label{tab:cold-performance}
+\begin{tabular}{lrrr}
+\toprule
+\textbf{Implementation} & \textbf{Mean (ns)} & \textbf{95\% CI Lower} & \textbf{95\% CI Upper} \\
+\midrule
+% TODO: Fill in your cold execution data
+Native        & [FILL]    & [FILL]  & [FILL] \\
+WAMR          & [FILL]    & [FILL]  & [FILL] \\
+Wasmtime      & [FILL]    & [FILL]  & [FILL] \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Hot Execution}
+
+% TODO: Present hot execution results
+Table~\ref{tab:hot-performance} shows steady-state performance after runtime warmup.
+
+\begin{table}[htbp]
+\centering
+\caption{Hot Execution Performance}
+\label{tab:hot-performance}
+\begin{tabular}{lrrr}
+\toprule
+\textbf{Implementation} & \textbf{Mean (ns)} & \textbf{Median (ns)} & \textbf{MAD (ns)} \\
+\midrule
+% TODO: Fill in your hot execution data
+Native        & [FILL]    & [FILL]  & [FILL] \\
+WAMR          & [FILL]    & [FILL]  & [FILL] \\
+Wasmtime      & [FILL]    & [FILL]  & [FILL] \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% TODO: Add performance comparison figure
+% \begin{figure}[htbp]
 % \centering
-% \caption{Runtime Setup Performance Comparison}
-% \label{tab:setup-performance}
-% \begin{tabular}{lrrr}
-% \toprule
-% \textbf{Implementation} & \textbf{Mean (ns)} & \textbf{Std Dev (ns)} & \textbf{Relative to Native} \\
-% \midrule
-% % TODO: Fill in your actual benchmark results
-% Native        & [FILL_NATIVE_SETUP]    & [FILL_STD]  & 1.0x \\
-% WAMR          & [FILL_WAMR_SETUP]      & [FILL_STD]  & [CALC]x \\
-% Wasmtime      & [FILL_WASMTIME_SETUP]  & [FILL_STD]  & [CALC]x \\
-% \bottomrule
-% \end{tabular}
-% \end{table}
+% \includegraphics[width=0.9\textwidth]{figures/execution-performance-comparison}
+% \caption{Execution Performance Comparison: WAMR vs Wasmtime vs Native}
+% \label{fig:execution-comparison}
+% \end{figure}
 
-% % TODO: Add your analysis of setup performance
-% % Focus on WAMR vs Wasmtime differences
-% % Why is Wasmtime so much slower?
-% % Implications for embedded usage
+\section{Statistical Analysis}
+\label{sec:statistical-analysis}
 
-% \subsection{Execution Performance}
-% \label{subsec:execution-performance}
+% TODO: Add statistical analysis of your results
+\subsection{Significance Testing}
 
-% \subsubsection{Cold Execution}
+% TODO: Perform and report statistical tests
+% Mann-Whitney U test between WAMR and Wasmtime
+% Effect size calculations
+% Discussion of practical vs statistical significance
 
-% % TODO: Present cold execution results
-% Table~\ref{tab:cold-performance} presents the performance of the first execution after runtime setup.
+\subsection{Performance Variability}
 
-% \begin{table}[htbp]
+% TODO: Analyze the stability/consistency of your measurements
+% Compare variability between implementations
+% Discuss implications for real-world usage
+
+% TODO: Reference box plots or violin plots showing distribution
+% \begin{figure}[htbp]
 % \centering
-% \caption{Cold Execution Performance}
-% \label{tab:cold-performance}
-% \begin{tabular}{lrrr}
-% \toprule
-% \textbf{Implementation} & \textbf{Mean (ns)} & \textbf{95\% CI Lower} & \textbf{95\% CI Upper} \\
-% \midrule
-% % TODO: Fill in your cold execution data
-% Native        & [FILL]    & [FILL]  & [FILL] \\
-% WAMR          & [FILL]    & [FILL]  & [FILL] \\
-% Wasmtime      & [FILL]    & [FILL]  & [FILL] \\
-% \bottomrule
-% \end{tabular}
-% \end{table}
+% \includegraphics[width=0.9\textwidth]{figures/performance-distributions}
+% \caption{Performance Distribution Comparison}
+% \label{fig:performance-distributions}
+% \end{figure}
 
-% \subsubsection{Hot Execution}
+\section{Memory Usage Analysis}
+\label{sec:memory-analysis}
 
-% % TODO: Present hot execution results
-% Table~\ref{tab:hot-performance} shows steady-state performance after runtime warmup.
+\subsection{DHAT Profiling Setup}
 
-% \begin{table}[htbp]
+% TODO: Explain your DHAT configuration
+Memory profiling was conducted using DHAT (Dynamic Heap Analysis Tool) with the following configuration:
+\begin{itemize}
+    \item \textbf{Profiling Targets:} [SPECIFY\_WHAT\_YOU\_PROFILED]
+    \item \textbf{Measurement Phases:} Runtime setup, ping-pong execution
+    \item \textbf{Output Format:} JSON for automated analysis
+\end{itemize}
+
+\subsection{Runtime Setup Memory Usage}
+
+% TODO: Present DHAT results for setup phase
+Table~\ref{tab:memory-setup} shows memory allocation patterns during runtime initialization.
+
+\begin{table}[htbp]
+\centering
+\caption{Memory Usage During Runtime Setup}
+\label{tab:memory-setup}
+\begin{tabular}{lrrr}
+\toprule
+\textbf{Implementation} & \textbf{Peak Heap (KB)} & \textbf{Total Allocs} & \textbf{Avg Alloc Size (B)} \\
+\midrule
+% TODO: Fill in your DHAT setup results
+Native        & [FILL]    & [FILL]  & [FILL] \\
+WAMR          & [FILL]    & [FILL]  & [FILL] \\
+Wasmtime      & [FILL]    & [FILL]  & [FILL] \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Execution Memory Usage}
+
+% TODO: Present DHAT results for ping-pong execution
+Table~\ref{tab:memory-execution} shows memory usage patterns during ping-pong operations.
+
+\begin{table}[htbp]
+\centering
+\caption{Memory Usage During Ping-Pong Execution}
+\label{tab:memory-execution}
+\begin{tabular}{lrrr}
+\toprule
+\textbf{Implementation} & \textbf{Heap Growth (KB)} & \textbf{Execution Allocs} & \textbf{Memory Lifetime (ms)} \\
+\midrule
+% TODO: Fill in your DHAT execution results
+Native        & [FILL]    & [FILL]  & [FILL] \\
+WAMR          & [FILL]    & [FILL]  & [FILL] \\
+Wasmtime      & [FILL]    & [FILL]  & [FILL] \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% TODO: Analyze memory usage differences
+% Why does Wasmtime use more memory?
+% Implications for embedded systems
+% Memory efficiency comparison
+
+\section{WAMR vs Wasmtime Comparison}
+\label{sec:wamr-vs-wasmtime}
+
+% TODO: This is your main focus section
+% Direct comparison of the two WebAssembly runtimes
+% Analyze strengths/weaknesses of each approach
+
+\subsection{Performance Characteristics}
+
+% TODO: Compare performance profiles
+\begin{itemize}
+    \item \textbf{Setup Performance:} [ANALYZE\_SETUP\_DIFFERENCES]
+    \item \textbf{Steady-State Performance:} [ANALYZE\_EXECUTION\_DIFFERENCES] 
+    \item \textbf{Memory Efficiency:} [COMPARE\_MEMORY\_USAGE]
+    \item \textbf{Performance Consistency:} [COMPARE\_VARIABILITY]
+\end{itemize}
+
+\subsection{Architecture Differences}
+
+% TODO: Discuss architectural differences affecting performance
+\begin{itemize}
+    \item \textbf{WASI Preview 1 vs Preview 2:} [IMPACT\_ON\_PERFORMANCE]
+    \item \textbf{Component Model Overhead:} [WASMTIME\_SPECIFIC\_COSTS]
+    \item \textbf{Handwritten vs Generated Bindings:} [BINDING\_IMPACT]
+    \item \textbf{Runtime Optimizations:} [DIFFERENT\_OPTIMIZATION\_STRATEGIES]
+\end{itemize}
+
+\subsection{Embedded Suitability}
+
+% TODO: Evaluate suitability for embedded applications
+\begin{itemize}
+    \item \textbf{Resource Constraints:} [MEMORY\_CPU\_REQUIREMENTS]
+    \item \textbf{Startup Latency:} [IMPACT\_ON\_REAL\_APPLICATIONS]
+    \item \textbf{Deterministic Performance:} [REAL\_TIME\_CONSIDERATIONS]
+    \item \textbf{Development Experience:} [TOOLING\_DEBUGGING\_SUPPORT]
+\end{itemize}
+
+\section{Flame Graph Analysis}
+\label{sec:flamegraph-analysis}
+
+% TODO: Analyze your pprof flame graph results
+Flame graph analysis provides insights into CPU time distribution during execution.
+
+% TODO: Reference your flame graph figure
+% \begin{figure}[htbp]
 % \centering
-% \caption{Hot Execution Performance}
-% \label{tab:hot-performance}
-% \begin{tabular}{lrrr}
-% \toprule
-% \textbf{Implementation} & \textbf{Mean (ns)} & \textbf{Median (ns)} & \textbf{MAD (ns)} \\
-% \midrule
-% % TODO: Fill in your hot execution data
-% Native        & [FILL]    & [FILL]  & [FILL] \\
-% WAMR          & [FILL]    & [FILL]  & [FILL] \\
-% Wasmtime      & [FILL]    & [FILL]  & [FILL] \\
-% \bottomrule
-% \end{tabular}
-% \end{table}
+% \includegraphics[width=1.0\textwidth]{figures/flamegraph-comparison}
+% \caption{CPU Time Distribution Flame Graph}
+% \label{fig:flamegraph}
+% \end{figure}
 
-% % TODO: Add performance comparison figure
-% % \begin{figure}[htbp]
-% % \centering
-% % \includegraphics[width=0.9\textwidth]{figures/execution-performance-comparison}
-% % \caption{Execution Performance Comparison: WAMR vs Wasmtime vs Native}
-% % \label{fig:execution-comparison}
-% % \end{figure}
+% TODO: Analyze what the flame graph shows
+% Where is time spent in each implementation?
+% What are the bottlenecks?
+% How do call stacks compare between WAMR and Wasmtime?
 
-% \section{Statistical Analysis}
-% \label{sec:statistical-analysis}
+\subsection{Hotspot Analysis}
 
-% % TODO: Add statistical analysis of your results
-% \subsection{Significance Testing}
+% TODO: Identify performance hotspots from flame graph
+\begin{itemize}
+    \item \textbf{WAMR Hotspots:} [IDENTIFY\_EXPENSIVE\_FUNCTIONS]
+    \item \textbf{Wasmtime Hotspots:} [IDENTIFY\_EXPENSIVE\_FUNCTIONS]
+    \item \textbf{Common Bottlenecks:} [SHARED\_EXPENSIVE\_OPERATIONS]
+\end{itemize}
 
-% % TODO: Perform and report statistical tests
-% % Mann-Whitney U test between WAMR and Wasmtime
-% % Effect size calculations
-% % Discussion of practical vs statistical significance
+\subsection{Call Stack Comparison}
 
-% \subsection{Performance Variability}
+% TODO: Compare call stack depth and complexity
+% Which runtime has simpler/more complex execution paths?
 
-% % TODO: Analyze the stability/consistency of your measurements
-% % Compare variability between implementations
-% % Discuss implications for real-world usage
+\section{Summary}
+\label{sec:performance-summary}
 
-% % TODO: Reference box plots or violin plots showing distribution
-% % \begin{figure}[htbp]
-% % \centering
-% % \includegraphics[width=0.9\textwidth]{figures/performance-distributions}
-% % \caption{Performance Distribution Comparison}
-% % \label{fig:performance-distributions}
-% % \end{figure}
+% TODO: Brief summary of key findings
+% Keep this short since you'll have full conclusion chapter
+This chapter presented a comprehensive performance analysis comparing WAMR and Wasmtime implementations of the I2C WASI interface.
 
-% \section{Memory Usage Analysis}
-% \label{sec:memory-analysis}
+\textbf{Key Findings:}
+\begin{itemize}
+    \item [SUMMARIZE\_SETUP\_PERFORMANCE\_DIFFERENCE]
+    \item [SUMMARIZE\_EXECUTION\_PERFORMANCE\_SIMILARITY]
+    \item [SUMMARIZE\_MEMORY\_USAGE\_DIFFERENCES] 
+    \item [SUMMARIZE\_EMBEDDED\_SUITABILITY\_ASSESSMENT]
+\end{itemize}
 
-% \subsection{DHAT Profiling Setup}
-
-% % TODO: Explain your DHAT configuration
-% Memory profiling was conducted using DHAT (Dynamic Heap Analysis Tool) with the following configuration:
-% \begin{itemize}
-%     \item \textbf{Profiling Targets:} [SPECIFY_WHAT_YOU_PROFILED]
-%     \item \textbf{Measurement Phases:} Runtime setup, ping-pong execution
-%     \item \textbf{Output Format:} JSON for automated analysis
-% \end{itemize}
-
-% \subsection{Runtime Setup Memory Usage}
-
-% % TODO: Present DHAT results for setup phase
-% Table~\ref{tab:memory-setup} shows memory allocation patterns during runtime initialization.
-
-% \begin{table}[htbp]
-% \centering
-% \caption{Memory Usage During Runtime Setup}
-% \label{tab:memory-setup}
-% \begin{tabular}{lrrr}
-% \toprule
-% \textbf{Implementation} & \textbf{Peak Heap (KB)} & \textbf{Total Allocs} & \textbf{Avg Alloc Size (B)} \\
-% \midrule
-% % TODO: Fill in your DHAT setup results
-% Native        & [FILL]    & [FILL]  & [FILL] \\
-% WAMR          & [FILL]    & [FILL]  & [FILL] \\
-% Wasmtime      & [FILL]    & [FILL]  & [FILL] \\
-% \bottomrule
-% \end{tabular}
-% \end{table}
-
-% \subsection{Execution Memory Usage}
-
-% % TODO: Present DHAT results for ping-pong execution
-% Table~\ref{tab:memory-execution} shows memory usage patterns during ping-pong operations.
-
-% \begin{table}[htbp]
-% \centering
-% \caption{Memory Usage During Ping-Pong Execution}
-% \label{tab:memory-execution}
-% \begin{tabular}{lrrr}
-% \toprule
-% \textbf{Implementation} & \textbf{Heap Growth (KB)} & \textbf{Execution Allocs} & \textbf{Memory Lifetime (ms)} \\
-% \midrule
-% % TODO: Fill in your DHAT execution results
-% Native        & [FILL]    & [FILL]  & [FILL] \\
-% WAMR          & [FILL]    & [FILL]  & [FILL] \\
-% Wasmtime      & [FILL]    & [FILL]  & [FILL] \\
-% \bottomrule
-% \end{tabular}
-% \end{table}
-
-% % TODO: Analyze memory usage differences
-% % Why does Wasmtime use more memory?
-% % Implications for embedded systems
-% % Memory efficiency comparison
-
-% \section{WAMR vs Wasmtime Comparison}
-% \label{sec:wamr-vs-wasmtime}
-
-% % TODO: This is your main focus section
-% % Direct comparison of the two WebAssembly runtimes
-% % Analyze strengths/weaknesses of each approach
-
-% \subsection{Performance Characteristics}
-
-% % TODO: Compare performance profiles
-% \begin{itemize}
-%     \item \textbf{Setup Performance:} [ANALYZE_SETUP_DIFFERENCES]
-%     \item \textbf{Steady-State Performance:} [ANALYZE_EXECUTION_DIFFERENCES] 
-%     \item \textbf{Memory Efficiency:} [COMPARE_MEMORY_USAGE]
-%     \item \textbf{Performance Consistency:} [COMPARE_VARIABILITY]
-% \end{itemize}
-
-% \subsection{Architecture Differences}
-
-% % TODO: Discuss architectural differences affecting performance
-% \begin{itemize}
-%     \item \textbf{WASI Preview 1 vs Preview 2:} [IMPACT_ON_PERFORMANCE]
-%     \item \textbf{Component Model Overhead:} [WASMTIME_SPECIFIC_COSTS]
-%     \item \textbf{Handwritten vs Generated Bindings:} [BINDING_IMPACT]
-%     \item \textbf{Runtime Optimizations:} [DIFFERENT_OPTIMIZATION_STRATEGIES]
-% \end{itemize}
-
-% \subsection{Embedded Suitability}
-
-% % TODO: Evaluate suitability for embedded applications
-% \begin{itemize}
-%     \item \textbf{Resource Constraints:} [MEMORY_CPU_REQUIREMENTS]
-%     \item \textbf{Startup Latency:} [IMPACT_ON_REAL_APPLICATIONS]
-%     \item \textbf{Deterministic Performance:} [REAL_TIME_CONSIDERATIONS]
-%     \item \textbf{Development Experience:} [TOOLING_DEBUGGING_SUPPORT]
-% \end{itemize}
-
-% \section{Flame Graph Analysis}
-% \label{sec:flamegraph-analysis}
-
-% % TODO: Analyze your pprof flame graph results
-% Flame graph analysis provides insights into CPU time distribution during execution.
-
-% % TODO: Reference your flame graph figure
-% % \begin{figure}[htbp]
-% % \centering
-% % \includegraphics[width=1.0\textwidth]{figures/flamegraph-comparison}
-% % \caption{CPU Time Distribution Flame Graph}
-% % \label{fig:flamegraph}
-% % \end{figure}
-
-% % TODO: Analyze what the flame graph shows
-% % Where is time spent in each implementation?
-% % What are the bottlenecks?
-% % How do call stacks compare between WAMR and Wasmtime?
-
-% \subsection{Hotspot Analysis}
-
-% % TODO: Identify performance hotspots from flame graph
-% \begin{itemize}
-%     \item \textbf{WAMR Hotspots:} [IDENTIFY_EXPENSIVE_FUNCTIONS]
-%     \item \textbf{Wasmtime Hotspots:} [IDENTIFY_EXPENSIVE_FUNCTIONS]
-%     \item \textbf{Common Bottlenecks:} [SHARED_EXPENSIVE_OPERATIONS]
-% \end{itemize}
-
-% \subsection{Call Stack Comparison}
-
-% % TODO: Compare call stack depth and complexity
-% % Which runtime has simpler/more complex execution paths?
-
-% \section{Summary}
-% \label{sec:performance-summary}
-
-% % TODO: Brief summary of key findings
-% % Keep this short since you'll have full conclusion chapter
-% This chapter presented a comprehensive performance analysis comparing WAMR and Wasmtime implementations of the I2C WASI interface.
-
-% \textbf{Key Findings:}
-% \begin{itemize}
-%     \item [SUMMARIZE_SETUP_PERFORMANCE_DIFFERENCE]
-%     \item [SUMMARIZE_EXECUTION_PERFORMANCE_SIMILARITY]
-%     \item [SUMMARIZE_MEMORY_USAGE_DIFFERENCES] 
-%     \item [SUMMARIZE_EMBEDDED_SUITABILITY_ASSESSMENT]
-% \end{itemize}
-
-% % TODO: Lead into next chapter (Discussion?)
-% The implications of these findings for embedded WebAssembly applications are discussed in Chapter~\ref{chap:discussion}.
+% TODO: Lead into next chapter (Discussion?)
+The implications of these findings for embedded WebAssembly applications are discussed in Chapter~\ref{chap:discussion}.
