@@ -1,29 +1,4 @@
-% Master thesis template for Ghent University (2021)
-%
-%
-%  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-%  !!        MAKE SURE TO SET XeLaTex AS LATEX ENGINE        !!
-%  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-%  !! For overleaf:                                          !!
-%  !!     1. click gear icon in top right                    !!
-%  !!     2. select `XeLaTex` in "latex engine"              !!
-%  !!     3. click "save project settings"                   !!
-%  !!                                                        !!
-%  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-%
-%
-%  History
-%    2014         Doctoral Thesis of Bruno Volckaert
-%    2017         Adapted to master thesis by Jerico Moeyersons
-%    2018         Cleanup by Merlijn Sebrechts
-%    2021         Update by Marleen Denert and Merlijn Sebrechts with feedback from Leen Pollefliet
-%    2022, 2023   Updates by Merlijn Sebrechts
-%    2024         Switch to English as first language
-%
-%  Latest version
-%    https://github.com/merlijn-sebrechts/masterproef-template
-%
-
+% TODO: Consider using modern I2C terms: "controller" & "peripheral"/"target" vs. "master" & "slave"
 % Note: remove `openany` for printed version
 \documentclass[12pt,a4paper,openany,dutch,english]{extbook}
 \usepackage[a4paper,includeheadfoot,margin=2.50cm]{geometry}
@@ -63,14 +38,14 @@
 %
 % UGent style guide
 % zet onderstaande lijnen uit commentaar om het font in te stellen
-% \setmainfont[
-% 	Path=fonts/,
-% 	BoldFont      =UGentPannoText-SemiBold.ttf,
-% 	ItalicFont    =UGentPannoText-Normal.ttf,
-% 	ItalicFeatures={FakeSlant=0.3},
-% 	BoldItalicFont=UGentPannoText-SemiBold.ttf,
-%    BoldItalicFeatures={FakeSlant=0.3},
-% ]{UGentPannoText-Normal.ttf}
+\setmainfont[
+	Path=fonts/,
+	BoldFont      =UGentPannoText-SemiBold.ttf,
+	ItalicFont    =UGentPannoText-Normal.ttf,
+	ItalicFeatures={FakeSlant=0.3},
+	BoldItalicFont=UGentPannoText-SemiBold.ttf,
+   BoldItalicFeatures={FakeSlant=0.3},
+]{UGentPannoText-Normal.ttf}
 
 \urlstyle{same} % Also use the default font for URLs
 
