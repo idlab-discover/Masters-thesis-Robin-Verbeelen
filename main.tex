@@ -34,7 +34,7 @@
 \usepackage{lipsum}
 
 
-\setmainfont{Arial}
+% \setmainfont{Arial}
 %
 % UGent style guide
 % zet onderstaande lijnen uit commentaar om het font in te stellen
@@ -51,7 +51,7 @@
 
 
 % If you want left justified text, uncomment the line below.
-%\usepackage[document]{ragged2e} % Left justify all text
+% \usepackage[document]{ragged2e} % Left justify all text
 
 % Style Chapter titles so they have the chapter number in grey.
 \usepackage{color}
@@ -126,6 +126,9 @@
 \usepackage[toc,acronym]{glossaries}  % for list of acronyms
 \makeglossaries                       % start internal list of acronyms
 
+% TODO: Bepalen of ik dit wel wil. Text dan met iets meer "spaties" tussen woorden, maar vermijdt wel ongemakkelijke woordafbrekingen.
+\hyphenpenalty=5000
+\tolerance=1000
 
 %
 % Set the title and your name
@@ -166,6 +169,7 @@
 \include{chapters/8_chapter_2.tex}
 \include{chapters/8_chapter_3.tex}
 \include{chapters/8_chapter_4.tex}
+\include{chapters/8_chapter_5.tex}
 \include{chapters/9_conclusion.tex}
 \include{chapters/10_future-work.tex}
 \include{chapters/11_ethical-reflection.tex}

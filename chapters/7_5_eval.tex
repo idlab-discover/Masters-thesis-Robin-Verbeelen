@@ -4,12 +4,13 @@
 \section{Introduction}
 \label{sec:eval-intro}
 
-% TODO: Write brief intro explaining:
-% - Purpose of experimental evaluation comparing I2C WASI implementations
-% - Primary focus: WAMR vs Wasmtime detailed comparison
-% - Native implementation serves as performance baseline and reference
-% - Methodology: timing analysis, memory profiling, statistical evaluation
-% - Research questions this chapter addresses
+% TODO: Write brief intro
+
+With comparable I2C WASI interface implementations now available for both WAMR and Wasmtime runtimes, this chapter presents a comprehensive experimental evaluation comparing their \textbf{performance characteristics} and \textbf{resource utilization}. The primary focus centers on a detailed comparative analysis between these two WebAssembly runtime approaches, while leveraging the native implementation as a performance baseline and reference point.
+
+The evaluation encompasses \textbf{timing analysis} across multiple execution phases and comprehensive \textbf{memory profiling} to track allocation patterns. This data is then used for statistical analysis to ensure reliable and reproducible results. By systematically measuring runtime setup overhead, execution latency, and memory consumption, this experimental evaluation provides quantitative insights into the practical trade-offs between different WebAssembly runtime architectures.
+
+This analysis directly addresses the second research question of this thesis: \textbf{RQ2: What is the performance impact of different WebAssembly runtime approaches?} Through controlled experimentation and statistical validation, the evaluation establishes an empirical foundation for understanding when and why specific runtime choices are optimal for embedded I2C applications.
 
 \section{Experimental Setup}
 \label{sec:experimental-setup}
@@ -17,9 +18,9 @@
 \subsection{Hardware Configuration}
 \label{subsec:hardware-config}
 
-The experimental testbed consists of a Raspberry Pi acting as the I2C master device, connected to an Arduino Uno serving as the I2C slave device.
+The experimental testbed consists of a Raspberry Pi acting as the I2C controller, connected to an Arduino Uno serving as the I2C peripheral\footnote{Modern naming conventions for I2C context prefer \textit{controller/peripheral} over \textit{master/slave}}.
 
-\textbf{Raspberry Pi Master Configuration:}
+\textbf{Raspberry Pi Controller Configuration:}
 \begin{itemize}
     \item Model: \textit{[FILL: your Pi model]}
     \item Architecture: aarch64-unknown-linux-musl
@@ -28,7 +29,7 @@ The experimental testbed consists of a Raspberry Pi acting as the I2C master dev
     \item I2C Clock Speed: \textit{[FILL: if you know the frequency]}
 \end{itemize}
 
-\textbf{Arduino Uno Slave Configuration:}
+\textbf{Arduino Uno Peripheral Configuration:}
 \begin{itemize}
     \item Model: Arduino Uno (ATmega328P)
     \item I2C Slave Address: \textit{[FILL: your address, e.g., 0x09]}

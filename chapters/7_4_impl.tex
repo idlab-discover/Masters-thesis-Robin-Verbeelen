@@ -1,0 +1,27 @@
+\chapter{Implementation}
+\label{chap:4}
+
+
+Dev env: rust, cross comp en justfile
+
+p1 bindings
+- waarom geen wit-bindgen
+- code highlights
+- type mapping from wit to p1
+- Error handling (lack of system of reporting wamr problems vs i2c errors)
+
+Wamr
+- host function registration
+    - exec\_env available in host param
+    - converting pointers from guest to native
+- ACL on handles (I2cPermManager)
+- registering managed host heap size when using host-managed heap
+
+Wasmtime
+- Focus on differences instead of actual implementation
+- bespreek meest belangrijke code met codeblocks
+
+Usage of Linux embedded HAL voor host functions in beide runtimes
+Mapping van errors makkelijk sinds i2c interface based on embedded-hal
+
+Benchmarking framework design en mogelijkheden, maar uitgebreidere implementatiebespreking is pas voor chap:evaluation
