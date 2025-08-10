@@ -4,8 +4,6 @@
 \section{Introduction}
 \label{sec:eval-intro}
 
-% TODO: Write brief intro
-
 With comparable I2C WASI interface implementations now available for both WAMR and Wasmtime runtimes, this chapter presents a comprehensive experimental evaluation comparing their \textbf{performance characteristics} and \textbf{resource utilization}. The primary focus centers on a detailed comparative analysis between these two WebAssembly runtime approaches, while leveraging the native implementation as a performance baseline and reference point.
 
 The evaluation encompasses \textbf{timing analysis} across multiple execution phases and comprehensive \textbf{memory profiling} to track allocation patterns. This data is then used for statistical analysis to ensure reliable and reproducible results. By systematically measuring runtime setup overhead, execution latency, and memory consumption, this experimental evaluation provides quantitative insights into the practical trade-offs between different WebAssembly runtime architectures.
@@ -14,36 +12,33 @@ This analysis directly addresses the second research question of this thesis: \t
 
 \section{Experimental Setup}
 \label{sec:experimental-setup}
+Having established the evaluation objectives and methodology in Section~\ref{sec:eval-intro}, this section details the required infrastructure. The experimental setup encompasses three critical components: the hardware configuration that enables I2C communication, the firmware implementations of the I2C peripheral, and the software framework that facilitates accurate performance measurement and statistical analysis.
 
 \subsection{Hardware Configuration}
 \label{subsec:hardware-config}
 
-The experimental testbed consists of a Raspberry Pi acting as the I2C controller, connected to an Arduino Uno serving as the I2C peripheral\footnote{Modern naming conventions for I2C context prefer \textit{controller/peripheral} over \textit{master/slave}}.
+The experimental testbed consists of a Raspberry Pi acting as the I2C controller, connected to an Arduino Uno serving as the I2C peripheral \footnote{Modern naming conventions for I2C context prefer \textit{controller/peripheral} over \textit{master/slave}}.
 
-\textbf{Raspberry Pi Controller Configuration:}
+\textbf{Controller Configuration:}
 \begin{itemize}
-    \item Model: \textit{[FILL: your Pi model]}
-    \item Architecture: aarch64-unknown-linux-musl
-    \item Operating System: \textit{[FILL: your OS version]}
-    \item I2C Interface: Hardware I2C via GPIO pins \textit{[FILL: specify pins]}
-    \item I2C Clock Speed: \textit{[FILL: if you know the frequency]}
+    \item Board: \textit{Raspberry Pi 5}
+    \item Architecture: \textit{ARM64} % TODO: reference pi datasheet
+    \item Operating System: \textit{Raspberry Pi OS}
 \end{itemize}
 
-\textbf{Arduino Uno Peripheral Configuration:}
+\textbf{Peripheral Configuration:}
 \begin{itemize}
-    \item Model: Arduino Uno (ATmega328P)
-    \item I2C Slave Address: \textit{[FILL: your address, e.g., 0x09]}
-    \item Firmware: Custom I2C responder implementation
-    \item Serial Interface: USB serial for correctness verification (disabled during performance tests)
+    \item Board: \textit{Arduino Uno R3 (ATmega328P)}
+    \item Peripheral Address: \textit{0x09}
+    \item Serial Interface: \textit{USB serial for correctness verification (disabled during performance tests)}
 \end{itemize}
 
-% TODO: Add hardware connection diagram if available
-% \begin{figure}[htbp]
-% \centering
-% \includegraphics[width=0.7\textwidth]{figures/hardware-setup}
-% \caption{Raspberry Pi and Arduino I2C Communication Setup}
-% \label{fig:hardware-setup}
-% \end{figure}
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.7\textwidth]{images/HW_config.png}
+	\caption{Hardware connection diagram.}
+	\label{fig:hw-connection}
+\end{figure}
 
 \subsection{Arduino Firmware Implementation}
 \label{subsec:arduino-firmware}
@@ -51,174 +46,220 @@ The experimental testbed consists of a Raspberry Pi acting as the I2C controller
 Two firmware versions were developed for different evaluation phases:
 
 \textbf{Correctness Verification Firmware:}
-% TODO: Briefly describe the serial monitor version
 The initial firmware version implements echo functionality with serial output for debugging and correctness verification. This version logs all I2C transactions to the serial monitor, allowing verification of successful read/write operations.
 
 \textbf{Performance Testing Firmware:}
-% TODO: Describe the optimized version
-For performance benchmarks, an optimized firmware version was deployed that eliminates serial communication overhead. Upon receiving any I2C write request, the Arduino responds with a fixed ``hello'' message (\texttt{0x68, 0x65, 0x6c, 0x6c, 0x6f}) for subsequent read operations. This approach minimizes Arduino-side processing variability and ensures consistent response timing.
+For performance benchmarks, an optimized firmware version was deployed that eliminates serial communication overhead. Upon receiving any I2C write request, the Arduino responds with a fixed ``hello'' message (\texttt{0x68, 0x65, 0x6c, 0x6c, 0x6f}) for one subsequent read operation. This approach minimizes Arduino-side processing variability and keeps extra overhead to a minimum.
 
 \subsection{Benchmark Methodology}
 \label{subsec:benchmark-methodology}
 
-The evaluation follows a rigorous two-phase methodology to ensure both correctness and measurement reliability.
+The evaluation follows a two-phase methodology to ensure both correctness and measurement reliability.
 
 \subsubsection{Phase 1: Correctness Verification}
 \label{subsubsec:correctness-verification}
 
 Prior to performance measurement, functional correctness is verified:
 \begin{enumerate}
-    \item Deploy correctness verification firmware with serial logging
-    \item Execute ping-pong operations across all implementations
-    \item Verify successful I2C transactions via Arduino serial monitor output
-    \item Confirm data integrity for both write and read operations
+    \item Deploy correctness verification firmware with serial logging to the Arduino
+    \item Execute ping-pong operations across all implementations on the Pi
+    \item Verify successful I2C transactions via Arduino Serial Monitor output
 \end{enumerate}
-
-% TODO: Consider adding example serial output in appendix
-Example verification output demonstrates successful I2C communication (see Appendix~\ref{appendix:serial-logs} for complete logs).
 
 \subsubsection{Phase 2: Performance Measurement}
 \label{subsubsec:performance-measurement}
 
-Performance evaluation employs Criterion.rs, a statistical benchmarking framework that provides:
-\begin{itemize}
-    \item \textbf{Statistical Rigor:} Automatic outlier detection and confidence interval calculation
-    \item \textbf{Output Format:} Machine-readable JSON for reproducible analysis
-    \item \textbf{Sampling Strategy:} Automatically defined sample size based on measurement stability
-\end{itemize}
+Performance evaluation employs \textbf{Criterion.rs}, a statistical benchmarking framework that provides automatic outlier detection, distribution plotting, achievable sample size/mean/deviation/... calculation and more \cite{criterion_rs}. The tool \texttt{cargo-criterion }provides machine-readable JSON output of those measurements, which allows us to also perform manual analysis and visualizations using Python/Jupyter.
 
-\textbf{Ping-Pong Operation Definition:}
-The benchmarked function performs a complete I2C transaction cycle:
-\begin{enumerate}
-    \item Open a I2C-resource
-    \item Write 5 bytes (\texttt{[0x68, 0x65, 0x6c, 0x6c, 0x6f]}) to I2C slave address
-    \item Read 5 bytes from the same I2C slave address
-    \item Verify operation completion (no explicit data validation during timing)
-\end{enumerate}
-
-\textbf{Measurement Categories:}
+We divide the benchmark into three different \textbf{groups}. Each runtime gets evaluated according to the group's implementation:
 \begin{itemize}
     \item \textbf{Runtime Setup:} Time to initialize runtime and prepare for I2C operations
-    \item \textbf{Cold Execution:} First ping-pong operation after runtime initialization
+    \item \textbf{Cold Execution:} A single ping-pong operation after a new runtime initialization
     \item \textbf{Hot Execution:} Repeated ping-pong operations in steady state
 \end{itemize}
 
-\section{Native Implementation Performance}
-\label{sec:native-performance}
+\section{Native Implementation - Baseline}
+\label{sec:native-baseline}
 
-% TODO: Present native results separately due to scale differences
-As the performance baseline, the native implementation provides reference timing and memory usage characteristics.
+As the baseline, the native implementation provides reference timing and memory usage characteristics. Visualizing these results is done separately as these axes don't allow cooperation with those from WAMR and Wasmtime results.
 
-\subsection{Native Timing Results}
-\label{subsec:native-timing}
+\subsection{Native Performance Results}
+\label{subsec:native-performance}
 
-Table~\ref{tab:native-performance} presents timing characteristics for the native implementation using linux-embedded-hal.
+Table~\ref{tab:native-performance} presents timing characteristics for the native implementation only using linux-embedded-hal.
 
-\begin{table}[htbp]
-\centering
-\caption{Native Implementation Performance Characteristics}
-\label{tab:native-performance}
-\begin{tabular}{lrrrr}
-\toprule
-\textbf{Measurement Type} & \textbf{Mean (ns)} & \textbf{Median (ns)} & \textbf{Std Dev (ns)} & \textbf{95\% CI} \\
-\midrule
-% TODO: Fill in your native benchmark results
-Runtime Setup    & \textit{[FILL]} & \textit{[FILL]} & \textit{[FILL]} & \textit{[FILL]} \\
-Cold Execution   & \textit{[FILL]} & \textit{[FILL]} & \textit{[FILL]} & \textit{[FILL]} \\
-Hot Execution    & \textit{[FILL]} & \textit{[FILL]} & \textit{[FILL]} & \textit{[FILL]} \\
-\bottomrule
-\end{tabular}
+\begin{table}[h]
+    \centering
+    \caption{Native Implementation Performance Characteristics}
+    \label{tab:native-performance}
+    \begin{tabular}{lrrrr}
+        \toprule
+        \textbf{Measurement Type} & \textbf{Mean (µs)} & \textbf{Median (µs)} & \textbf{Std Dev (ns)} & \textbf{95\% CI (µs)} \\
+        \midrule
+        Runtime Setup    & 1.9466 & 1.9483 & 10.5846 & [1.9445 , 1.9487] \\
+        Cold Execution   & 594.5275 & 594.5636 & 281.8579 & [594.4715 , 594.5834] \\
+        Hot Execution    & 589.0368 & 589.0307 & 69.9196 & [589.0230 , 589.0507] \\
+        \bottomrule
+    \end{tabular}
 \end{table}
 
-% TODO: Add native performance figure
-% \begin{figure}[htbp]
-% \centering
-% \includegraphics[width=0.8\textwidth]{figures/native-performance-distribution}
-% \caption{Native Implementation Performance Distribution}
-% \label{fig:native-performance}
-% \end{figure}
+% TODO: Add reference naar de appendix met grotere fotos
+Figure~\ref{fig:native-distributions} shows the distribution analysis of the Native runtime implementations for each group.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{images/native-distributions}
+    \caption{Native Implementation Performance Distribution for each group}
+    \label{fig:native-distributions}
+\end{figure}
 
 \subsection{Native Memory Usage}
 \label{subsec:native-memory}
 
-% TODO: Present DHAT results for native implementation
-Memory profiling reveals minimal allocation overhead for the native implementation, consistent with direct hardware access patterns.
+Table~\ref{tab:native-memory} presents the amount of bytes divided into blocks that were allocated during the setup of the runtime and execution of the routine. Memory profiling reveals minimal allocation overhead for the Native implementation.
 
-\section{WebAssembly Implementation Performance}
+\begin{table}[h]
+    \centering
+    \caption{Native Implementation Memory Characteristics}
+    \label{tab:native-memory}
+    \begin{tabular}{lrr}
+        \toprule
+        \textbf{Operation} & \textbf{\#bytes} & \textbf{\#blocks} \\
+        \midrule
+        Runtime Setup & 10 & 1 \\
+        Ping-Pong & 16 & 1 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+
+\section{WebAssembly Implementations - Performance}
 \label{sec:wasm-performance}
 
-This section presents detailed performance analysis comparing WAMR and Wasmtime implementations.
+The Native implementation is now defined as the baseline. This section presents a detailed performance analysis comparing WAMR and Wasmtime implementations.
 
-\subsection{Runtime Setup Performance}
-\label{subsec:setup-performance}
+\subsection{Runtime Setup}
+\label{subsec:wasm-setup-performance}
 
-Table~\ref{tab:setup-performance} compares runtime initialization overhead between WebAssembly implementations.
+Table~\ref{tab:wasm-setup-performance} compares runtime initialization overhead between WebAssembly implementations.
 
-\begin{table}[htbp]
-\centering
-\caption{WebAssembly Runtime Setup Performance}
-\label{tab:setup-performance}
-\begin{tabular}{lrrrr}
-\toprule
-\textbf{Implementation} & \textbf{Mean (ns)} & \textbf{Median (ns)} & \textbf{Std Dev (ns)} & \textbf{95\% CI} \\
-\midrule
-% TODO: Fill in your WAMR and Wasmtime setup results
-WAMR          & \textit{[FILL]} & \textit{[FILL]} & \textit{[FILL]} & \textit{[FILL]} \\
-Wasmtime      & \textit{[FILL]} & \textit{[FILL]} & \textit{[FILL]} & \textit{[FILL]} \\
-\bottomrule
-\end{tabular}
+\begin{table}[h]
+    \centering
+    \caption{WebAssembly Runtime Setup Performance}
+    \label{tab:wasm-setup-performance}
+    \begin{tabular}{lrrrr}
+        \toprule
+        \textbf{Measurement Type} & \textbf{Mean (µs)} & \textbf{Median (µs)} & \textbf{Std Dev (ns)} & \textbf{95\% CI (µs)} \\
+        \midrule
+        WAMR          & 253.1126 & 253.1301 & 258.4145 & [253.0613, 253.1638] \\
+        Wasmtime      & 19 559.1592 & 19 559.8473 & 11 656.5225 & [19 556.8463, 19 561.4721] \\
+        \bottomrule
+    \end{tabular}
 \end{table}
 
-% TODO: Add setup performance comparison figure
-% \begin{figure}[htbp]
+Figure~\ref{fig:wasm-setup-distributions} shows the distribution analysis of both \acrshort{WASM} Runtime Setups.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{images/wasm-rt-distributions}
+    \caption{\acrshort{WASM} Runtime Setup Performance Distributions}
+    \label{fig:wasm-setup-distributions}
+\end{figure}
+
+
+
+\subsection{Ping Pong Routine}
+\label{subsec:wasm-execution-performance}
+
+\subsubsection{Cold Execution}
+\label{subsubsec:wasm-cold-execution-performance}
+
+Table~\ref{tab:wasm-cold-execution-performance} presents first-execution performance after runtime initialization.
+
+\begin{table}[h]
+    \centering
+    \caption{Cold Execution Performance: WAMR vs Wasmtime}
+    \label{tab:wasm-cold-execution-performance}
+    \begin{tabular}{lrrrr}
+        \toprule
+        \textbf{Measurement Type} & \textbf{Mean (µs)} & \textbf{Median (µs)} & \textbf{Std Dev (ns)} & \textbf{95\% CI (µs)} \\
+        \midrule
+        WAMR          & 1 211.0415 & 1 210.9849 & 5 144.4222 & [1 210.0207, 1 212.0622] \\
+        Wasmtime      & 1 301.8975 & 1 300.5868 & 4 895.5251 & [1 300.9262, 1 302.8689] \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+Figure~\ref{fig:wasm-cold-execution-distributions} shows the distribution analysis of both \acrshort{WASM} Cold Execution routines.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{images/wasm-cold-distributions}
+    \caption{\acrshort{WASM} Cold Execution Performance Distributions}
+    \label{fig:wasm-cold-execution-distributions}
+\end{figure}
+
+\subsubsection{Hot Execution}
+\label{subsubsec:wasm-hot-execution}
+
+Table~\ref{tab:wasm-hot-execution-performance} shows steady-state performance characteristics.
+
+\begin{table}[h]
+    \centering
+    \caption{Hot Execution Performance: WAMR vs Wasmtime}
+    \label{tab:wasm-hot-execution-performance}
+    \begin{tabular}{lrrrr}
+        \toprule
+        \textbf{Measurement Type} & \textbf{Mean (µs)} & \textbf{Median (µs)} & \textbf{Std Dev (ns)} & \textbf{95\% CI (µs)} \\
+        \midrule
+        WAMR          & 1 185.4778 & 1 185.8310 & 673.0608 & [1 185.3442 , 1 185.6113] \\
+        Wasmtime      & 1 184.4430 & 1 184.2941 & 522.5048 & [1 184.3393 , 1 184.5467] \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+Figure~\ref{fig:wasm-hot-execution-distributions} shows the distribution analysis of both \acrshort{WASM} Hot Execution routines.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{images/wasm-hot-distributions}
+    \caption{\acrshort{WASM} Hot Execution Performance Distributions}
+    \label{fig:wasm-hot-execution-distributions}
+\end{figure}
+
+
+
+% Figure~\ref{fig:wasm-cold-relative} indicates how much slower each Cold Execution routine is compared to the Native baseline.
+% \begin{figure}[h]
 % \centering
-% \includegraphics[width=0.9\textwidth]{figures/setup-performance-comparison}
-% \caption{Runtime Setup Performance: WAMR vs Wasmtime}
-% \label{fig:setup-comparison}
+% \includegraphics[width=\textwidth]{images/wasm-cold-relative}
+% \caption{Relative Performance of Cold Execution routine compared to Native baseline}
+% \label{fig:wasm-cold-relative}
 % \end{figure}
 
-\subsection{Execution Performance Analysis}
-\label{subsec:execution-performance}
+% Figure~\ref{fig:wasm-hot-relative} indicates how much slower each Hot Execution routine is compared to the Native baseline.
+% \begin{figure}[h]
+% \centering
+% \includegraphics[width=\textwidth]{images/wasm-hot-relative}
+% \caption{Relative Performance of Hot Execution routine compared to Native baseline}
+% \label{fig:wasm-hot-relative}
+% \end{figure}
 
-\subsubsection{Cold Execution Comparison}
-\label{subsubsec:cold-execution}
+% Figure~\ref{fig:wasm-rt-relative} indicates how much slower each Runtime Setup is compared to the Native baseline.
+% \begin{figure}[h]
+% \centering
+% \includegraphics[width=\textwidth]{images/wasm-rt-relative}
+% \caption{Relative Performance of Runtime Setups compared to Native baseline}
+% \label{fig:wasm-rt-relative}
+% \end{figure}
 
-Table~\ref{tab:cold-performance} presents first-execution performance after runtime initialization.
 
-\begin{table}[htbp]
-\centering
-\caption{Cold Execution Performance: WAMR vs Wasmtime}
-\label{tab:cold-performance}
-\begin{tabular}{lrrrr}
-\toprule
-\textbf{Implementation} & \textbf{Mean (ns)} & \textbf{Median (ns)} & \textbf{MAD (ns)} & \textbf{95\% CI} \\
-\midrule
-% TODO: Fill in cold execution data
-WAMR          & \textit{[FILL]} & \textit{[FILL]} & \textit{[FILL]} & \textit{[FILL]} \\
-Wasmtime      & \textit{[FILL]} & \textit{[FILL]} & \textit{[FILL]} & \textit{[FILL]} \\
-\bottomrule
-\end{tabular}
-\end{table}
 
-\subsubsection{Hot Execution Comparison}
-\label{subsubsec:hot-execution}
 
-Table~\ref{tab:hot-performance} shows steady-state performance characteristics.
 
-\begin{table}[htbp]
-\centering
-\caption{Hot Execution Performance: WAMR vs Wasmtime}
-\label{tab:hot-performance}
-\begin{tabular}{lrrrr}
-\toprule
-\textbf{Implementation} & \textbf{Mean (ns)} & \textbf{Median (ns)} & \textbf{MAD (ns)} & \textbf{IQR (ns)} \\
-\midrule
-% TODO: Fill in hot execution data
-WAMR          & \textit{[FILL]} & \textit{[FILL]} & \textit{[FILL]} & \textit{[FILL]} \\
-Wasmtime      & \textit{[FILL]} & \textit{[FILL]} & \textit{[FILL]} & \textit{[FILL]} \\
-\bottomrule
-\end{tabular}
-\end{table}
+
+
+
+
+
 
 % TODO: Add execution performance comparison figure
 % \begin{figure}[htbp]
@@ -227,6 +268,9 @@ Wasmtime      & \textit{[FILL]} & \textit{[FILL]} & \textit{[FILL]} & \textit{[F
 % \caption{Execution Performance Distribution: WAMR vs Wasmtime}
 % \label{fig:execution-comparison}
 % \end{figure}
+
+\section{WebAssembly Implementations - Memory}
+\label{sec:wasm-memory}
 
 \section{Statistical Analysis}
 \label{sec:statistical-analysis}
