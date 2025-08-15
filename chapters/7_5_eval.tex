@@ -84,20 +84,20 @@ Runtime initialization represents a critical performance dimension, particularly
 
 The native implementation only using linux-embedded-hal provides the performance baseline for "runtime" initialization. Table~\ref{tab:native-setup} presents an overview of the measured characteristics, while Figure~\ref{fig:native-setup-distribution} gives a visual representation of the distribution.
 
-\begin{table}[htbp]
+\begin{table}[h]
     \centering
     \caption{Native Implementation's Setup overhead}
     \label{tab:native-setup}
-    \begin{tabular}{rrrr}
+    \begin{tabular}{cccc}
         \toprule
         \textbf{Mean (µs)} & \textbf{Median (µs)} & \textbf{Std Dev (ns)} & \textbf{95\% CI (µs)} \\
         \midrule
-        1.9466 & 1.9483 & 10.5846 & [1.9445 , 1.9487] \\
+        1.9466 & 1.9483 & 10.5846 & [1.9445 ; 1.9487] \\
         \bottomrule
     \end{tabular}
 \end{table}
 
-\begin{figure}[htbp]
+\begin{figure}[h]
     \centering
     \includegraphics[width=0.7\textwidth]{images/native-setup-distribution}
     \caption{Distribution of Native Runtime Setup measurements}
@@ -111,21 +111,21 @@ While the native implementation is categorized under Runtime Setup, it does not 
 
 Table~\ref{tab:wasm-setup} presents the initialization overhead for \acrshort{wamr} and Wasmtime implementations. Figure~\ref{fig:wasm-setup-distribution} gives a visual representation.
 
-\begin{table}[htbp]
+\begin{table}[h]
     \centering
     \caption{\acrshort{wasm} Implementations's Runtime Setup overhead comparison}
     \label{tab:wasm-setup}
-    \begin{tabular}{lrrrr}
+    \begin{tabular}{lcccc}
         \toprule
         \textbf{Implementation} & \textbf{Mean (µs)} & \textbf{Median (µs)} & \textbf{Std Dev (ns)} & \textbf{95\% CI (µs)} \\
         \midrule
-        WAMR        & 253.1126 & 253.1301 & 258.4145 & [253.0613, 253.1638] \\
-        Wasmtime    & 19,559.1592 & 19,559.8473 & 11,656.5225 & [19 556.8463, 19 561.4721] \\
+        WAMR        & 253.1126 & 253.1301 & 258.4145 & [253.0613 ; 253.1638] \\
+        Wasmtime    & 19,559.1592 & 19,559.8473 & 11,656.5225 & [19,556.8463 ; 19,561.4721] \\
         \bottomrule
     \end{tabular}
 \end{table}
 
-\begin{figure}[htbp]
+\begin{figure}[h]
     \centering
     \includegraphics[width=0.9\textwidth]{images/wasm-setup-distribution}
     \caption{Distributions of \acrshort{wasm} Runtime Setup measurements}
@@ -135,7 +135,7 @@ Table~\ref{tab:wasm-setup} presents the initialization overhead for \acrshort{wa
 \subsubsection{Setup Performance Analysis}
 The results reveal a dramatic performance disparity between the two WebAssembly runtimes. \acrshort{wamr} achieves setup initialization in approximately 253 μs, representing 130x overhead compared to the native implementation. However, Wasmtime exhibits substantially higher initialization costs at 19.6 ms, creating just over 10,000x overhead relative to native and 77x overhead compared to \acrshort{wamr}. Figure~\ref{fig:wasm-setup-relative} gives an overview.
 
-\begin{figure}[htbp]
+\begin{figure}[h]
     \centering
     \includegraphics[width=0.9\textwidth]{images/wasm-setup-relative}
     \caption{Comparison of \acrshort{wasm} Implementation's Runtime Setup relative to the baseline}
@@ -163,16 +163,16 @@ With runtime initialization complete, this section examines the steady-state exe
 
 Table~\ref{tab:native-execution} establishes the native performance baseline for I2C ping-pong operations.
 
-\begin{table}[htbp]
+\begin{table}[h]
     \centering
     \caption{Native Implementation Execution Performance}
     \label{tab:native-execution}
-    \begin{tabular}{lrrrr}
+    \begin{tabular}{lcccc}
         \toprule
         \textbf{Execution Type} & \textbf{Mean (µs)} & \textbf{Median (µs)} & \textbf{Std Dev (ns)} & \textbf{95\% CI (µs)} \\
         \midrule
-        Cold Execution  & 594.5275 & 594.5636 & 281.8579 & [594.4715 , 594.5834] \\
-        Hot Execution   & 589.0368 & 589.0307 & 69.9196 & [589.0230 , 589.0507] \\
+        Cold Execution  & 594.5275 & 594.5636 & 281.8579 & [594.4715 ; 594.5834] \\
+        Hot Execution   & 589.0368 & 589.0307 & 69.9196 & [589.0230 ; 589.0507] \\
     \end{tabular}
 \end{table}
 
@@ -181,37 +181,37 @@ Table~\ref{tab:native-execution} establishes the native performance baseline for
 
 Tables \ref{tab:wasm-execution-cold} and \ref{tab:wasm-execution-hot} compare execution performance between WAMR and Wasmtime for both cold and hot execution scenarios respectively.
 
-\begin{table}[htbp]
+\begin{table}[h]
     \centering
     \caption{WebAssembly Cold Execution Performance Comparison}
     \label{tab:wasm-execution-cold}
-    \begin{tabular}{lrrrr}
+    \begin{tabular}{lcccc}
         \toprule
         \textbf{Implementation} & \textbf{Mean (µs)} & \textbf{Median (µs)} & \textbf{Std Dev (ns)} & \textbf{95\% CI (µs)} \\
         \midrule
-        WAMR      & 1,211.0415 & 1,210.9849 & 5,144.4222 & [1 210.0207, 1 212.0622] \\
-        Wasmtime  & 1,301.8975 & 1,300.5868 & 4,895.5251 & [1 300.9262, 1 302.8689] \\
+        WAMR      & 1,211.0415 & 1,210.9849 & 5,144.4222 & [1,210.0207 ; 1,212.0622] \\
+        Wasmtime  & 1,301.8975 & 1,300.5868 & 4,895.5251 & [1,300.9262 ; 1,302.8689] \\
         \bottomrule
     \end{tabular}
 \end{table}
 
-\begin{table}[htbp]
+\begin{table}[h]
     \centering
     \caption{WebAssembly Hot Execution Performance Comparison}
     \label{tab:wasm-execution-hot}
-    \begin{tabular}{lrrrr}
+    \begin{tabular}{lcccc}
         \toprule
         \textbf{Implementation} & \textbf{Mean (µs)} & \textbf{Median (µs)} & \textbf{Std Dev (ns)} & \textbf{95\% CI (µs)} \\
         \midrule
-        WAMR      & 1,185.4778 & 1,185.8310 & 673.0608 & [1 185.3442 , 1 185.6113] \\
-        Wasmtime  & 1,184.4430 & 1,184.2941 & 522.5048 & [1 184.3393 , 1 184.5467] \\
+        WAMR      & 1,185.4778 & 1,185.8310 & 673.0608 & [1,185.3442 ; 1,185.6113] \\
+        Wasmtime  & 1,184.4430 & 1,184.2941 & 522.5048 & [1,184.3393 ; 1,184.5467] \\
         \bottomrule
     \end{tabular}
 \end{table}
 
 \subsubsection{Key Execution Performance Findings:}
 
-\begin{figure}[htbp]
+\begin{figure}[h]
     \centering
     \includegraphics[width=1.0\textwidth]{images/wasm-execution-relative}
     \caption{Execution Performance Comparison: Native vs \acrshort{wamr} vs Wasmtime}
@@ -233,11 +233,11 @@ Tables \ref{tab:wasm-execution-cold} and \ref{tab:wasm-execution-hot} compare ex
 
 Table~\ref{tab:variability} presents Coefficient of Variation (CV) metrics to assess performance consistency across implementations. Figure~\ref{fig:variability-comparison}
 
-\begin{table}[htbp]
+\begin{table}[h]
     \centering
     \caption{Performance Variability Comparison (Coefficient of Variation)}
     \label{tab:variability}
-    \begin{tabular}{lrrr}
+    \begin{tabular}{lccc}
     \toprule
     \textbf{Implementation} & \textbf{Setup CV (\%)} & \textbf{Cold Exec CV (\%)} & \textbf{Hot Exec CV (\%)} \\
     \midrule
@@ -248,7 +248,7 @@ Table~\ref{tab:variability} presents Coefficient of Variation (CV) metrics to as
     \end{tabular}
 \end{table}
 
-\begin{figure}[htbp]
+\begin{figure}[h]
     \centering
     \includegraphics[width=0.9\textwidth]{images/variability-comparison}
     \caption{Comparison of calculated Coefficient of Variation across all implementations}
@@ -267,11 +267,11 @@ Memory consumption patterns provide critical insights for embedded applications 
 
 Table~\ref{tab:memory-setup} presents memory allocation characteristics during runtime initialization, revealing the resource requirements for each implementation approach.
 
-\begin{table}[htbp]
+\begin{table}[h]
     \centering
     \caption{Memory Usage During Runtime Setup}
     \label{tab:memory-setup}
-    \begin{tabular}{lrrr}
+    \begin{tabular}{lccc}
         \toprule
         \textbf{Implementation} & \textbf{Total (bytes)} & \textbf{Peak (bytes)} & \textbf{Blocks (count)} \\
         \midrule
