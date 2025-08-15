@@ -1,7 +1,7 @@
 \chapter{Implementation}
 \label{chap:implementation}
 
-This chapter presents the implementation of a WASI Preview 1 I2C interface designed specifically for WebAssembly Micro Runtime (WAMR), addressing the critical requirement for embedded device support in the WASI I2C standardization proposal. Building upon Friedrich's foundation work, this implementation establishes a comprehensive Preview 1 ecosystem that enables resource-constrained embedded systems to participate in the I2C standardization effort.
+This chapter presents the implementation of a WASI Preview 1 I2C interface designed specifically for compatibility with WebAssembly Micro Runtime (WAMR), addressing the critical requirement for embedded device support in the WASI I2C standardization proposal. Building upon Friedrich's foundational work, this implementation establishes a Preview 1 ecosystem that enables resource-constrained embedded systems to participate in the I2C standardization effort.
 
 The implementation serves as a foundational exploration of how the WASI I2C interface could be adapted for Preview 1 environments, providing essential groundwork for the proposal's progression to the next standardization phase, which requires demonstrated compatibility with embedded device constraints.
 
@@ -12,17 +12,13 @@ The implementation serves as a foundational exploration of how the WASI I2C inte
 
 The development effort encompasses five core implementations that collectively demonstrate Preview 1 I2C interface feasibility:
 
-\begin{listing}[H]
-\begin{minted}[breaklines]{text}
-├── wasip1-i2c-lib/          // Manual Preview 1 bindings library
-├── wasip1-i2c-guest/        // Core WASM module (target: wasm32-wasip1)
-├── wasip2-i2c-guest/        // WASM component (target: wasm32-wasip2)
-├── wamr_impl/              // WAMR host runtime implementation
-└── wasmtime_impl/          // Wasmtime host runtime implementation
+\begin{minted}[frame=none]{text}
+wasip1-i2c-lib/         // Manual Preview 1 bindings library
+wasip1-i2c-guest/       // Core WASM module (target: wasm32-wasip1)
+wasip2-i2c-guest/       // WASM component (target: wasm32-wasip2)
+wamr_impl/              // WAMR host runtime implementation
+wasmtime_impl/          // Wasmtime host runtime implementation
 \end{minted}
-\caption{Implementation architecture demonstrating complete Preview 1 I2C ecosystem alongside Preview 2 reference implementation}
-\label{lst:repo-structure}
-\end{listing}
 
 All implementations in this ecosystem, including the Preview 2 component and Wasmtime host, represent original contributions developed specifically for this research. The system design enables direct comparison between Preview 1 and Preview 2 approaches while maintaining functional equivalence in I2C communication capabilities.
 
@@ -31,11 +27,11 @@ All implementations in this ecosystem, including the Preview 2 component and Was
 The implementation targets the following runtime environment specifications:
 
 \begin{itemize}
-    \item \textbf{WAMR Version}: 1.3.3 with Rust SDK bindings
-    \item \textbf{Wasmtime Version}: 26.0.0 with component model support
-    \item \textbf{Rust Toolchain}: 1.82.0 with \texttt{wasm32-wasip1} and \texttt{wasm32-wasip2} targets
+    \item \textbf{WAMR Rust SDK Version}: v1.0.0 (uses WAMR Version 2.1.2)
+    \item \textbf{Wasmtime Version}: v35.0.0
+    \item \textbf{Rust Toolchain}: 1.88.0 with \texttt{wasm32-wasip1} and \texttt{wasm32-wasip2} targets
     \item \textbf{Target Architecture}: ARM64 (aarch64-unknown-linux-musl) for Raspberry Pi deployment
-    \item \textbf{Component Tooling}: \texttt{cargo-component} 0.15.0 for Preview 2 builds
+    \item \textbf{Component Tooling}: \texttt{cargo-component} v0.21.1 for Preview 2 builds
 \end{itemize}
 
 \subsection{Design Principles and Constraints}
@@ -46,14 +42,14 @@ The implementation addresses three fundamental requirements for embedded WebAsse
 
 \textbf{Resource Efficiency}: The implementation must minimize both binary size and runtime memory consumption to demonstrate viability on embedded devices with severe resource constraints.
 
-\textbf{Functional Parity}: Despite the architectural differences between Preview 1 and Preview 2, the actual I2C communication capabilities must remain equivalent, ensuring that embedded applications can access the full range of I2C protocol features.
+\textbf{Functional Parity}: Despite the architectural differences between Preview 1 and Preview 2, the actual I2C communication capabilities must remain equivalent.
 
 \subsection{Preview 1 vs Preview 2 Architectural Differences}
 
 The fundamental challenge lies in adapting Preview 2's sophisticated resource-based component model to Preview 1's minimalist function-based interface system. This adaptation requires careful consideration of how high-level abstractions can be preserved while working within Preview 1's limited type system.
 
 \begin{listing}[H]
-\begin{minted}[breaklines]{rust}
+\begin{minted}[breaklines]{rs}
 // Preview 2: Resource-based approach with automatic lifecycle management
 world pingpong {
     import wasi:i2c/i2c@0.2.0-draft;
@@ -62,55 +58,60 @@ world pingpong {
 
 // Preview 1: Function-based approach requiring manual resource management
 world wasip1-pingpong {
+    // Function to request resource
     import host_open: func() -> u32;
+    // Definition for each function imported by the interface
     import host_write: func(handle: u32, addr: u16, len: usize, offset: usize) -> u8;
     import host_read: func(handle: u32, addr: u16, len: usize, offset: usize) -> u8;
+    // Function 
     import host_close: func(handle: u32);
-    export _start: func();
+    export run: func();
 }
 \end{minted}
-\caption{Architectural comparison highlighting the semantic gap between Preview 2's component model and Preview 1's function-based interface}
+\caption{Architectural comparison defined in WIT, highlighting the semantic gap between Preview versions using the WASI I\textsuperscript{2}C interface}
 \label{lst:preview-comparison}
 \end{listing}
 
 Preview 2's component model provides automatic resource lifecycle management, type-safe binding generation, and sophisticated error handling mechanisms. In contrast, Preview 1 requires manual implementation of all these features through carefully designed function interfaces and explicit resource tracking systems.
 
-\section{Departing from the Canonical ABI}
-\label{sec:canonical-abi-departure}
+\section{Canonical ABI Adaptation and Design Choices}
+\label{sec:canonical-abi-adaptation}
 
-\subsection{Canonical ABI Overview and Limitations}
+\subsection{Canonical ABI Compatibility and Implementation Options}
 
-The WebAssembly Component Model defines a Canonical Application Binary Interface (ABI) that specifies how WIT type definitions are translated to bits and bytes for inter-component communication. This ABI provides sophisticated mechanisms for passing complex data structures, managing resources, and handling errors between WebAssembly components and their host environments.
+The WebAssembly Component Model defines a Canonical Application Binary Interface (ABI) that specifies how WIT type definitions are translated to bits and bytes for inter-component communication. This ABI provides standardized mechanisms for passing complex data structures, managing resources, and handling errors between WebAssembly components and their host environments.
 
-However, the Canonical ABI assumes the presence of Preview 2's component model infrastructure, including automatic memory management, garbage collection, and sophisticated type system support. These assumptions make it incompatible with Preview 1's minimalist execution environment, necessitating a custom ABI design for Preview 1 I2C implementations.
+Importantly, the Canonical ABI is fully implementable for Preview 1 environments and WAMR. Wasmtime automatically handles Canonical ABI compliance for Preview 2 components, while WAMR could manually implement the same ABI specifications. The Canonical ABI provides a generic, universally compatible approach that works across all WebAssembly implementations, ensuring maximum interoperability.
 
-\subsection{Custom ABI Design Decisions}
+\subsection{Context-Driven ABI Design Decisions}
 
-The departure from the Canonical ABI impacts multiple aspects of the interface design, with the most significant changes occurring in error handling, memory management, and resource lifecycle control.
+Rather than indicating a limitation or incompatibility, the departure from strict Canonical ABI compliance represents a deliberate design choice based on the specific context and constraints of embedded I2C communication. Understanding the application domain enables targeted optimizations that would not be possible with a generic ABI approach.
 
-\textbf{Error Handling Transformation}: The Canonical ABI represents errors as complex algebraic data types with automatic marshalling between guest and host representations. The Preview 1 implementation replaces this with a compact bit-encoding scheme that preserves semantic information while fitting within primitive return types.
+\textbf{Error Handling Optimization}: The Canonical ABI represents errors using a discriminated union approach, where the error type discriminant and error-specific data (such as NoAckowledgeSource) would be stored in separate fields, similar to C union structures. The Preview 1 implementation consolidates this information into a single byte using bit manipulation, providing an errno-style interface that reduces memory usage and simplifies error propagation in resource-constrained environments.
 
-\textbf{Memory Management Simplification}: Where the Canonical ABI provides automatic memory allocation and garbage collection, the Preview 1 approach requires explicit memory management through direct pointer manipulation and manual allocation control.
+\textbf{WASM vs I2C Error Separation}: The implementation distinguishes between WebAssembly-related errors (reported as "Other") and actual I2C protocol errors. When WASM runtime issues occur—such as module instance validation failures or memory translation problems—these are abstracted as "Other" errors rather than exposing internal runtime details to the guest application.
 
-\textbf{Resource Handle Substitution}: The Canonical ABI's sophisticated resource tracking system is replaced with simple integer handles that must be manually managed throughout their lifecycle.
+\textbf{Memory Management Adaptation}: While the Canonical ABI specifies standardized memory allocation patterns, the Preview 1 implementation adapts these patterns to the specific requirements of I2C communication, optimizing for the predictable data sizes and communication patterns typical in embedded scenarios.
 
-\subsection{Advantages and Disadvantages of Custom ABI}
+\subsection{Trade-offs of Context-Specific Optimization}
 
-\textbf{Advantages}:
+\textbf{Advantages of Custom Approach}:
 \begin{itemize}
-    \item \textbf{Embedded Compatibility}: The simplified ABI enables deployment on resource-constrained systems that cannot support the Canonical ABI's runtime overhead.
-    \item \textbf{Performance Predictability}: Manual memory management eliminates garbage collection pauses and provides deterministic performance characteristics essential for real-time embedded applications.
-    \item \textbf{Minimal Dependencies}: The custom ABI requires no runtime infrastructure beyond basic WebAssembly support, enabling deployment in minimal embedded environments.
-    \item \textbf{Direct Control}: Explicit resource management provides fine-grained control over memory usage and allocation patterns.
+    \item \textbf{Embedded Optimization}: Targeted optimizations for I2C communication patterns reduce memory usage and improve predictability for embedded deployment scenarios.
+    \item \textbf{Simplified Error Model}: The errno-style error reporting aligns with embedded programming conventions and reduces complexity in error handling logic.
+    \item \textbf{Resource Efficiency}: Compact error encoding and optimized memory patterns minimize overhead in resource-constrained environments.
+    \item \textbf{Deterministic Behavior}: Context-specific optimizations enable more predictable performance characteristics suitable for real-time embedded applications.
 \end{itemize}
 
-\textbf{Disadvantages}:
+\textbf{Disadvantages of Deviation from Standards}:
 \begin{itemize}
-    \item \textbf{Development Complexity}: Manual binding creation requires significantly more implementation effort compared to automatic generation from WIT files.
-    \item \textbf{Error-Prone Implementation}: The lack of automatic safety guarantees increases the risk of memory leaks, handle confusion, and resource management errors.
-    \item \textbf{Limited Composability}: The custom ABI cannot leverage the component model's sophisticated composition and linking mechanisms.
-    \item \textbf{Maintenance Burden}: Interface changes require manual updates to binding code rather than automatic regeneration.
+    \item \textbf{Reduced Interoperability}: Custom ABI choices limit compatibility with generic WebAssembly tooling and component model infrastructure.
+    \item \textbf{Development Overhead}: Manual implementation requires significantly more effort compared to automatic Canonical ABI generation.
+    \item \textbf{Maintenance Complexity}: Custom ABI implementations require manual updates when interface specifications change.
+    \item \textbf{Limited Reusability}: Context-specific optimizations may not transfer to other use cases or interface types.
 \end{itemize}
+
+The decision to deviate from the Canonical ABI represents a conscious trade-off between universal compatibility and context-specific optimization. While the Canonical ABI could be fully implemented for this use case, the specific constraints and patterns of embedded I2C communication justify targeted optimizations that provide measurable benefits in the target deployment environment.
 
 \section{WASI Preview 1 Bindings Implementation}
 \label{sec:wasip1-bindings}
@@ -352,25 +353,51 @@ pub extern "C" fn _start() {
 
 The resulting binary size demonstrates the effectiveness of this approach: the optimized Preview 1 module compiles to approximately 2.1KB, compared to significantly larger binaries that would result from standard library inclusion.
 
-\subsubsection{Memory Allocation Strategy and Guest vs Host Heap Management}
+\subsubsection{Memory Allocation Strategy: Guest-Managed vs Host-Managed Heap}
 
-The implementation utilizes guest-managed heap allocation, representing a strategic departure from WAMR's default host-managed heap approach. This decision reflects performance considerations specific to I2C communication patterns and embedded system constraints.
+The implementation utilizes guest-managed heap allocation, representing an experimental departure from WAMR's default configuration and the Canonical ABI's preference for host-managed memory allocation. This design choice reflects specific considerations related to I2C communication patterns rather than fundamental performance advantages.
 
-\textbf{Guest-Managed Heap Advantages}:
+\textbf{WAMR Memory Management Models}:
+
+WAMR supports multiple heap management approaches, each with distinct characteristics and use cases:
+
 \begin{itemize}
-    \item \textbf{Reduced Boundary Crossings}: Memory allocation occurs entirely within the WebAssembly module, eliminating expensive host function calls for each allocation operation.
-    \item \textbf{Predictable Performance}: Guest-controlled allocation provides deterministic timing characteristics essential for real-time I2C communication.
-    \item \textbf{Simplified Host Implementation}: The host runtime requires less complex memory management logic when guests control their own heap space.
+    \item \textbf{WASI Heap}: Created when modules are built with WASI-LIBC, managed by the wasi-libc memory allocator. Used when the guest module exports standard malloc/free functions.
+    \item \textbf{Host-Managed Heap}: Created and managed by WAMR's embedded memory system (ems) allocator. The host runtime controls all memory allocation decisions and provides memory to the guest on request.
+    \item \textbf{Guest-Managed Heap}: The guest module maintains control over its own memory allocation, managing buffers and data structures within its linear memory space.
+\end{itemize}
+
+\textbf{Canonical ABI Preference for Host-Managed Memory}:
+
+The Canonical ABI specification recommends host-managed memory allocation for several reasons: enhanced security through centralized memory control, improved resource monitoring capabilities, and simplified garbage collection integration. Host-managed approaches provide the runtime with complete visibility into memory usage patterns and enable sophisticated memory protection mechanisms.
+
+\textbf{Rationale for Guest-Managed Allocation}:
+
+The decision to implement guest-managed heap allocation was driven by the specific characteristics of I2C read operations and experimental objectives rather than inherent performance benefits:
+
+\begin{itemize}
+    \item \textbf{Predictable Buffer Sizing}: I2C read operations require the guest to specify the expected number of bytes in advance. Guest-managed allocation allows the buffer to be pre-allocated based on this known size before initiating the host function call.
+    \item \textbf{Error Handling Considerations}: When I2C operations fail, guest-managed allocation results in pre-allocated buffers that cannot be used, representing wasted allocation effort. This trade-off was accepted to explore the guest-managed approach.
+    \item \textbf{Experimental Evaluation}: The implementation serves as an exploration of alternative memory management strategies within the constraints of Preview 1 interfaces, providing comparative data against standard host-managed approaches.
+    \item \textbf{Implementation Simplicity}: For the specific case of I2C communication, guest-managed allocation simplifies the host-side implementation by eliminating the need for complex memory allocation coordination.
 \end{itemize}
 
 \textbf{Host-Managed Heap Considerations}:
+
+Host-managed memory allocation provides several advantages that make it the preferred approach in the Canonical ABI:
+
 \begin{itemize}
-    \item \textbf{Enhanced Security}: Host-controlled allocation can provide additional sandboxing and memory protection mechanisms.
-    \item \textbf{Resource Monitoring}: The host can implement sophisticated memory usage tracking and limits.
-    \item \textbf{Allocation Efficiency}: Host allocators might be more efficient for large or complex allocation patterns.
+    \item \textbf{Enhanced Security}: Host-controlled allocation provides additional sandboxing and memory protection mechanisms, preventing guests from exhausting system resources or accessing unauthorized memory regions.
+    \item \textbf{Resource Monitoring}: The host runtime can implement sophisticated memory usage tracking, quotas, and limits to ensure fair resource allocation across multiple module instances.
+    \item \textbf{Allocation Efficiency}: Host allocators can optimize allocation patterns across multiple guests and provide more sophisticated memory management strategies than simple guest-side allocators.
+    \item \textbf{Centralized Management}: Host-managed allocation enables coordinated resource management and provides better visibility into system-wide memory usage patterns.
 \end{itemize}
 
-For the I2C use case, where allocation patterns are simple and performance predictability is crucial, guest-managed heap allocation provides optimal characteristics while maintaining compatibility with embedded deployment constraints.
+\textbf{Performance and Architectural Implications}:
+
+Contrary to initial assumptions, guest-managed allocation does not necessarily provide performance advantages over host-managed approaches. The choice primarily impacts allocation timing and responsibility rather than fundamental performance characteristics. Host function call overhead remains similar in both approaches, and the memory allocation costs are comparable whether performed by the guest or host allocator.
+
+The experimental nature of this choice provides valuable insights into the flexibility of Preview 1 memory management strategies while maintaining compatibility with the broader I2C interface semantics.
 
 \subsection{Preview 2 Component: Automated Binding Generation}
 
