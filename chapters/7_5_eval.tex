@@ -314,26 +314,28 @@ The minimal peak-to-total allocation differences (WAMR: 5\%, Wasmtime: 17\%) ind
 
 Critically, these results demonstrate that the substantial initialization costs—particularly Wasmtime's 14.2MB—do not translate to proportional execution overhead. Once initialized, both runtimes operate within hundreds of bytes, making the initialization cost a one-time investment that can be amortized across the application lifetime.
 
+\begin{table}[htbp]
+    \centering
+    \caption{Memory Usage During Ping-Pong Execution}
+    \label{tab:memory-execution}
+    \begin{tabular}{lrrr}
+        \toprule
+        \textbf{Implementation} & \textbf{Total (bytes)} & \textbf{Peak (bytes)} & \textbf{Blocks (count)} \\
+        \midrule
+        Native        & 16   & 16  & 1 \\
+        WAMR          & 327  & 311 & 6 \\
+        Wasmtime      & 416  & 347 & 10 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
 % TODO: Decide on OLD or new content
 % \subsection{Execution Memory Profiling}
 % \label{subsec:memory-execution}
 
 % Table~\ref{tab:memory-execution} analyzes memory allocation patterns during ping-pong execution, focusing on runtime overhead and potential memory leaks.
 
-% \begin{table}[htbp]
-%     \centering
-%     \caption{Memory Usage During Ping-Pong Execution}
-%     \label{tab:memory-execution}
-%     \begin{tabular}{lrrr}
-%         \toprule
-%         \textbf{Implementation} & \textbf{Total (bytes)} & \textbf{Peak (bytes)} & \textbf{Blocks (count)} \\
-%         \midrule
-%         Native        & 16   & 16  & 1 \\
-%         WAMR          & 327  & 311 & 6 \\
-%         Wasmtime      & 416  & 347 & 10 \\
-%         \bottomrule
-%     \end{tabular}
-% \end{table}
+
 
 % \subsubsection{Execution Memory Efficiency:}
 % The memory consumption during ping-pong execution reveals the incremental memory overhead required for actual I2C operation execution, measured independently from the established runtime footprint. Since these measurements capture only the additional allocations occurring during guest function execution (after runtime initialization is complete), they provide insight into the operational memory efficiency of each approach.
