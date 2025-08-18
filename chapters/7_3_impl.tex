@@ -20,6 +20,13 @@ The development effort encompasses five core implementations that collectively d
     wasmtime_impl/           // Wasmtime host runtime implementation
 \end{minted}
 
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=\textwidth]{images/project schema.png}
+	\caption{Overview of the project structure, showcasing the structure and interaction between different components}
+	\label{fig:project_schema}
+\end{figure}
+
 All implementations in this ecosystem, including the Preview 2 component and Wasmtime host, represent original contributions developed specifically for this research. The system design enables direct comparison between Preview 1 and Preview 2 approaches while maintaining functional equivalence in I2C communication capabilities.
 
 \subsection{I2C Interface Implementation: Simplified vs. Official Specification}
