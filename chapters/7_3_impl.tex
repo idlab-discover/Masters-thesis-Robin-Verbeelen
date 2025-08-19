@@ -1,7 +1,7 @@
 \chapter{Implementation}
 \label{chap:implementation}
 
-This chapter presents the implementation of a WASI Preview 1 I2C interface designed specifically for WebAssembly Micro Runtime (WAMR), addressing the critical requirement for embedded device support in the WASI I2C standardization proposal. Building upon Friedrich's foundational work, this implementation establishes a comprehensive Preview 1 setup that enables resource-constrained embedded systems to participate in the I2C standardization effort.
+This chapter presents the implementation details of a WASI Preview 1 I2C interface designed specifically for \acrshort{wamr}, addressing the critical requirement for embedded device support in the WASI I2C standardization proposal. Building upon Friedrich's foundational work~\cite{friedrich_paper}~\cite{friedrich_impl}, this implementation establishes a comprehensive Preview 1 setup that enables resource-constrained embedded systems to participate in the I2C standardization effort.
 
 The implementation serves as an exploration of how the WASI I2C interface could be adapted for Preview 1 environments, providing essential groundwork for the proposal's progression to the next standardization phase, which requires demonstrated compatibility with embedded device constraints.
 
@@ -444,7 +444,7 @@ The resulting binary size demonstrates the effectiveness of this approach: the o
 
 \subsubsection{Memory Allocation Strategy: Guest-Managed vs Host-Managed Heap}
 
-The implementation utilizes guest-managed heap allocation, representing an experimental departure from WAMR's default configuration and the Canonical ABI's specification for host-managed memory allocation. This design choice was more experimental and allowed for insights in the different WAMR Heap strategies. 
+The implementation utilizes guest-managed heap allocation, representing an experimental departure from WAMR's default configuration and the Canonical ABI's specification for host-managed memory allocation. This design choice was more experimental and allowed for insights into the different WAMR Heap strategies. 
 
 %TODO refereer naar Understand the Wamr heaps
 WAMR supports multiple heap management approaches, each with distinct characteristics and use cases:
@@ -464,9 +464,7 @@ The \textbf{Canonical ABI} specification recommends \textbf{host-managed memory 
     \item \textbf{Implementation Simplicity}: For the specific case of I2C communication, guest-managed allocation simplifies the host-side implementation by eliminating the need for complex memory allocation coordination.
 \end{itemize}
 
-Contrary to initial assumptions, guest-managed allocation does not necessarily provide performance advantages over host-managed approaches. The choice primarily impacts allocation timing and responsibility rather than fundamental performance characteristics. Host function call overhead remains similar in both approaches, and the memory allocation costs are comparable whether performed by the guest or host allocator.
-
-The experimental nature of this choice provides valuable insights into the flexibility of Preview 1 memory management strategies while maintaining compatibility with the broader I2C interface semantics.
+The pure experimental nature of this choice provides valuable insights into the flexibility of Preview 1 memory management strategies while maintaining compatibility with the broader I2C interface semantics.
 
 \subsection{Preview 2 Component: Automated Binding Generation}
 
@@ -869,6 +867,9 @@ The ping-pong routine exercises the following critical system components:
 
 \textbf{Hardware Integration}: The actual I2C communication with the target device ensures that the entire software stack correctly interfaces with real hardware, validating the embedded HAL integration and confirming that the abstraction layers do not interfere with proper I2C protocol implementation.
 
+\section{Viability}
 The implementation successfully demonstrates that WASI Preview 1 provides a viable foundation for I2C communication in resource-constrained WebAssembly environments. The carefully designed binding layer effectively bridges the semantic gap between Preview 1's function-based interface and Preview 2's resource-based component model, enabling embedded systems to participate in the WebAssembly ecosystem while meeting the stringent resource requirements of embedded deployment scenarios.
 
 This work establishes the essential groundwork for the WASI I2C proposal's embedded device support requirements, providing a concrete demonstration that the interface can be successfully adapted to the constraints of resource-limited environments without sacrificing functional capability or semantic correctness.
+
+%TODO bepalen of ik hier in dit chapter de binary sizes wil bespreken en een antwoord in section Viability wil bieden op één van de research questions OF alle info over binary sizes en antwoord op de RQ wil overzetten naar het evaluatie hoofdstuk (leaning towards de tweede optie) sidenote: bekijk de RQ nog eens goed en zie of je echt een vraag opstelt dat kijkt of de binary sizes oké zijn voor de compat crit.

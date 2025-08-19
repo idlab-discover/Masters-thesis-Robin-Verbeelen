@@ -4,11 +4,9 @@
 \section{Introduction}
 \label{sec:eval-intro}
 
-This chapter presents a comprehensive experimental evaluation of the I2C WASI interface implementations developed for WAMR and Wasmtime runtimes. It focuses on comparing their \textbf{performance characteristics} and \textbf{resource utilization}. The primary focus centers on a detailed comparative analysis between these two WebAssembly runtime approaches, while leveraging the native implementation as a performance baseline and reference point.
+This chapter presents a comprehensive experimental evaluation of the I2C WASI interface implementations developed for the runtimes WAMR and Wasmtime. It focuses on comparing their \textbf{performance characteristics} and \textbf{resource utilization}. The primary focus centers on a detailed comparative analysis between these two WebAssembly runtime approaches, while leveraging the native implementation as a performance baseline and reference point.
 
 The evaluation encompasses \textbf{timing analysis} across multiple execution phases and comprehensive \textbf{memory profiling} to track allocation patterns. This data is then used for statistical analysis to ensure reliable and reproducible results. By systematically measuring runtime setup overhead, execution latency, and memory consumption, this experimental evaluation provides quantitative insights into the practical trade-offs between different WebAssembly runtime architectures.
-
-This analysis directly addresses the second research question of this thesis: \textbf{RQ2: What is the performance impact of different WebAssembly runtime approaches?} Through controlled experimentation and statistical validation, the evaluation establishes an empirical foundation for understanding when and why specific runtime choices are optimal for embedded I2C applications.
 
 \section{Evaluation Setup}
 \label{sec:eval-methodology}

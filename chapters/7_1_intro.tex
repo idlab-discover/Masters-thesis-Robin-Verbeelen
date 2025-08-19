@@ -7,7 +7,7 @@ WebAssembly (Wasm) and its system interface specification, WASI (WebAssembly Sys
 
 % TODO: Add diagram showing the evolution from browser-only WebAssembly to system-level WASI deployments, highlighting the gap in hardware interface standardization
 
-The emergence of WASI Preview 2, accompanied by the component model architecture, introduced sophisticated mechanisms for building interoperable WebAssembly libraries, applications, and environments. This component model utilizes WebAssembly Interface Type (WIT) files to define interface contracts and enable automatic binding generation between components~\cite{wasi_p2}. However, a critical gap remains in WASI's hardware interface coverage: despite the ubiquity of Inter-Integrated Circuit (I2C) communication in embedded systems, no standardized WASI interface exists for this essential protocol.
+The emergence of WASI Preview 2, accompanied by the component model architecture, introduced sophisticated mechanisms for building interoperable WebAssembly libraries, applications, and environments. This component model utilizes \acrfull{wit} files to define interface contracts and enable automatic binding generation between components~\cite{wasi_p2}. However, a critical gap remains in WASI's hardware interface coverage: despite the ubiquity of Inter-Integrated Circuit (I2C) communication in embedded systems, the standardization of the WASI I2C interface is only in very early stages.
 
 I2C represents one of the most widely deployed communication protocols in embedded systems, serving as the backbone for sensor communication, device configuration, and inter-chip data exchange in IoT applications~\cite{i2c_specification}. The protocol's simplicity, addressing efficiency, and multi-host capability have made it indispensable for embedded system designers. Yet, the absence of a standardized WASI I2C interface creates a significant barrier to WebAssembly adoption in embedded environments where I2C communication is fundamental.
 
@@ -24,19 +24,19 @@ However, Friedrich's implementation approach, while technically sound and aligne
     \item \textbf{Binary Size Overhead}: More sophisticated runtimes combined with component model metadata and automatic binding generation introduce significant binary size increases, challenging deployment in memory-constrained embedded systems.
 \end{enumerate}
 
-These limitations represent a fundamental tension between the sophisticated developer experience provided by WASI Preview 2 and the resource constraints that define embedded system deployment scenarios. To advance the WASI I2C proposal toward Phase 3 standardization, which requires demonstrated compatibility with embedded device constraints, a Preview 1-compatible implementation becomes essential.
+These limitations represent a fundamental tension between the sophisticated developer experience provided by WASI Preview 2 and the resource constraints that define embedded system deployment scenarios. To advance the WASI I2C proposal towards Phase 3 standardization, which requires demonstrated compatibility with embedded device constraints, a Preview 1-compatible implementation becomes essential.
 
 \section{Research Objectives and Contributions}
 \label{sec:research-objectives}
 
-This thesis addresses the embedded system compatibility gap by developing a comprehensive WASI Preview 1 I2C interface implementation designed for use with the more lightweight WebAssembly Micro Runtime (WAMR) environment. Building upon Friedrich's foundational standardization work, this research explores how WASI I2C interfaces can be adapted for resource-constrained embedded systems while maintaining semantic and functional equivalence with Preview 2 implementations.
+This thesis addresses the embedded system compatibility gap by developing a comprehensive WASI Preview 1 I2C interface implementation designed for use with the more lightweight WebAssembly Micro Runtime (WAMR) environment~\cite{wamr_project}. Building upon Friedrich's foundational standardization work~\cite{friedrich_paper}, this research explores how WASI I2C interfaces can be adapted for resource-constrained embedded systems while maintaining semantic and functional equivalence with Preview 2 implementations.
 
 The primary technical contributions of this work include:
 
 \begin{enumerate}
     \item \textbf{Manual Preview 1 Bindings Library}: Development of a custom Rust bindings library that bridges WIT interface semantics with Preview 1's primitive function call mechanisms while maintaining type safety and error handling capabilities.
     
-    \item \textbf{Minimal Guest Implementation}: Creation of a WebAssembly Core Module optimized for embedded deployment, achieving lower binary size through careful dependency management and custom memory allocation strategies.
+    \item \textbf{Minimal Guest Implementation}: Creation of a WebAssembly Module optimized for embedded deployment, achieving lower binary size through careful dependency management and custom memory allocation strategies.
     
     \item \textbf{WAMR Host Integration}: Implementation of a complete WAMR-based host runtime that navigates the complex boundary between Rust's memory safety model and WAMR's C-based architecture while providing I2C hardware access.
     
@@ -48,7 +48,7 @@ The primary technical contributions of this work include:
 
 This investigation addresses the following research questions, which collectively evaluate the feasibility and performance implications of WASI Preview 1 I2C implementation for embedded systems:
 
-\textbf{RQ1: How can a WASI I2C interface be effectively adapted for WASI Preview 1 environments while maintaining functional compatibility with the standardized Preview 2 specification?}
+\textbf{RQ1: How can the WASI Preview 2 I2C interface be effectively adapted for WASI Preview 1 environments while maintaining functional compatibility with the standardized Preview 2 specification?}
 
 This question examines the technical challenges of manually implementing Preview 1 bindings that preserve the semantic richness of WIT-defined interfaces. It investigates type system adaptation strategies, error handling mechanism design, and resource management approaches that enable Preview 1 implementations to provide equivalent functionality to their Preview 2 counterparts.
 

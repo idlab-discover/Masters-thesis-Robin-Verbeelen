@@ -1,7 +1,7 @@
 \chapter{Background}
 \label{chap:background}
 
-This chapter provides the essential background knowledge required to understand the implementation and evaluation of the I2C WebAssembly System Interface. The chapter begins with an overview of WebAssembly and its ecosystem, followed by detailed explanations of WASI and its evolution through different preview versions. Subsequently, the chapter explores WebAssembly Interface Type (WIT) files and binding generation mechanisms, examines WebAssembly runtimes with particular emphasis on WAMR and Wasmtime, and introduces the I2C protocol and embedded systems context. The chapter concludes with an analysis of the current WASI I2C standardization proposal, a review of Friedrich's foundational work and its limitations, and an overview of existing WebAssembly performance studies.
+This chapter provides the essential background knowledge required to understand the implementation and evaluation of the I2C WebAssembly System Interface. The chapter begins with an overview of WebAssembly and its ecosystem, followed by detailed explanations of WASI and its evolution through different preview versions. Subsequently, the chapter explores \acrshort{wit} files and binding generation mechanisms, examines WebAssembly runtimes with particular emphasis on WAMR and Wasmtime, and introduces the I2C protocol and embedded systems context. The chapter concludes with an analysis of the current WASI I2C standardization proposal, a review of Friedrich's foundational work and its limitations, and an overview of existing WebAssembly performance studies.
 
 \section{WebAssembly}
 \label{sec:webassembly}
@@ -9,30 +9,22 @@ This chapter provides the essential background knowledge required to understand 
 \subsection{Overview and Motivation}
 \label{subsec:wasm-overview}
 
-WebAssembly (WASM) is a binary instruction format for a stack-based virtual machine designed as a portable compilation target for programming languages\cite{haas2017webassembly}. Originally developed to enable near-native performance execution of code in web browsers, WebAssembly has evolved into a comprehensive platform that extends well beyond the browser environment. The technology was collaboratively designed by engineers from the four major browser vendors (Mozilla, Google, Microsoft, and Apple) to address the performance limitations of JavaScript while maintaining the security and portability characteristics essential for web execution.
+WebAssembly (WASM) is a binary instruction format for a stack-based virtual machine designed as a portable compilation target for programming languages\cite{rossberg2018webassembly}. Originally developed to enable near-native performance execution of code in web browsers, WebAssembly emerged from a collaborative effort by engineers from the four major browser vendors (Mozilla, Google, Microsoft, and Apple) to address JavaScript's performance limitations while preserving the security and portability characteristics essential for web execution.
 
-% TODO: Add figure showing WebAssembly's position in the modern computing stack
-% Comment: Figure should illustrate WebAssembly as an intermediate layer between high-level languages (C/C++/Rust/etc.) and various execution environments (browsers, servers, embedded devices)
+However, developers quickly recognized that WebAssembly's unique combination of performance, security, and portability extended far beyond browser environments. The technology's sandboxed execution model delivers near-native performance across diverse hardware architectures while maintaining strict security guarantees—characteristics that proved particularly valuable for embedded systems and IoT devices where code must run safely on resource-constrained hardware. The introduction of the WebAssembly System Interface (WASI) marked the pivotal transition from web-centric to general-purpose computing, providing standardized APIs for filesystem access, networking, and system interactions that enabled WebAssembly modules to operate independently of browsers. The capability-based security model inherent in WASI further addresses critical concerns in embedded deployments, where unauthorized access to hardware peripherals could compromise device functionality or user safety.
 
-The fundamental motivation behind WebAssembly stems from the need for a technology that is secure, reliable, and easily updatable while requiring minimal overhead\cite{friedrich_thesis}. Critical infrastructure software and consumer products ranging from baby monitors to smart-watches have created a demand for software that can be securely updated and reliably executed across diverse platforms. This need has been further emphasized by regulatory frameworks such as the European Parliament's Cyber Resilience Act, which obligates manufacturers to handle vulnerabilities effectively during the support period and provide security updates throughout the product's expected lifespan.
-
-\subsection{Technical Architecture}
-\label{subsec:wasm-architecture}
-
-WebAssembly operates as an assembly language for a conceptual machine rather than a physical one, enabling execution across various machine architectures. The binary format features a compact representation that facilitates fast loading and decoding, while the formal semantics designed from the outset ensure predictable behavior across different implementations\cite{rossberg2018webassembly}.
-
-The WebAssembly instruction set is designed around a stack-based virtual machine with a linear memory model. Programs execute in a sandboxed environment with capability-based security, preventing unauthorized access to system resources. This security model ensures that WebAssembly modules cannot access memory or resources beyond those explicitly provided by the host environment.
+This evolution has proven timely, as critical infrastructure software and consumer products—ranging from baby monitors to smart-watches—have created unprecedented demand for technology that is secure, reliable, and easily updatable while requiring minimal overhead. Regulatory frameworks such as the European Parliament's Cyber Resilience Act~\cite{eu_cyber_res_act} have further emphasized this need, obligating manufacturers to handle vulnerabilities effectively during support periods and provide security updates throughout a product's expected lifespan. WebAssembly's ability to deliver secure, cross-platform execution with straightforward update mechanisms positions it as an ideal solution for these emerging requirements in safety-critical and resource-constrained environments.
 
 \subsection{WebAssembly Ecosystem}
 \label{subsec:wasm-ecosystem}
 
 The WebAssembly ecosystem encompasses multiple components that enable the development, compilation, and execution of WebAssembly applications. The ecosystem includes:
 
-\textbf{Compilation Toolchains:} Various compilers can target WebAssembly, including but not limited to: Emscripten for C/C++, the Rust compiler, wasi-sdk~\cite{wasisdk} and specialized tools like AssemblyScript. These toolchains handle the translation from high-level languages to WebAssembly bytecode while managing language-specific runtime requirements.
+\textbf{Compilation Toolchains:} Various compilers can target WebAssembly, including but not limited to: Emscripten for C/C++~\cite{emscripten_git}, Tier 2 support by the Rust compiler~\cite{rust_wasm_target}, wasi-sdk~\cite{wasisdk} and specialized tools like AssemblyScript~\cite{assemblyscript_git}. These toolchains handle the translation from high-level languages to WebAssembly bytecode while managing language-specific runtime requirements.
 
 \textbf{Runtime Environments:} WebAssembly can execute in browsers through built-in JavaScript engines, but also in standalone runtimes designed for server-side and embedded applications. These runtimes provide the execution environment and implement the WebAssembly specification.
 
-\textbf{Development Tools:} The ecosystem includes debugging tools, profilers, and analysis frameworks that support WebAssembly development. Tools like WABT (WebAssembly Binary Toolkit) provide utilities for working with WebAssembly binaries.
+\textbf{Development Tools:} The ecosystem includes debugging tools, profilers, and analysis frameworks that support WebAssembly development. Tools like wasm-tools~\cite{wasm_tools_git} and WABT (WebAssembly Binary Toolkit)~\cite{wabt_git} provide utilities for working with WebAssembly binaries.
 
 \textbf{Standards and Governance:} WebAssembly development follows W3C standardization processes, with active community involvement through the WebAssembly Community Group. This ensures that the technology evolves in a consensus-driven manner.
 
@@ -50,70 +42,49 @@ The design philosophy of WASI centers on capability-based security principles, w
 
 \subsection{WASI Preview 1}
 \label{subsec:wasi-preview1}
+Preview 1 represents the initial stabilized release of the WebAssembly System Interface, launched with a focus on establishing fundamental system interaction capabilities. Preview 1 employs WITX~\cite{witx_docs} as its \acrfull{idl}, an experimental interface definition language originally developed specifically for expressing WASI APIs. WITX is based on S-expressions and the WebAssembly Text (WAT) format, following a function-based interface model that closely mirrors traditional system call interfaces.
 
-Preview 1 represents the initial stabilized release of the WebAssembly System Interface, launched with a focus on establishing fundamental system interaction capabilities. Preview 1 uses WITX as the \acrfull{idl} to define APIs and follows a function-based interface model that closely mirrors traditional system call interfaces.
+The Preview 1 design draws heavily from POSIX influences, implementing familiar concepts such as file descriptors, path-based file operations, and process-centric resource management. The API covers essential system operations including file system operations (open, close, read, write), clock and time functions, random number generation, environment variable access, and command-line argument handling.
 
-The Preview 1 design draws heavily from POSIX influences, implementing familiar concepts such as file descriptors, path-based file operations, and process-centric resource management. The API covers essential system operations including:
+Preview 1 achieved widespread adoption due to its practical utility and stability guarantees. However, the WITX-based design exposed several fundamental limitations that drove the WASI Subgroup's migration toward the more sophisticated \acrshort{wit} format and Preview 2 for subsequent versions:
 
-\begin{itemize}
-    \item File system operations (open, close, read, write)
-    \item Clock and time functions
-    \item Random number generation
-    \item Environment variable access
-    \item Command-line argument handling
-\end{itemize}
+\textbf{Limited Language Support:} WITX primarily targets C-like languages and lacks the expressiveness needed to support diverse programming language paradigms effectively. The interface design assumptions make it challenging to provide idiomatic bindings for languages with different memory models or type systems.
 
-Preview 1 achieved widespread adoption due to its practical utility and stability guarantees. However, the design exposed several limitations that informed the development of subsequent versions:
+\textbf{Restricted Type Expressiveness:} While WITX provides basic type safety with limited support for strings and arrays, it cannot express complex return types beyond simple scalar values. Functions can only return success/failure indicators through the \texttt{expected} mechanism, with actual data passed through pointer parameters—a pattern that complicates memory management and API design.
 
-\textbf{Limited Type System:} The WITX-based interface provides basic type safety but lacks the expressiveness needed for complex resource management and inter-component communication.
+\textbf{Monolithic Structure:} Preview 1 presents a relatively monolithic API surface that cannot be easily extended, composed, or virtualized. The lack of modularity prevents fine-grained capability management and makes it difficult to create specialized API subsets for specific use cases.
 
-\textbf{Monolithic Structure:} Preview 1 presents a relatively monolithic API surface that cannot be easily extended or composed with other interface definitions.
+\textbf{Limited Async and Virtualization Support:} WITX lacks comprehensive mechanisms for integrating asynchronous behavior or API virtualization, features that became increasingly important as WASI expanded beyond simple system call wrappers towards more sophisticated component-based architectures.
 
-\textbf{Resource Management Limitations:} The function-based approach requires manual resource lifetime management, increasing the potential for resource leaks and programming errors.
+These limitations necessitated the development of the more powerful WIT format and the component model for WASI Preview 2, which provides significantly enhanced type expressiveness, better language support, and comprehensive virtualization capabilities. WITX is considered legacy.
 
 \subsection{WASI Preview 2 and the Component Model}
 \label{subsec:wasi-preview2}
 
-Preview 2 represents a comprehensive redesign that addresses the fundamental limitations identified in Preview 1 while introducing advanced capabilities for component composition and virtualization\cite{wasi_component_model}. The most significant innovation in Preview 2 is the integration with the WebAssembly Component Model, which enables building interoperable WebAssembly libraries, applications, and environments.
+Preview 2 represents a comprehensive redesign that addresses the fundamental limitations identified in Preview 1 while introducing advanced capabilities for component composition and virtualization.
 
-\textbf{Component Model Integration:} Preview 2 leverages the Component Model to enable the composition of WebAssembly modules with well-defined interfaces. Components can export and import functionality through standardized interfaces, enabling complex application architectures with multiple interacting components.
+\textbf{Component Model:} Preview 2 defined the Component Model~\cite{wasi_component_model} to enable the composition of WebAssembly modules with well-defined interfaces. Components can export and import functionality through standardized interfaces, enabling complex application architectures with multiple interacting components.
 
 \textbf{Resource-Based Design:} Unlike Preview 1's function-based approach, Preview 2 implements a resource-based design where system entities are represented as first-class resources with associated methods. This approach provides better encapsulation, automatic resource management, and improved type safety.
 
-\textbf{WIT Interface Definition:} Preview 2 uses the \acrfull{wit} format for defining interfaces, which provides a more expressive type system compared to WITX. WIT supports complex data structures, resource types, and interface composition mechanisms.
+\textbf{WIT Interface Definition:} Preview 2 uses the \acrshort{wit} format for defining interfaces. \acrshort{wit} supports complex data structures, resource types, and interface composition mechanisms.
 
-\textbf{Capability-Based Security Enhancement:} The component model enhances WASI's capability-based security by providing fine-grained control over resource access and enabling capability delegation between components.
-
-\textbf{Virtualizability:} Preview 2 is designed with virtualization in mind, allowing WASI implementations to be layered and composed. This enables use cases such as capability attenuation, resource multiplexing, and policy enforcement.
+\textbf{Capability-Based Security Enhancement:} The component model enhances \acrshort{wasi}'s capability-based security by providing fine-grained control over resource access and enabling capability delegation between components. This enables use cases such as capability attenuation, resource multiplexing, and policy enforcement.
 
 \subsection{Preview Differences and Trade-offs}
 \label{subsec:preview-differences}
-
 The evolution from Preview 1 to Preview 2 involves significant trade-offs that affect implementation complexity, performance characteristics, and deployment scenarios:
 
-\textbf{Implementation Complexity:} Preview 2's component model introduces substantial complexity in runtime implementation. Supporting component instantiation, interface resolution, and resource management requires sophisticated runtime infrastructure compared to Preview 1's straightforward function dispatching.
+\textbf{Memory Architecture:} Preview 1 and Preview 2 employ fundamentally different approaches to memory management and inter-module communication. Preview 1 follows a shared memory model inherited from POSIX, where modules communicate through exported linear memory and raw pointer manipulation. APIs mutating data operate directly on caller-provided buffers using pointers to mutable data, requiring modules to share memory space for data exchange. In contrast, Preview 2 implements a strict shared-nothing architecture where each component instance fully encapsulates its core WebAssembly module, including memory, tables, globals, and functions. Components communicate exclusively through well-defined import and export boundaries using high-level data types defined in \acrshort{wit}, eliminating the need for direct memory sharing between components.
 
-\textbf{Development Experience:} Preview 2 provides a superior development experience through automatic binding generation, improved type safety, and better tooling support. However, this comes at the cost of increased build complexity and toolchain requirements.
+\textbf{Implementation Complexity:} Preview 2's component model introduces substantial complexity in runtime implementation. Supporting component instantiation, interface resolution, resource management, and the shared-nothing linking model requires sophisticated runtime infrastructure compared to Preview 1's straightforward function dispatching with shared memory access. The transition from pointer-based interfaces to high-level type abstractions necessitates additional translation layers and Canonical \acrshort{abi} implementation.
 
-\textbf{Performance Implications:} The resource-based design and component model overhead can impact performance, particularly during startup and resource allocation phases. Preview 1's direct function call approach typically exhibits lower overhead.
+\textbf{Development Experience:} Preview 2 provides a superior development experience through automatic binding generation, improved type safety, and better tooling support. The elimination of raw pointer manipulation reduces common security vulnerabilities such as buffer overflows and out-of-bounds memory access. However, this comes at the cost of increased build complexity, toolchain requirements, and the need to understand component model concepts rather than familiar POSIX-style interfaces.
 
-\section{\acrshort{wit} Files and Binding Generation}
+\textbf{Performance Implications:} The architectural differences create distinct performance characteristics. Preview 1's shared memory approach enables efficient data exchange through direct pointer manipulation and zero-copy operations within the shared address space. Preview 2's shared-nothing model introduces a different approach to data transfer through the Canonical \acrshort{abi}, which defines how high-level component types are represented in terms of low-level WebAssembly types. While the specification describes lifting and lowering operations that appear to create intermediate copies, real implementations are designed to fuse these operations into efficient direct copies between component memory spaces when possible. The Canonical \acrshort{abi} is optimized to minimize copying where possible, particularly for immutable data structures that can be passed between components without duplication. However, performance characteristics depend heavily on data types, mutability requirements, and the specific component implementations involved. Lastly, the resource-based design and component instantiation overhead can impact startup performance compared to Preview 1's direct function call approach.
+
+\section{Binding Generation}
 \label{sec:wit-binding}
-
-\subsection{\acrfull{wit}}
-\label{subsec:wit-overview}
-
-\acrshort{wit} is and \acrshort{idl} that constitutes a domain-specific language designed for defining interfaces in the WebAssembly Component Model~\cite{wit_specification}. WIT enables precise specification of component interfaces, including function signatures, data types, resource definitions, and interface composition rules.
-
-The WIT format addresses several limitations of previous interface definition approaches by providing:
-
-\textbf{Expressive Type System:} \acrshort{wit} supports complex data structures including records, variants, tuples, lists, and resource types. This expressiveness enables modeling sophisticated APIs that would be difficult to represent in simpler \acrshort{idl} formats.
-
-\textbf{Resource Management:} \acrshort{wit} includes first-class support for resource types, which represent opaque handles to system entities. Resources enable proper lifetime management and provide a foundation for capability-based security.
-
-\textbf{Interface Composition:} \acrshort{wit} supports interface inheritance, composition, and world definitions that specify the complete interface surface of a component. This modularity enables building complex systems from composable interface definitions.
-
-\textbf{Version Management:} \acrshort{wit} includes versioning semantics that enable interface evolution while maintaining compatibility with existing implementations.
 
 \subsection{Binding Generation Process}
 \label{subsec:binding-generation}
@@ -131,9 +102,9 @@ Binding generation transforms \acrshort{wit} interface definitions into language
 Popular binding generation tools include:
 
 \begin{itemize}
-    \item \textbf{wit-bindgen:} The reference implementation supporting multiple target languages including Rust, C, JavaScript, and Python
-    \item \textbf{Wasmtime bindgen macro:} Rust-specific integration that generates bindings at compile time
-    \item \textbf{jco:} JavaScript-focused tooling for component development and execution
+    \item \textbf{wit-bindgen:} The reference implementation supporting multiple target languages including Rust, C, JavaScript, and Python~\cite{wit_bindgen_git}
+    \item \textbf{Wasmtime bindgen macro:} Rust-specific integration that generates bindings at compile time~\cite{wasmtime_bindgen_docs}
+    \item \textbf{jco:} JavaScript-focused tooling for component development and execution~\cite{jco_docs}
 \end{itemize}
 
 \subsection{Binding Generation vs Manual Implementation}
@@ -254,7 +225,7 @@ The WASI I2C proposal represents an ongoing effort to standardize I2C communicat
 \subsection{Proposal Architecture and Design}
 \label{subsec:i2c-proposal-design}
 
-The WASI I2C proposal defines interfaces that closely follow the embedded-hal version 1 design principles while adapting to the WebAssembly Component Model's resource-based architecture. The proposal consists of three primary WIT files that implement a modular, composable interface design.
+The WASI I2C proposal~\cite{wasi_i2c_proposal} defines interfaces that closely follow the embedded-hal version 1 design principles while adapting to the WebAssembly Component Model's resource-based architecture. The proposal consists of three primary WIT files that implement a modular, composable interface design.
 
 \textbf{Core Interface Components:}
 \begin{itemize}
