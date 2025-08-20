@@ -4,25 +4,63 @@
 \section{Introduction}
 \label{sec:eval-intro}
 
-This chapter presents a comprehensive experimental evaluation of the I2C WASI interface implementations developed for the runtimes WAMR and Wasmtime. It focuses on comparing their \textbf{performance characteristics} and \textbf{resource utilization}. The primary focus centers on a detailed comparative analysis between these two WebAssembly runtime approaches, while leveraging the native implementation as a performance baseline and reference point.
+The WASI I2C proposal's progression to Phase 3 requires demonstrated compatibility with embedded device constraints as defined by the portability criteria Table~\ref{tab:portability_criteria}. These specify resource-constrained platforms including the Nucleo F412ZG with only 256 KB SRAM and 1 MB Flash memory, representing the minimal viable embedded deployment target. For WebAssembly to succeed in embedded I2C applications, implementations must operate efficiently within these stringent memory and performance constraints.
 
-The evaluation encompasses \textbf{timing analysis} across multiple execution phases and comprehensive \textbf{memory profiling} to track allocation patterns. This data is then used for statistical analysis to ensure reliable and reproducible results. By systematically measuring runtime setup overhead, execution latency, and memory consumption, this experimental evaluation provides quantitative insights into the practical trade-offs between different WebAssembly runtime architectures.
+This chapter presents a comprehensive experimental evaluation of the I2C WASI interface implementations developed for the WAMR and Wasmtime runtimes, with particular emphasis on their \textbf{performance characteristics} and \textbf{resource utilization} in embedded deployment scenarios. It encompasses \textbf{timing analysis} across multiple execution phases and comprehensive \textbf{memory profiling} to track allocation patterns. This data is then used for statistical analysis to ensure reliable and reproducible results. By systematically measuring \textbf{runtime setup overhead}, \textbf{execution latency}, and \textbf{memory consumption}, this experimental evaluation provides quantitative insights into the use of the WASI I2C interface in these constrained environments.
+
+WAMR's results are particularly critical because it represents the primary runtime architecture capable of meeting these embedded constraints. Unlike feature-rich runtimes designed for server environments, WAMR's embedded-optimized architecture directly targets the resource limitations specified in the portability criteria. If WAMR cannot demonstrate acceptable performance and memory efficiency, the Preview 1 approach --- and by extension, the entire embedded WebAssembly I2C ecosystem --- would lack a viable deployment foundation for resource-constrained systems.\\
 
 \section{Evaluation Setup}
 \label{sec:eval-methodology}
 
-Having established the evaluation objectives and methodology in Section~\ref{sec:eval-intro}, this section details the used infrastructure for this analysis. The experimental setup encompasses three critical components: the hardware configuration that enables I2C communication, the firmware implementations of the I2C peripheral, and the software framework that facilitates accurate performance measurement and statistical analysis.
+\subsection{The Ping-Pong Routine: Comprehensive System Validation}
+\label{subsec:ping-pong-routine}
+
+The Ping-Pong routine represents more than a simple I2C communication test; it serves as a comprehensive validation of the entire WebAssembly I2C ecosystem, exercising every critical component of the system in a minimal, reproducible manner. Importantly, the routine encompasses the complete resource lifecycle, including resource creation, usage, and destruction.
+
+\begin{listing}[H]
+    \begin{minted}[breaklines]{rust}
+        fn complete_pingpong_sequence() -> Result<(), ErrorCode> {
+            // Phase 1: Resource Creation and Acquisition
+            let device = I2cResource::new();  // Triggers host_open() call, handle allocation
+            
+            // Phase 2: Write Operation with Memory Transfer
+            let message = [0x68, 0x65, 0x6c, 0x6c, 0x6f]; // ASCII "hello"
+            device.write(0x09, &message)?;  // Triggers host_write() call, Host/guest boundary crossing
+            
+            // Phase 3: Read Operation with Buffer Allocation and Return
+            let response = device.read(0x09, 5)?;  // Triggers host_read() call, Guest-managed memory allocation and data transfer
+            
+            Ok(())
+            // Phase 4: Automatic Resource Cleanup (via Drop trait)
+        }  // device.drop() called here, triggering host_close() and handle deallocation
+    \end{minted}
+    \caption{Complete ping-pong implementation demonstrating resource creation, bidirectional I2C communication, and automatic cleanup within a single operation}
+    \label{lst:complete-pingpong}
+\end{listing}
+
+The ping-pong routine exercises the following critical system components:
+
+\textbf{Resource Lifecycle Management}: The creation of an \texttt{I2cResource} instance triggers the complete resource acquisition sequence, including host function invocation, handle allocation, permission assignment, and registration in the permission management system. The automatic cleanup through Rust's Drop trait ensures proper resource deallocation and prevents handle leaks.
+
+\textbf{Memory Boundary Transitions}: Both write and read operations require careful translation between WebAssembly linear memory and native memory spaces, testing the memory safety mechanisms implemented in the host functions and validating the pointer translation logic.
+
+\textbf{Error Handling Pathways}: The routine exercises the complete error lifting and lowering pipeline, ensuring that I2C protocol errors are correctly propagated from hardware through the host implementation to the guest application without loss of semantic information.
+
+\textbf{Bidirectional Communication}: The sequence tests both host-to-guest parameter passing (addresses, lengths) and guest-to-host data transfer (message buffers), validating the complete communication infrastructure including memory allocation and data marshalling.
+
+\textbf{Hardware Integration}: The actual I2C communication with the target device ensures that the entire software stack correctly interfaces with real hardware, validating the embedded HAL integration and confirming that the abstraction layers do not interfere with proper I2C protocol implementation.
 
 \subsection{Hardware Configuration}
 \label{subsec:eval-setup-hw}
 
-The experimental testbed consists of a Raspberry Pi acting as the I2C controller, connected to an Arduino Uno serving as the I2C peripheral \footnote{Modern naming conventions for I2C context prefer \textit{controller/peripheral} over \textit{master/slave}}.
+The experimental testbed consists of a Raspberry Pi acting as the I2C controller, connected to an Arduino Uno serving as the I2C peripheral.
 
 \textbf{Controller Configuration:}
 \begin{itemize}
     \item Board: \textit{Raspberry Pi 5}
     \item Architecture: \textit{ARM64} % TODO: reference pi datasheet
-    \item Operating System: \textit{Raspberry Pi OS (Desktop features turned off)}
+    \item Operating System: \textit{Raspberry Pi OS (reference 2024-11-19)}~\cite{pi_os}
 \end{itemize}
 
 \textbf{Peripheral Configuration:}
@@ -35,7 +73,7 @@ The experimental testbed consists of a Raspberry Pi acting as the I2C controller
 \begin{figure}[h]
 	\centering
 	\includegraphics[width=0.7\textwidth]{images/HW_config.png}
-	\caption{Hardware connection diagram.}
+	\caption{Hardware connection diagram. SDA: Pi pin 3 to Arduino A4; SCL: Pi pin 5 to Arduino A5. Ground cable connection was omitted for simplicity of the diagram, but uses Pi pin 6 to Arduino GND.}
 	\label{fig:hw-connection}
 \end{figure}
 
@@ -50,13 +88,13 @@ This firmware implements echo functionality for debugging. All I2C transactions 
 \subsubsection{Performance Testing Firmware}
 For performance benchmarks, an optimized firmware version was deployed that eliminates serial communication overhead. Upon receiving any I2C write request, the Arduino responds with a fixed ``hello'' message (\texttt{0x68, 0x65, 0x6c, 0x6c, 0x6f}) for one subsequent read operation. This approach minimizes Arduino-side processing variability and keeps extra overhead to a minimum.
 
-\subsection{Benchmark Methodology}
+\subsection{Methodology}
 \label{subsec:eval-setup-bench}
 
 The evaluation follows a three-phase methodology to ensure correctness and robust measurement of latency and memory utilization.
 
 \subsubsection{Phase 1: Correctness Verification}
-Prior to performance measurement, functional correctness is verified by executing ping-pong operations across all implementations and confirming successful I2C transactions via Arduino serial monitor output.
+Prior to profiling, functional correctness is verified by executing ping-pong operations across all implementations and confirming successful I2C transactions via Arduino serial monitor output.
 
 \subsubsection{Phase 2: Performance Measurement}
 Performance evaluation employs \textbf{Criterion.rs}, a statistical benchmarking framework that provides automatic outlier detection, distribution plotting, calculates achievable sample size prior to measurements during a warm-up phase and provides statistical insights post measurements\cite{criterion_rs}. The tool \texttt{cargo-criterion} provides machine-readable JSON output of those measurements, which allows us to also perform manual analysis and visualizations using Python/Jupyter.
@@ -69,74 +107,46 @@ The benchmark is divided into three different measurements, referred to as \text
 \end{itemize}
 
 \subsubsection{Phase 3: Memory utilization}
-% TODO: reference dhat
-A single binary is built to run memory utilization profiling using DHAT. It initializes two profilers, measuring Runtime Setup and Guest execution.
+A single binary is built to run memory utilization profiling across all the different runtimes, using DHAT~\cite{dhat_crate}. Two profilers are initialized, measuring Runtime Setup and Guest execution. A separate binary for each runtime is compiled to analyze the resulting binary sizes.
 
 \section{Runtime Setup Performance Analysis}
 \label{sec:eval-setup}
 
-Runtime initialization represents a critical performance dimension, particularly for embedded devices deployed in scenarios where Time-to-First-Execution is crucial. This section analyzes the setup overhead for each implementation and discusses the implications for practical deployment scenarios.
-
-\subsection{Native Baseline}
-\label{subsec:eval-setup-native}
-
-The native implementation only using linux-embedded-hal provides the performance baseline for "runtime" initialization. Table~\ref{tab:native-setup} presents an overview of the measured characteristics, while Figure~\ref{fig:native-setup-distribution} gives a visual representation of the distribution.
-
-\begin{table}[h]
-    \centering
-    \caption{Native Implementation's Setup overhead}
-    \label{tab:native-setup}
-    \begin{tabular}{cccc}
-        \toprule
-        \textbf{Mean (µs)} & \textbf{Median (µs)} & \textbf{Std Dev (ns)} & \textbf{95\% CI (µs)} \\
-        \midrule
-        1.9466 & 1.9483 & 10.5846 & [1.9445 ; 1.9487] \\
-        \bottomrule
-    \end{tabular}
-\end{table}
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.7\textwidth]{images/native-setup-distribution}
-    \caption{Distribution of Native Runtime Setup measurements}
-    \label{fig:native-setup-distribution}
-\end{figure}
+Runtime initialization represents a critical performance dimension, particularly for embedded devices deployed in scenarios where Time-to-First-Execution is crucial. This section analyzes the setup overhead for each runtime and discusses the implications for practical deployment scenarios.
 
 While the native implementation is categorized under Runtime Setup, it does not involve any runtime initialization. Instead, it establishes a performance baseline by measuring the Linux I2C Stack overhead for opening the \texttt{/dev/i2c-1} device file. Since the \acrshort{wasm} implementations utilize the same underlying Linux I2C software stack, this baseline enables quantification of the additional overhead introduced purely by runtime instantiation when compared against the \acrshort{wasm} implementations.
 
-\subsection{WebAssembly Comparison}
-\label{subsec:eval-setup-wasm}
-
-Table~\ref{tab:wasm-setup} presents the initialization overhead for \acrshort{wamr} and Wasmtime implementations. Figure~\ref{fig:wasm-setup-distribution} gives a visual representation.
+Table~\ref{tab:wasm-setup} presents the initialization overhead for \acrshort{wamr} and Wasmtime implementations compared to the Native baseline. Figure~\ref{fig:wasm-setup-distribution} gives a visual representation.
 
 \begin{table}[h]
     \centering
-    \caption{\acrshort{wasm} Implementations's Runtime Setup overhead comparison}
+    \caption{Runtime Setup overhead comparison, showcasing absolute differences between implementations.}
     \label{tab:wasm-setup}
-    \begin{tabular}{lcccc}
+    \begin{tabular}{lccccc}
         \toprule
-        \textbf{Implementation} & \textbf{Mean (µs)} & \textbf{Median (µs)} & \textbf{Std Dev (ns)} & \textbf{95\% CI (µs)} \\
+        \textbf{Implementation} & \textbf{Mean (µs)} & \textbf{Median (µs)} & \textbf{Std Dev (ns)} & \textbf{95\% CI (µs)} & \textbf{CI Range (µs)} \\
         \midrule
-        WAMR        & 253.1126 & 253.1301 & 258.4145 & [253.0613 ; 253.1638] \\
-        Wasmtime    & 19,559.1592 & 19,559.8473 & 11,656.5225 & [19,556.8463 ; 19,561.4721] \\
+        Native      & 1.9466 & 1.9483 & 10.5846 & [1.9445 ; 1.9487] & 0.0042 \\
+        WAMR        & 253.1126 & 253.1301 & 258.4145 & [253.0613 ; 253.1638] & 0.1025 \\
+        Wasmtime    & 19,559.1592 & 19,559.8473 & 11,656.5225 & [19,556.8463 ; 19,561.4721] & 4.6258 \\
         \bottomrule
     \end{tabular}
 \end{table}
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.9\textwidth]{images/wasm-setup-distribution}
-    \caption{Distributions of \acrshort{wasm} Runtime Setup measurements}
+    \includegraphics[width=0.9\textwidth]{images/setup-distribution}
+    \caption{Distribution plots, showcasing relatively stable measurements.}
     \label{fig:wasm-setup-distribution}
 \end{figure}
 
-\subsubsection{Setup Performance Analysis}
-The results reveal a dramatic performance disparity between the two WebAssembly runtimes. \acrshort{wamr} achieves setup initialization in approximately 253 μs, representing 130x overhead compared to the native implementation. However, Wasmtime exhibits substantially higher initialization costs at 19.6 ms, creating just over 10,000x overhead relative to native and 77x overhead compared to \acrshort{wamr}. Figure~\ref{fig:wasm-setup-relative} gives an overview.
+\subsection{Analysis}
+The results reveal a dramatic performance disparity between the two WebAssembly runtimes. \acrshort{wamr} achieves setup initialization in approximately 253 μs, representing a 130x overhead compared to the native implementation. However, Wasmtime exhibits substantially higher initialization costs at 19.6 ms, creating a just over 10,000x overhead relative to the native implementation and a 77x overhead compared to the \acrshort{wamr} implementation. Figure~\ref{fig:wasm-setup-relative} gives a visualization of the dramatic differences.
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.9\textwidth]{images/wasm-setup-relative}
-    \caption{Comparison of \acrshort{wasm} Implementation's Runtime Setup relative to the baseline}
+    \includegraphics[width=0.9\textwidth]{images/setup_bars}
+    \caption{Bar chart comparing Runtime Setup overhead, showcasing the much higher Wasmtime overhead for setting up the runtime.}
     \label{fig:wasm-setup-relative}
 \end{figure}
 
@@ -145,7 +155,7 @@ The results reveal a dramatic performance disparity between the two WebAssembly 
 
 These setup time characteristics have profound implications for embedded deployment patterns. For example:
 
-\textbf{Ultra Low Power devices:} Scenarios where Ultra Low Power devices are completely turned off, making them lose their state. Having to instantiate a new Wasmtime runtime would take up too much power. Even \acrshort{wamr} could bring too much overhead, but when virtualization advantages are required, \acrshort{wasm} features could make \acrshort{wamr} viable.
+\textbf{Ultra Low Power:} In some cases, Ultra Low Power devices leaving their duty cycle are completely turned off, making them lose their state. Setting up a new Wasmtime instance each time would take up too much power. In some extreme scenarios, even setting up \acrshort{wamr} could be too much overhead, but it would remain feasible in cases where the benefits of WebAssembly are favored.
 
 \textbf{Real-time Systems:} Applications requiring deterministic startup behavior within millisecond constraints would exclude Wasmtime entirely, while \acrshort{wamr}'s sub-millisecond setup remains viable for many real-time scenarios.
 
@@ -156,72 +166,47 @@ These setup time characteristics have profound implications for embedded deploym
 
 With runtime initialization complete, this section examines the steady-state execution performance for I2C operations, comparing cold (first-execution) and hot (repeated-execution) characteristics.
 
-\subsection{Native Baseline}
-\label{subsec:eval-execution-native}
-
-Table~\ref{tab:native-execution} establishes the native performance baseline for I2C ping-pong operations.
+Table~\ref{tab:wasm-execution} compares execution performance between WAMR, Wasmtime, and Native for both Cold and Hot execution.
 
 \begin{table}[h]
     \centering
-    \caption{Native Implementation Execution Performance}
-    \label{tab:native-execution}
-    \begin{tabular}{lcccc}
+    \caption{WebAssembly Execution Performance Comparison}
+    \label{tab:wasm-execution}
+    \begin{tabular}{llcccc}
         \toprule
-        \textbf{Execution Type} & \textbf{Mean (µs)} & \textbf{Median (µs)} & \textbf{Std Dev (ns)} & \textbf{95\% CI (µs)} \\
+        \textbf{Execution} & \textbf{Implementation} & \textbf{Mean (µs)} & \textbf{Median (µs)} & \textbf{Std Dev (ns)} & \textbf{95\% CI (µs)} \\
         \midrule
-        Cold Execution  & 594.5275 & 594.5636 & 281.8579 & [594.4715 ; 594.5834] \\
-        Hot Execution   & 589.0368 & 589.0307 & 69.9196 & [589.0230 ; 589.0507] \\
-    \end{tabular}
-\end{table}
-
-\subsection{WebAssembly Comparison}
-\label{subsec:eval-execution-wasm}
-
-Tables \ref{tab:wasm-execution-cold} and \ref{tab:wasm-execution-hot} compare execution performance between WAMR and Wasmtime for both cold and hot execution scenarios respectively.
-
-\begin{table}[h]
-    \centering
-    \caption{WebAssembly Cold Execution Performance Comparison}
-    \label{tab:wasm-execution-cold}
-    \begin{tabular}{lcccc}
-        \toprule
-        \textbf{Implementation} & \textbf{Mean (µs)} & \textbf{Median (µs)} & \textbf{Std Dev (ns)} & \textbf{95\% CI (µs)} \\
-        \midrule
-        WAMR      & 1,211.0415 & 1,210.9849 & 5,144.4222 & [1,210.0207 ; 1,212.0622] \\
-        Wasmtime  & 1,301.8975 & 1,300.5868 & 4,895.5251 & [1,300.9262 ; 1,302.8689] \\
+                & Native    & 594.5275 & 594.5636 & 281.8579 & [594.4715 ; 594.5834] \\
+        Cold    & WAMR      & 1,211.0415 & 1,210.9849 & 5,144.4222 & [1,210.0207 ; 1,212.0622] \\
+                & Wasmtime  & 1,301.8975 & 1,300.5868 & 4,895.5251 & [1,300.9262 ; 1,302.8689] \\
+        \hline
+                & Native    & 589.0368 & 589.0307 & 69.9196 & [589.0230 ; 589.0507] \\
+        Hot     & WAMR      & 1,185.4778 & 1,185.8310 & 673.0608 & [1,185.3442 ; 1,185.6113] \\
+                & Wasmtime  & 1,184.4430 & 1,184.2941 & 522.5048 & [1,184.3393 ; 1,184.5467] \\
         \bottomrule
     \end{tabular}
 \end{table}
-
-\begin{table}[h]
-    \centering
-    \caption{WebAssembly Hot Execution Performance Comparison}
-    \label{tab:wasm-execution-hot}
-    \begin{tabular}{lcccc}
-        \toprule
-        \textbf{Implementation} & \textbf{Mean (µs)} & \textbf{Median (µs)} & \textbf{Std Dev (ns)} & \textbf{95\% CI (µs)} \\
-        \midrule
-        WAMR      & 1,185.4778 & 1,185.8310 & 673.0608 & [1,185.3442 ; 1,185.6113] \\
-        Wasmtime  & 1,184.4430 & 1,184.2941 & 522.5048 & [1,184.3393 ; 1,184.5467] \\
-        \bottomrule
-    \end{tabular}
-\end{table}
-
-\subsubsection{Key Execution Performance Findings:}
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=1.0\textwidth]{images/wasm-execution-relative}
+    \includegraphics[width=0.9\textwidth]{images/execution-distribution}
+    \caption{Distribution plots, showcasing stability of the measurements.}
+    \label{fig:wasm-setup-distribution}
+\end{figure}
+
+\subsection{Analysis}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1.0\textwidth]{images/wasm-execution-rel}
     \caption{Execution Performance Comparison: Native vs \acrshort{wamr} vs Wasmtime}
     \label{fig:wasm-execution-relative}
 \end{figure}
 
 \begin{enumerate}
-    \item \textbf{Convergent Steady-State Performance:} Both WAMR and Wasmtime achieve remarkably similar hot execution performance 2x native overhead, despite their architectural differences.
-
-    \item \textbf{Statistical difference:} Although the Cold Execution would statistically be considered significantly different, a practical difference of only 90 µs is considered negligible.
+    \item \textbf{Convergent Steady-State Performance:} Both WAMR and Wasmtime achieve remarkably similar hot execution performance with a 2x native overhead, despite their architectural differences.
     
-    \item \textbf{Minimal Cold/Hot Differences:} Minimal cold/hot differences for WAMR (2.1\% improvement), with Wasmtime showing moderate optimization benefits (9.0\% improvement), suggesting some caching or optimization effects.
+    \item \textbf{Cold/Hot Differences:} Minimal cold/hot differences for WAMR (2.1\% improvement), with Wasmtime showing moderate optimization benefits (9.0\% improvement), suggesting some caching or similar optimization effects.
     
     \item \textbf{Consistent WebAssembly Overhead:} Both implementations exhibit approximately 2x overhead compared to native execution, representing the cost of WebAssembly instruction execution and host function call marshalling.
 \end{enumerate}
@@ -260,7 +245,7 @@ The performance variability analysis reveals distinct consistency patterns acros
 
 Memory consumption patterns provide critical insights for embedded applications with constrained resources. This section analyzes heap allocation behavior during both runtime setup and execution phases using DHAT profiling.
 
-\subsection{Runtime Setup Memory Profiling}
+\subsection{Runtime Setup}
 \label{subsec:memory-setup}
 
 Table~\ref{tab:memory-setup} presents memory allocation characteristics during runtime initialization, revealing the resource requirements for each implementation approach.
@@ -280,15 +265,19 @@ Table~\ref{tab:memory-setup} presents memory allocation characteristics during r
     \end{tabular}
 \end{table}
 
-\subsubsection{Setup Memory Analysis}
+\subsubsection{Analysis}
 
 The memory allocation patterns during runtime initialization reveal fundamental architectural differences between the implementations. The native implementation establishes a minimal baseline with just 10 bytes allocated, reflecting direct hardware access without abstraction overhead.
 
 WAMR demonstrates embedded-friendly resource consumption, requiring approximately 10KB across 16 allocation blocks. This three-order-of-magnitude increase over native remains acceptable for most embedded systems, particularly given that 99.6\% of allocated memory persists throughout the runtime lifecycle—indicating efficient, stable memory management without excessive allocation churn.
 
-Wasmtime's memory profile reflects its sophisticated execution engine architecture. While total allocations reach 14.2MB during initialization, the runtime maintains only 2.7MB at peak usage. This 81\% temporary allocation ratio reveals intensive memory operations during JIT compilation and module optimization. The 16,686 allocation blocks (over 1,000x more than WAMR) further illustrate the complexity of component model instantiation and type system initialization.
+Wasmtime's memory profile reflects its sophisticated execution engine architecture. While total allocations reach 14.2MB during initialization, the runtime maintains only 2.7MB at peak usage. This 81\% temporary allocation ratio reveals intensive memory operations during JIT compilation and module optimization. The 16,686 allocation blocks (over 1,000x more than WAMR) further illustrate the complexity of component model instantiation and type system initialization. Most importantly, Wasmtime's peak memory usage crosses the RAM limitations of both the ESP32-C3 (400KB) and the Nucleo (256KB) of the Portability Criteria from Table~\ref{tab:portability_criteria_specs}. Further optimization strategies were not researched, so will not be discussed.
 
 These patterns directly impact deployment feasibility: WAMR's 10KB footprint fits comfortably within typical embedded constraints (even sub-MB microcontrollers), while Wasmtime's multi-megabyte requirements restrict it to more capable embedded Linux platforms. The correlation between memory complexity and setup time (77x difference) suggests that memory allocation overhead contributes significantly to initialization latency.
+
+\section{Binary Size}
+
+
 
 % TODO: decide on OLD or new content
 % \subsubsection{Setup Memory Analysis:}
@@ -302,17 +291,11 @@ These patterns directly impact deployment feasibility: WAMR's 10KB footprint fit
 
 % From an \textbf{embedded systems perspective}, these results highlight critical deployment considerations. WAMR's 10 KB memory overhead remains feasible for many embedded applications, while Wasmtime's multi-megabyte requirements may exceed available memory in resource-constrained environments. The memory consumption patterns also correlate with the observed setup performance differences, where Wasmtime's extensive memory allocation activity contributes to its longer initialization times, while WAMR's moderate memory footprint aligns with its faster setup performance.
 
-\subsubsection{Execution Memory Efficiency}
+\subsection{Execution}
 
-Post-initialization memory requirements reveal excellent steady-state efficiency for both WebAssembly runtimes. These measurements capture only the incremental allocations required for guest function execution, independent of the established runtime footprint.
+Table~\ref{tab:memory-execution} presents memory allocation characteristics during the execution of the Ping-Pong routine, revealing the resource requirements for each implementation approach.
 
-Both runtimes demonstrate remarkable efficiency: WAMR requires 327 bytes across 6 allocations, while Wasmtime uses 416 bytes across 10 allocations—a negligible 89-byte difference despite their architectural disparities. Compared to the 16-byte native baseline, this represents approximately 20-26x overhead, primarily attributable to WASI interface marshalling and guest-host communication buffers.
-
-The minimal peak-to-total allocation differences (WAMR: 5\%, Wasmtime: 17\%) indicate stable execution without memory leaks or excessive temporary allocations. This efficiency validates both runtimes for long-running embedded applications where thousands of I2C operations must execute within constrained memory budgets.
-
-Critically, these results demonstrate that the substantial initialization costs—particularly Wasmtime's 14.2MB—do not translate to proportional execution overhead. Once initialized, both runtimes operate within hundreds of bytes, making the initialization cost a one-time investment that can be amortized across the application lifetime.
-
-\begin{table}[htbp]
+\begin{table}[H]
     \centering
     \caption{Memory Usage During Ping-Pong Execution}
     \label{tab:memory-execution}
@@ -326,6 +309,14 @@ Critically, these results demonstrate that the substantial initialization costs�
         \bottomrule
     \end{tabular}
 \end{table}
+
+\subsubsection{Analysis}
+
+Both runtimes demonstrate remarkable efficiency: WAMR requires 327 bytes across 6 allocations, while Wasmtime uses 416 bytes across 10 allocations --- a negligible 89-byte difference despite their architectural disparities. Compared to the 16-byte native baseline, this represents approximately 20-26x overhead, primarily attributable to WASI interface marshalling and guest-host communication buffers.
+
+The minimal peak-to-total allocation differences (WAMR: 5\%, Wasmtime: 17\%) indicate stable execution without memory leaks or excessive temporary allocations. This efficiency validates both runtimes for long-running embedded applications where thousands of I2C operations must execute within constrained memory budgets.
+
+Critically, these results demonstrate that the substantial initialization costs --- particularly Wasmtime's 14.2MB --- do not translate to proportional execution overhead. Once initialized, both runtimes operate within hundreds of bytes, making the initialization cost a one-time investment that can be amortized across the application lifetime.
 
 % TODO: Decide on OLD or new content
 % \subsection{Execution Memory Profiling}

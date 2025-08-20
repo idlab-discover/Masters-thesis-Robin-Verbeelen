@@ -824,48 +824,7 @@ impl wasi::i2c::i2c::HostI2c for HostState {
 
 The Wasmtime implementation benefits from automatic resource lifecycle management and type-safe binding generation, significantly reducing implementation complexity compared to the manual WAMR approach. However, this convenience comes at the cost of increased runtime requirements that may not be suitable for all embedded deployment scenarios.
 
-\section{The Ping-Pong Routine: Comprehensive System Validation}
-\label{sec:ping-pong-routine}
-
-\subsection{Operation Sequence and Resource Lifecycle}
-
-The ping-pong routine represents more than a simple I2C communication test; it serves as a comprehensive validation of the entire WebAssembly I2C ecosystem, exercising every critical component of the system in a minimal, reproducible manner. Importantly, the routine encompasses the complete resource lifecycle, including resource creation, which represents a significant portion of the operational complexity.
-
-\begin{listing}[H]
-\begin{minted}[breaklines]{rust}
-// Complete ping-pong sequence demonstrating full resource lifecycle
-fn complete_pingpong_sequence() -> Result<(), ErrorCode> {
-    // Phase 1: Resource Creation and Acquisition
-    let device = I2cResource::new();  // Triggers host_open() call, handle allocation
-    
-    // Phase 2: Write Operation with Memory Transfer
-    let message = [0x68, 0x65, 0x6c, 0x6c, 0x6f]; // ASCII "hello"
-    device.write(0x09, &message)?;  // Host/guest memory boundary crossing
-    
-    // Phase 3: Read Operation with Buffer Allocation and Return
-    let response = device.read(0x09, 5)?;  // Memory allocation and data transfer
-    
-    Ok(())
-    // Phase 4: Automatic Resource Cleanup (via Drop trait)
-}  // device.drop() called here, triggering host_close() and handle deallocation
-\end{minted}
-\caption{Complete ping-pong implementation demonstrating resource creation, bidirectional I2C communication, and automatic cleanup within a single operation}
-\label{lst:complete-pingpong}
-\end{listing}
-
-\subsection{System Components Under Test}
-
-The ping-pong routine exercises the following critical system components:
-
-\textbf{Resource Lifecycle Management}: The creation of an \texttt{I2cResource} instance triggers the complete resource acquisition sequence, including host function invocation, handle allocation, permission assignment, and registration in the permission management system. The automatic cleanup through Rust's Drop trait ensures proper resource deallocation and prevents handle leaks.
-
-\textbf{Memory Boundary Transitions}: Both write and read operations require careful translation between WebAssembly linear memory and native memory spaces, testing the memory safety mechanisms implemented in the host functions and validating the pointer translation logic.
-
-\textbf{Error Handling Pathways}: The routine exercises the complete error encoding and decoding pipeline, ensuring that I2C protocol errors are correctly propagated from hardware through the host implementation to the guest application without loss of semantic information.
-
-\textbf{Bidirectional Communication}: The sequence tests both host-to-guest parameter passing (addresses, lengths) and guest-to-host data transfer (message buffers), validating the complete communication infrastructure including memory allocation and data marshalling.
-
-\textbf{Hardware Integration}: The actual I2C communication with the target device ensures that the entire software stack correctly interfaces with real hardware, validating the embedded HAL integration and confirming that the abstraction layers do not interfere with proper I2C protocol implementation.
+% TODO: De pingpong routine stond hier, nu verplaatst naar eval hoofdstuk. Nog zien of er eerder in de text niet verwacht wordt dat pingpong hier uitgelegd wordt.
 
 \section{Viability}
 The implementation successfully demonstrates that WASI Preview 1 provides a viable foundation for I2C communication in resource-constrained WebAssembly environments. The carefully designed binding layer effectively bridges the semantic gap between Preview 1's function-based interface and Preview 2's resource-based component model, enabling embedded systems to participate in the WebAssembly ecosystem while meeting the stringent resource requirements of embedded deployment scenarios.
