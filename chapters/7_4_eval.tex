@@ -275,10 +275,6 @@ Wasmtime's memory profile reflects its sophisticated execution engine architectu
 
 These patterns directly impact deployment feasibility: WAMR's 10KB footprint fits comfortably within typical embedded constraints (even sub-MB microcontrollers), while Wasmtime's multi-megabyte requirements restrict it to more capable embedded Linux platforms. The correlation between memory complexity and setup time (77x difference) suggests that memory allocation overhead contributes significantly to initialization latency.
 
-\section{Binary Size}
-
-
-
 % TODO: decide on OLD or new content
 % \subsubsection{Setup Memory Analysis:}
 % The memory consumption analysis during runtime setup reveals dramatic differences in resource requirements across implementations, with implications spanning several orders of magnitude. The \textbf{native }implementation demonstrates minimal memory overhead, allocating only 10 bytes in a single allocation block, reflecting the direct hardware access approach with virtually no abstraction layer overhead. This establishes an extremely lean baseline that showcases the efficiency of direct I2C library usage.
@@ -336,3 +332,41 @@ Critically, these results demonstrate that the substantial initialization costs 
 % \textbf{Wasmtime} requires 416 bytes total allocation with a peak usage of 347 bytes distributed across 10 allocation blocks for execution. While this represents the highest overhead among the implementations, the absolute increment remains modest at approximately 26 times the native requirement and only 1.27 times the WAMR requirement. The 69 bytes difference between total and peak usage (16.6\%) suggests slightly more dynamic memory management during execution, potentially related to component model overhead.
 
 % These results are particularly significant because they demonstrate that \textbf{both WebAssembly runtimes achieve very efficient steady-state execution}. After absorbing the substantial initialization costs (especially Wasmtime's 14.2MB setup overhead), the incremental memory required for actual I2C operations remains in the hundreds of bytes range. This profile makes both runtimes highly suitable for embedded applications performing repeated I2C operations, where the setup cost can be amortized and the per-operation overhead remains minimal.
+
+
+
+\subsection{Binary Size}
+\label{subsec:binary-size}
+
+Binary size represents a critical deployment consideration for embedded systems, directly impacting flash memory requirements and distribution costs. This analysis examines the compilation footprint of each implementation variant, including both standard and optimized builds that target minimal binary size through \texttt{no\_std} compilation strategies.
+
+Table~\ref{tab:binary-sizes} presents the binary size characteristics across all implementations, including both standard and optimized variants. The optimized variants employ aggressive size reduction techniques, including Link Time Optimization (LTO), optimization level \texttt{-Oz} (optimize for size), and \texttt{no\_std} compilation strategies that eliminate the standard library overhead. For every host implementation, the \texttt{aarch64-unknown-linux-musl} target was used. Musl is a lightweight implementation of the C standard library, specifically designed for embedded environments~\cite{musl}. It uses static linking out of the box, making sure the binary files include everything they need to execute successfully.
+
+\begin{table}[H]
+\centering
+\caption{Binary Size Comparison Across Implementation Variants}
+\label{tab:binary-sizes}
+\begin{tabular}{lrrr}
+\toprule
+\textbf{Implementation} & \textbf{Standard Build (MB)} & \textbf{Optimized Build (KB)} & \textbf{Size Reduction (\%)} \\
+\midrule
+Native              & 7.23  & 348   & 95.2 \\
+WAMR                & 10.44 & 660   & 93.7 \\
+Wasmtime            & 12.20 & 3,609 & 70.4 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The standard builds include full runtime initialization capabilities with debugging support and standard library linking, while optimized builds embed the guest module directly within the host binary and apply comprehensive size reduction optimizations. For the WAMR implementation, the Preview 1 guest module contributes 38 KB in standard builds and 4.8 KB in optimized builds. The Wasmtime Preview 2 component remains at 16.2 KB, as \texttt{no\_std} compilation is not compatible with runtime binding generation tools providing Preview 2 support. Manual interference could solve that issue, but it defeats the desire for the enhanced developer experience.
+
+\textbf{Standard Build Analysis:} The unoptimized builds reveal the base overhead of each runtime architecture. Wasmtime's 12.2 MB footprint reflects its sophisticated compilation infrastructure and component model support, representing a 69\% increase over the native baseline. WAMR's 10.4 MB binary demonstrates a more modest 44\% overhead, aligning with its embedded-focused design philosophy that prioritizes resource efficiency over feature completeness.
+
+\textbf{Optimized Build Analysis:} The size reduction potential through aggressive optimization varies significantly across implementations. Native implementations achieve the most dramatic compression (95.2\% reduction to 348 KB), demonstrating that direct hardware access patterns are highly amenable to dead code elimination and static linking optimizations. WAMR follows closely with 93.7\% reduction to 660 KB, indicating that its architecture remains compatible with embedded optimization strategies.
+
+Wasmtime's more modest 70.4\% reduction to 3.6 MB reflects the inherent complexity of the component model and WIT binding infrastructure, which resists aggressive optimization due to dynamic type system requirements. This 3.6 MB minimum footprint significantly exceeds the flash memory constraints of the Nucleo F412ZG (1 MB flash), defined in the Portability Criteria.
+
+\textbf{Embedded Systems Deployment Implications:} The binary size analysis reveals a clear architectural trade-off between feature sophistication and deployment flexibility. WAMR's optimized 660 KB footprint remains viable for moderately constrained embedded systems, while still providing WebAssembly isolation and portability benefits. Wasmtime's 3.6 MB minimum requirement restricts itself to deployment on more capable embedded platforms with sufficient flash storage.
+
+The dramatic size reduction potential (93.7\% for WAMR) demonstrates that embedded WebAssembly deployments can achieve reasonable footprints when unnecessary debugging infrastructure and standard library dependencies are eliminated. However, these optimizations require careful consideration of development workflow impacts, as debugging capabilities are significantly reduced in size-optimized builds.
+
+% TODO: Bepalen of we hier de RQ gaan beantwoorden
