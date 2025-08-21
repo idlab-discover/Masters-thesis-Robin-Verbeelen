@@ -144,20 +144,21 @@ The fundamental challenge lies in adapting Preview 2's sophisticated resource-ba
     \begin{minted}{rust}
     // Preview 2: Resource-based approach with automatic lifecycle management
     world pingpong {
-        import wasi:i2c/i2c;
-        export run: func();
+        // Resource management provided by Runtime
+        import wasi:i2c/i2c;    // Functionality imported as dependency
+        export run: func();     // Guest entry point
     }
     
     // Preview 1: Function-based approach requiring manual resource management
     world wasip1-pingpong {
-        import host_open: func() -> u32;
-        import host_write: func(handle: u32, addr: u16, len: usize, offset: usize) -> u8;
-        import host_read: func(handle: u32, addr: u16, len: usize, offset: usize) -> u8;
-        import host_close: func(handle: u32);
-        export run: func();
+        import host_open: func() -> u32;            // Resource creation
+        import host_write: func(handle: u32, addr: u16, len: usize, offset: usize) -> u8;                                     // Resource functionality
+        import host_read: func(handle: u32, addr: u16, len: usize, offset: usize) -> u8;                                     // Resource functionality
+        import host_close: func(handle: u32);       // Resource destruction
+        export run: func();                         // Guest entry point
     }
     \end{minted}
-    \caption{Architectural comparison highlighting semantic gap between Preview versions}
+    \caption{Architectural comparison only meant for highlighting semantic gap between Preview versions and never actually used.}
     \label{lst:preview-comparison}
 \end{listing}
 
@@ -388,7 +389,7 @@ The \acrshort{raii} pattern ensures that I2C resources are automatically cleaned
 \section{Guest Implementations}
 \label{sec:guest-implementations}
 
-\subsection{Preview 1 Core Module}
+\subsection{Preview 1 Module}
 
 The Preview 1 guest implementation (\texttt{wasip1-i2c-guest}) represents a carefully optimized approach designed specifically for resource-constrained embedded environments. This implementation prioritizes minimal binary size and runtime overhead while maintaining full functional compatibility with the I2C interface specification.
 
@@ -472,7 +473,7 @@ The Preview 2 implementation (\texttt{wasip2-i2c-guest}) showcases the sophistic
 
 \subsubsection{Component Model Integration and Toolchain Requirements}
 
-The Preview 2 implementation utilizes \texttt{cargo-component}, a specialized build tool that extends Cargo's functionality to support WebAssembly component generation with automatic WIT binding creation. This tool represents a vision of the future where WASI dependencies can be specified directly in Cargo.toml files, similar to how traditional Rust crates are managed today.
+The Preview 2 implementation utilizes \texttt{cargo-component}, a specialized build tool that extends Cargo's functionality to support WebAssembly component generation with automatic WIT binding creation~\cite{cargo_component_git}. This tool represents a vision of the future where WASI dependencies can be specified directly in Cargo.toml files, similar to how traditional Rust crates are managed today.
 
 \begin{listing}[H]
     \begin{minted}{rust}
@@ -514,7 +515,7 @@ world = "pingpong"
 [package.metadata.component.target.dependencies]
 "wasi:i2c" = { path = "../wit/deps/wasi-i2c" }
 \end{minted}
-\caption{Component metadata enabling automatic WIT binding generation and dependency management through cargo-component}
+\caption{Component metadata enabling automatic WIT binding generation and dependency management through \texttt{cargo-component}}
 \label{lst:component-config}
 \end{listing}
 
@@ -526,31 +527,25 @@ Unlike the Preview 1 implementation, Preview 2 components cannot utilize \texttt
 
 This architectural limitation means that Preview 2 components inherently require larger binary sizes and more sophisticated runtime environments, making them less suitable for the most resource-constrained embedded applications. The trade-off provides significant development productivity improvements and automatic correctness guarantees at the cost of increased resource requirements.
 
-\subsection{Compilation Process and Binary Size Analysis}
-
-The compilation processes for the two approaches reveal fundamental architectural differences:
+\subsection{Compilation Process}
 
 \begin{listing}[H]
 \begin{minted}[breaklines]{bash}
-# Preview 1 compilation: produces minimal WebAssembly core module
+# Preview 1 compilation: produces minimal WebAssembly Module
 cargo build --target wasm32-wasip1 --release
-# Result: ~4.8KB optimized binary with manual bindings
 \end{minted}
-\caption{Preview 1 compilation producing resource-efficient core WebAssembly module}
+\caption{Preview 1 compilation producing resource-efficient WebAssembly module}
 \label{lst:preview1-compilation}
 \end{listing}
 
 \begin{listing}[H]
 \begin{minted}[breaklines]{bash}
-# Preview 2 compilation: produces feature-rich WebAssembly component
+# Preview 2 compilation: produces feature-rich WebAssembly Component
 cargo component build --target wasm32-wasip2 --release
-# Result: ~34.8KB binary including component model infrastructure
 \end{minted}
-\caption{Preview 2 compilation via cargo-component producing comprehensive WebAssembly component with metadata}
+\caption{Preview 2 compilation via \texttt{cargo-component} producing comprehensive WebAssembly component with metadata}
 \label{lst:preview2-compilation}
 \end{listing}
-
-The seven-fold size difference illustrates the fundamental trade-off between minimalism and automation. While Preview 2 components provide superior development ergonomics and automatic correctness guarantees, Preview 1 modules achieve the minimal resource footprint essential for embedded deployment scenarios.
 
 \section{Host Runtime Integration}
 \label{sec:host-runtime-integration}

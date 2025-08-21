@@ -109,7 +109,7 @@ The benchmark is divided into three different measurements, referred to as \text
 \subsubsection{Phase 3: Memory utilization}
 A single binary is built to run memory utilization profiling across all the different runtimes, using DHAT~\cite{dhat_crate}. Two profilers are initialized, measuring Runtime Setup and Guest execution. A separate binary for each runtime is compiled to analyze the resulting binary sizes.
 
-\section{Runtime Setup Performance Analysis}
+\section{Performance Analysis: Runtime Setup}
 \label{sec:eval-setup}
 
 Runtime initialization represents a critical performance dimension, particularly for embedded devices deployed in scenarios where Time-to-First-Execution is crucial. This section analyzes the setup overhead for each runtime and discusses the implications for practical deployment scenarios.
@@ -161,12 +161,12 @@ These setup time characteristics have profound implications for embedded deploym
 
 \textbf{Long-running Applications:} Conversely, applications with infrequent instantiation (e.g., edge computing services) can amortize Wasmtime's setup cost over extended execution periods.
 
-\section{Execution Performance Analysis}
+\section{Performance Analysis: Routine Execution}
 \label{sec:eval-execution}
 
 With runtime initialization complete, this section examines the steady-state execution performance for I2C operations, comparing cold (first-execution) and hot (repeated-execution) characteristics.
 
-Table~\ref{tab:wasm-execution} compares execution performance between WAMR, Wasmtime, and Native for both Cold and Hot execution.
+Table~\ref{tab:wasm-execution} compares execution performance between WAMR, Wasmtime, and Native for both Cold and Hot Routine Executions.
 
 \begin{table}[h]
     \centering

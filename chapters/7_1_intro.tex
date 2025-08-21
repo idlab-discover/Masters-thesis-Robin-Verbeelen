@@ -5,11 +5,12 @@ Modern embedded systems face unprecedented challenges in balancing security, rel
 
 WebAssembly (Wasm) and its system interface specification, WASI (WebAssembly System Interface), represent a promising technological response to these challenges. Originally designed to execute binary code within web browsers, WebAssembly has evolved beyond its initial scope to enable portable, secure, and efficient code execution across diverse environments~\cite{wasm_spec}. WASI extends this capability by providing a standardized system interface that facilitates interaction with filesystems, network resources, and hardware peripherals while maintaining WebAssembly's core security guarantees through capability-based access control.
 
-% TODO: Add diagram showing the evolution from browser-only WebAssembly to system-level WASI deployments, highlighting the gap in hardware interface standardization
-
 The emergence of WASI Preview 2, accompanied by the component model architecture, introduced sophisticated mechanisms for building interoperable WebAssembly libraries, applications, and environments. This component model utilizes \acrfull{wit} files to define interface contracts and enable automatic binding generation between components~\cite{wasi_p2}. However, a critical gap remains in WASI's hardware interface coverage: despite the ubiquity of Inter-Integrated Circuit (I2C) communication in embedded systems, the standardization of the WASI I2C interface is only in very early stages.
 
 I2C represents one of the most widely deployed communication protocols in embedded systems, serving as the backbone for sensor communication, device configuration, and inter-chip data exchange in IoT applications~\cite{i2c_specification}. The protocol's simplicity, addressing efficiency, and multi-host capability have made it indispensable for embedded system designers. Yet, the absence of a standardized WASI I2C interface creates a significant barrier to WebAssembly adoption in embedded environments where I2C communication is fundamental.
+
+
+
 
 \section{Problem Statement and Research Context}
 \label{sec:problem-statement}
@@ -26,68 +27,72 @@ However, Friedrich's implementation approach, while technically sound and aligne
 
 These limitations represent a fundamental tension between the sophisticated developer experience provided by WASI Preview 2 and the resource constraints that define embedded system deployment scenarios. To advance the WASI I2C proposal towards Phase 3 standardization, which requires demonstrated compatibility with embedded device constraints, a Preview 1-compatible implementation becomes essential.
 
-\section{Research Objectives and Contributions}
-\label{sec:research-objectives}
 
-This thesis addresses the embedded system compatibility gap by developing a comprehensive WASI Preview 1 I2C interface implementation designed for use with the more lightweight WebAssembly Micro Runtime (WAMR) environment~\cite{wamr_project}. Building upon Friedrich's foundational standardization work~\cite{friedrich_paper}, this research explores how WASI I2C interfaces can be adapted for resource-constrained embedded systems while maintaining semantic and functional equivalence with Preview 2 implementations.
 
-The primary technical contributions of this work include:
-
-\begin{enumerate}
-    \item \textbf{Manual Preview 1 Bindings Library}: Development of a custom Rust bindings library that bridges WIT interface semantics with Preview 1's primitive function call mechanisms while maintaining type safety and error handling capabilities.
-    
-    \item \textbf{Minimal Guest Implementation}: Creation of a WebAssembly Module optimized for embedded deployment, achieving lower binary size through careful dependency management and custom memory allocation strategies.
-    
-    \item \textbf{WAMR Host Integration}: Implementation of a complete WAMR-based host runtime that navigates the complex boundary between Rust's memory safety model and WAMR's C-based architecture while providing I2C hardware access.
-    
-    \item \textbf{Comparative Performance Analysis}: Comprehensive benchmarking framework comparing Preview 1 and Preview 2 approaches across multiple performance dimensions, including startup latency, execution overhead, and memory utilization.
-\end{enumerate}
 
 \section{Research Questions}
 \label{sec:research-questions}
 
 This investigation addresses the following research questions, which collectively evaluate the feasibility and performance implications of WASI Preview 1 I2C implementation for embedded systems:
 
-\textbf{RQ1: How can the WASI Preview 2 I2C interface be effectively adapted for WASI Preview 1 environments while maintaining functional compatibility with the standardized Preview 2 specification?}
+\begin{researchquestion}\label{rq1}
+\textbf{How can the WASI Preview 2 I2C interface be effectively adapted for WASI Preview 1 environments while maintaining functional compatibility with the standardized Preview 2 specification?}
+\end{researchquestion}
 
 This question examines the technical challenges of manually implementing Preview 1 bindings that preserve the semantic richness of WIT-defined interfaces. It investigates type system adaptation strategies, error handling mechanism design, and resource management approaches that enable Preview 1 implementations to provide equivalent functionality to their Preview 2 counterparts.
 
-\textbf{RQ2: What are the performance implications of different WebAssembly runtime approaches for embedded I2C applications?}
-
-This question provides a quantitative comparison between WAMR (Preview 1) and Wasmtime (Preview 2) approaches across multiple performance dimensions. It examines startup latency, steady-state execution overhead, memory consumption patterns, and resource utilization efficiency to establish empirical foundations for runtime selection decisions.
-
-\textbf{RQ3: How do Preview 1 and Preview 2 approaches compare in terms of developer experience, maintainability, and implementation complexity?}
+\begin{researchquestion}\label{rq2}
+\textbf{How do Preview 1 and Preview 2 approaches compare in terms of developer experience, maintainability, and implementation complexity?}
+\end{researchquestion}
 
 This question evaluates the qualitative trade-offs between manual binding implementation and automatic code generation. It considers development effort requirements, maintenance overhead, testing complexity, and the long-term sustainability of different implementation approaches.
 
+\begin{researchquestion}\label{rq3}
+\textbf{What are the performance implications of WASI Preview 2 compared to Preview 1 for embedded I2C applications?}
+\end{researchquestion}
 
-% \section{Methodology Overview}
-% \label{sec:methodology-overview}
+This question provides a quantitative comparison between WAMR (Preview 1) and Wasmtime (Preview 2) approaches across multiple performance dimensions. It examines startup latency, steady-state execution overhead, memory consumption patterns, and resource utilization efficiency to establish empirical foundations for Preview selection decisions.
 
-% The research methodology combines implementation-driven technical investigation with rigorous experimental validation to address the posed research questions comprehensively.
 
-% \textbf{Implementation Development:} The core methodology centers on developing parallel implementations that provide functionally equivalent I2C communication capabilities across Preview 1 and Preview 2 environments. This approach enables direct performance comparison while ensuring that observed differences reflect architectural choices rather than functional disparities.
 
-% \textbf{Experimental Validation:} Performance evaluation employs controlled experimentation using Raspberry Pi 5 hardware connected to an Arduino Uno R3 over I2C. The experimental design incorporates statistical benchmarking through Criterion.rs, memory profiling via DHAT, and custom visualization tools to ensure measurement reliability and reproducibility.
 
-% \textbf{Comparative Analysis:} The investigation examines multiple performance dimensions including runtime initialization overhead, cold and hot execution latency, memory allocation patterns, and resource utilization efficiency. This multi-dimensional analysis provides comprehensive insights into the practical trade-offs between different runtime approaches.
+\section{Contributions and Thesis Structure}
+\label{sec:contributions-structure}
 
-% TODO: Add experimental setup diagram showing hardware configuration and measurement infrastructure
+This thesis makes several key contributions to the WASI I2C standardization effort and embedded WebAssembly deployment by developing a comprehensive Preview 1 implementation ecosystem that bridges the gap between resource-constrained embedded systems and modern WebAssembly standards.
 
-\section{Thesis Structure}
-\label{sec:thesis-structure}
+\subsection{Research Contributions}
+\label{subsec:research-contributions}
 
-This thesis is organized into chapters that progressively build from background knowledge through implementation details to experimental validation and analysis.
+The primary contributions of this work include:
 
-\textbf{Chapter~\ref{chap:background}} provides essential background knowledge covering WebAssembly fundamentals, WASI system interface architecture, I2C protocol specifications, and embedded systems constraints. This chapter establishes the technical foundation necessary for understanding the implementation challenges and design decisions that follow.
+\begin{enumerate}
+    \item \textbf{WASI Preview 1 I2C Bindings Library}: Development of a manual Rust bindings library that faithfully translates WIT-defined I2C interface semantics to Preview 1's function call mechanisms. This library preserves type safety, error handling capabilities, and maintains semantic compatibility with the official WASI I2C specification while operating within Preview 1 constraints.
 
-\textbf{Chapter~\ref{chap:implementation}} presents the complete Preview 1 implementation ecosystem, including the manual bindings library, guest module optimization strategies, host runtime integration approaches, and the comparative Preview 2 and native implementations used for benchmarking.
+    \item \textbf{Preview 1 Guest Implementation}: Creation of a WebAssembly Module targeting \sloppy\texttt{wasm32-wasip1} that demonstrates the usage of the Preview 1 bindings and functionality. The implementation emphasizes maintaining full functional compatibility with the Preview 2 Component version.
+    
+    \item \textbf{WAMR Integration}: Implementation of a complete host runtime based on WebAssembly Micro Runtime (WAMR) that provides I2C hardware access through careful integration between Rust's memory safety model and WAMR's C-based architecture. This contribution demonstrates practical embedded deployment strategies for WASI I2C applications.
+    
+    \item \textbf{Comparative Preview 2 Framework}: Development of a parallel WebAssembly Component and Wasmtime runtime implementation, enabling comprehensive comparison across different WebAssembly approaches for I2C communication.
+    
+    \item \textbf{Performance Evaluation Methodology}: Design and implementation of a rigorous benchmarking framework that measures startup latency, execution overhead, memory utilization, and resource efficiency across multiple runtime approaches, providing empirical foundations for embedded WebAssembly deployment decisions.
+\end{enumerate}
 
-\textbf{Chapter~\ref{chap:eval}} details the experimental methodology and presents comprehensive performance evaluation results. This chapter provides statistical analysis of timing characteristics, memory utilization patterns, and resource efficiency comparisons between different runtime approaches.
+\subsection{Thesis Organization}
+\label{subsec:thesis-organization}
 
-\texttt{TODO vanaf hier nog is beter bekijken wanneer ik mijn discussion en conclusion effectief geschreven heb}\\
-\textbf{Chapter~\ref{chap:discussion}} synthesizes the experimental findings to address the research questions directly. It examines the implications of the results for embedded WebAssembly deployment decisions and discusses the broader impact on WASI I2C standardization efforts, while analyzing the limitations of this research.
+This thesis is structured to progressively address the research questions through a combination of background establishment, implementation development, and empirical evaluation:
 
-\textbf{Chapter~\ref{chap:conclusion}} summarizes the key contributions and outlines future research directions that could extend this work toward production deployment scenarios.
+\textbf{Chapter~\ref{chap:background}} establishes the technical foundation necessary for understanding the implementation challenges. It covers WebAssembly fundamentals, WASI architecture, the evolution from Preview 1 to Preview 2, WIT interface definition and binding generation mechanisms, WebAssembly runtime ecosystem characteristics, I2C protocol specifications, and the current state of the WASI I2C standardization proposal.
 
-This investigation contributes to the growing body of research on WebAssembly embedded systems deployment while directly supporting the WASI I2C standardization effort through demonstration of embedded system compatibility. The findings provide practical guidance for embedded system developers considering WebAssembly adoption and inform ongoing standardization efforts regarding the balance between sophisticated developer experiences and resource-constrained deployment requirements.
+\textbf{Chapter~\ref{chap:implementation}} presents the complete development of the Preview 1 I2C ecosystem, detailing the manual bindings library design, WAMR host integration approaches, and the comparative Preview 2 implementation. This chapter directly addresses \textbf{\autoref{rq1}} by demonstrating how Preview 2 interface semantics can be effectively adapted for Preview 1 environments, and contributes to \textbf{\autoref{rq2}} by examining the implementation complexity and developer experience trade-offs between manual and automatic binding approaches.
+
+\textbf{Chapter~\ref{chap:eval}} details the experimental methodology and presents comprehensive performance evaluation results. Through controlled hardware experiments using Raspberry Pi and Arduino platforms, this chapter provides a statistical analysis of timing characteristics, memory utilization patterns, and resource efficiency comparisons. The empirical findings directly address \textbf{\autoref{rq3}} by quantifying the performance implications of different WebAssembly runtime approaches for embedded I2C applications.
+
+\textbf{Chapter~\ref{chap:conclusion}} synthesizes the experimental findings and implementation insights to provide definitive answers to all research questions. It examines the broader implications for embedded WebAssembly deployment, discusses the limitations of the current approach, and outlines the impact on WASI I2C standardization efforts.
+
+\textbf{Chapter~\ref{chap:future-work}} identifies promising research directions that extend this work toward production-ready deployment scenarios.
+
+\textbf{Chapter~\ref{chap:ethics}} briefly examines the ethical considerations surrounding WebAssembly for I2C standardization and its potential impact on technology accessibility and environmental sustainability.
+
+This investigation provides practical guidance for embedded system developers considering WebAssembly adoption while directly supporting the WASI I2C standardization effort through the demonstration of embedded system compatibility. The findings inform ongoing standardization discussions regarding the balance between sophisticated developer experiences and resource-constrained deployment requirements, ultimately contributing to the advancement of WebAssembly in embedded computing environments.
