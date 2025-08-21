@@ -25,7 +25,7 @@ However, Friedrich's implementation approach, while technically sound and aligne
     \item \textbf{Binary Size Overhead}: More sophisticated runtimes combined with component model metadata and automatic binding generation introduce significant binary size increases, challenging deployment in memory-constrained embedded systems.
 \end{enumerate}
 
-These limitations represent a fundamental tension between the sophisticated developer experience provided by WASI Preview 2 and the resource constraints that define embedded system deployment scenarios. To advance the WASI I2C proposal towards Phase 3 standardization, which requires demonstrated compatibility with embedded device constraints, a Preview 1-compatible implementation becomes essential.
+These limitations represent a fundamental tension between the sophisticated developer experience provided by WASI Preview 2 and the resource constraints that define embedded system deployment scenarios. To advance the WASI I2C proposal towards Phase 3 standardization, a Preview 1-compatible implementation becomes essential. This allows for demonstrating compatibility with embedded device constraints.
 
 
 
@@ -33,7 +33,7 @@ These limitations represent a fundamental tension between the sophisticated deve
 \section{Research Questions}
 \label{sec:research-questions}
 
-This investigation addresses the following research questions, which collectively evaluate the feasibility and performance implications of WASI Preview 1 I2C implementation for embedded systems:
+This thesis addresses the following research questions, which collectively evaluate the feasibility of the WASI I2C proposal in resource-constrained embedded systems:
 
 \begin{researchquestion}\label{rq1}
 \textbf{How can the WASI Preview 2 I2C interface be effectively adapted for WASI Preview 1 environments while maintaining functional compatibility with the standardized Preview 2 specification?}
@@ -45,13 +45,13 @@ This question examines the technical challenges of manually implementing Preview
 \textbf{How do Preview 1 and Preview 2 approaches compare in terms of developer experience, maintainability, and implementation complexity?}
 \end{researchquestion}
 
-This question evaluates the qualitative trade-offs between manual binding implementation and automatic code generation. It considers development effort requirements, maintenance overhead, testing complexity, and the long-term sustainability of different implementation approaches.
+This question evaluates the development and maintenance trade-offs between manual binding implementation and automatic code generation.
 
 \begin{researchquestion}\label{rq3}
 \textbf{What are the performance implications of WASI Preview 2 compared to Preview 1 for embedded I2C applications?}
 \end{researchquestion}
 
-This question provides a quantitative comparison between WAMR (Preview 1) and Wasmtime (Preview 2) approaches across multiple performance dimensions. It examines startup latency, steady-state execution overhead, memory consumption patterns, and resource utilization efficiency to establish empirical foundations for Preview selection decisions.
+This question is about a quantitative comparison between WAMR (Preview 1) and Wasmtime (Preview 2) approaches across multiple performance dimensions. It examines startup latency, steady-state execution overhead, memory consumption patterns, and resource utilization efficiency to establish empirical foundations in Preview characteristics.
 
 
 
