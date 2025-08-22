@@ -1,3 +1,89 @@
 \chapter*{Conclusion}
 \chaptermark{Conclusion}
-\addcontentsline{toc}{chapter}{Conclusion}  
+\addcontentsline{toc}{chapter}{Conclusion}
+\label{chap:conclusion}
+
+This thesis addressed the critical challenge of bridging WASI Preview 2 I2C interface specifications with resource-constrained embedded systems through a comprehensive Preview 1 implementation ecosystem. By developing manual bindings, runtime integrations, and comparative frameworks, this work advances the WASI I2C standardization effort while providing empirical insights into WebAssembly runtime performance trade-offs in embedded environments.
+
+% \section*{Research Contributions and Summary}
+% \label{sec:research-summary}
+
+% This investigation makes several key contributions to embedded WebAssembly deployment and WASI I2C standardization. The manual Rust bindings library demonstrates successful translation of WIT-defined interface semantics to Preview 1's function call mechanisms while preserving type safety and error handling. The complete implementation ecosystem establishes practical deployment strategies for resource-constrained embedded systems.
+
+% The empirical evaluation provides the first rigorous performance comparison between WAMR and Wasmtime for embedded I2C applications, establishing quantitative baselines for startup latency, memory utilization, and resource efficiency. Most importantly, this work directly supports the WASI I2C proposal's progression toward Phase 3 standardization by demonstrating embedded system compatibility --- a previously unaddressed requirement.
+
+\section*{Research Questions Answered}
+\label{sec:research-questions-answered}
+
+\textbf{Research Question 1: How can the WASI Preview 2 I2C interface be effectively adapted for WASI Preview 1 environments while maintaining functional compatibility with the standardized Preview 2 specification?}
+
+This thesis demonstrates successful adaptation of Preview 2 interface semantics to Preview 1 environments through manual binding implementation. The \texttt{wasip1-i2c-lib} library successfully translates resource-based I2C controller management, error handling, and simple communication patterns to Preview 1's function call mechanisms while maintaining type safety and functional equivalence with Preview 2 implementations. This validates that the interface can target both modern component model environments and resource-constrained systems.
+
+\textbf{Research Question 2: How do Preview 1 and Preview 2 approaches compare in terms of developer experience, maintainability, and implementation complexity?}
+
+The analysis reveals fundamental trade-offs between developer convenience and deployment flexibility. Preview 2's automatic code generation provides superior developer experience through \texttt{wit-bindgen}, while Preview 1 approaches offer advantages in embedded contexts: implementation transparency, runtime simplicity, deployment flexibility with lightweight runtimes like WAMR, and optimization opportunities. The development effort for manual Preview 1 bindings represents a significant investment compared to automatic generation, but enables deployment in resource-constrained environments where Preview 2 approaches are infeasible.
+
+\textbf{Research Question 3: What are the performance implications of WASI Preview 2 compared to Preview 1 for embedded I2C applications?}
+
+The empirical evaluation reveals dramatic performance differences with clear embedded deployment implications. WAMR demonstrates 77x faster startup (253μs vs 19,559μs) and dramatically lower memory requirements (10KB vs 2.7MB peak usage). Wasmtime's memory usage exceeds RAM limitations of ESP32-C3 and Nucleo F412ZG platforms, limiting deployment to capable platforms. Both runtimes achieve efficient steady-state execution with both a 2x latency overhead compared to native and acceptable memory consumption (WAMR: 327 bytes, Wasmtime: 416 bytes). These findings establish WAMR as viable for resource-constrained applications while Wasmtime remains viable for more capable (embedded) platforms. WAMR is therefore able to meet the requirements defined by the Portability Criteria.
+
+\section*{Impact on WASI I2C Standardization}
+\label{sec:standardization-impact}
+
+This work provides advances of the WASI I2C proposal --- toward Phase 3 requirements --- by addressing critical embedded system compatibility.
+
+The advancements of the proposal to its current state revealed dependency on WASI Preview 2 and component model architecture that created embedded deployment barriers. \textbf{The developed Preview 1 compatibility} from this research eliminates these barriers by demonstrating that the WASI I2C interface \textbf{accommodates resource-constrained environments without compromising functionality}. The successful WAMR integration proves lightweight WebAssembly runtimes can provide I2C hardware access while maintaining interface semantic integrity.
+
+\textbf{Key standardization contributions} include embedded compatibility demonstration, performance baselines for deployment decisions, and a complete Preview 1 reference implementation. Beyond I2C-specific contributions, this work establishes approaches for adapting WASI Preview 2 interfaces defined in WIT-files to embedded environments, providing methodology templates for other hardware interfaces (e.g., SPI, PWM, UART).
+
+\section*{Limitations and Threats to Validity}
+\label{sec:limitations}
+
+This investigation acknowledges several limitations that constrain the generalizability and scope of findings:
+
+\textbf{Workload Scope:} The evaluation focuses exclusively on the simple ping-pong I2C operations, which may not represent the complexity of production embedded applications with sophisticated transaction sequences, concurrent device communication, and error recovery scenarios.
+
+\textbf{Hardware Specificity:} Results are specific to the Raspberry Pi and Arduino experimental setup. Performance characteristics may vary significantly across different embedded platforms, I2C implementations, and hardware configurations.
+
+\textbf{Scale Considerations:} The single-operation focus may not accurately represent scenarios involving bulk I2C transactions, concurrent device management, or sustained high-frequency communication patterns typical in industrial embedded applications.
+
+\textbf{Interface Coverage:} The implementation utilizes a simplified version of the WASI I2C interface rather than the complete official specification. While enabling focused evaluation of core functionality, this may not capture performance implications of full interface complexity.
+
+\textbf{Optimization Potential:} The evaluation does not explore advanced optimization strategies that could potentially improve Wasmtime's embedded compatibility, such as ahead-of-time compilation, custom component model configurations, or memory optimization techniques.
+
+\textbf{Runtime-Preview Coupling:} The comparison conflates Preview version differences with runtime implementation differences. While the intention is to compare Preview 1 versus Preview 2 approaches, the evaluation necessarily uses different runtimes (WAMR for Preview 1, Wasmtime for Preview 2), making it impossible to isolate whether observed performance differences stem from Preview version characteristics or runtime-specific implementation choices and optimizations.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% % TODO
+
+% \subsection{Limitations and Validity Considerations}
+% \label{subsec:limitations}
+
+% Several limitations must be considered when interpreting these results:
+
+% \textbf{Experimental Scope Limitations:}
+% \begin{itemize}
+%     \item \textbf{Workload Simplicity:} Single ping-pong operations may not represent complex I2C transaction patterns
+%     \item No stress testing, monitoring error behavior
+%     \item \textbf{Hardware Specificity:} Results specific to Raspberry Pi + Arduino configuration bvb wat als de arduino veel trager of sneller zou reageren, wie is de bottleneck en wat gebeurd er dan?
+%     \item \textbf{Scale Limitations:} Single-operation focus may not capture bulk transfer scenarios, de getestte routine zou veel meer data of veel meer messages kunnen doen?
+%     \item \textbf{Environmental Control:} Laboratory conditions may not reflect real deployment environments
+% \end{itemize}
+
+% \section*{Reproducibility}
+% All experimental code, benchmarks, and analysis scripts are available at: \url{https://github.com/idlab-discover/wamr-wasi-i2c}. The repository includes automated setup scripts enabling complete reproduction of these results.
