@@ -1,22 +1,106 @@
 \chapter*{Future Work}
 \chaptermark{Future Work}
-\addcontentsline{toc}{chapter}{Future Work}  
+\addcontentsline{toc}{chapter}{Future Work}
+\label{chap:future-work}
 
-This chapter explains what the next steps are to continue the research and innovation of your master's thesis. Are there any additional features of research directions that are interesting? Are there ways in which your solution can be improved?
+This thesis establishes Preview 1 I2C interface compatibility and provides performance benchmarks for WAMR and Wasmtime implementations. Several research directions emerge from this foundation.
+
+\section*{Standardization and Testing}
+\label{sec:standardization-testing}
+
+\textbf{Phase 3 standardization} requires comprehensive test suites and examples beyond the current simplified interface implementation. Developing tests for the complete WASI I2C specification, including error handling scenarios and realistic I2C peripheral examples, would support the proposal's advancement.
+
+Testing in \textbf{more realistic environments} would reveal practical deployment characteristics. This includes evaluating larger message sizes, examining error conditions and recovery mechanisms, and validating how different types of I2C transactions perform under WebAssembly constraints.
+
+\section*{Preview 3 Integration}
+\label{sec:preview3-integration}
+
+\textbf{WASI 0.3} development, expected by November 2025, introduces native \textbf{async support} through stream<T> and future<T> types. Investigating how far async development has progressed and preparing the I2C interface for these capabilities could benefit embedded applications requiring asynchronous I2C operations.
+
+\section*{Runtime Optimization}
+\label{sec:runtime-optimization}
+
+Both WAMR and Wasmtime present optimization opportunities. For WAMR, strategies could focus on further reducing startup latency and memory footprint for embedded deployment. For Wasmtime, investigating whether targeted optimizations could make it viable for embedded scenarios remains an open question.
+
+The impact of \textbf{host-managed versus guest-managed heap} implementations represents an unexplored area that could affect embedded deployment characteristics.
+
+\section*{Interface Development}
+\label{sec:interface-development}
+
+The current implementation's relationship to \textbf{Canonical ABI compliance} warrants investigation. Determining whether Canonical ABI compatibility can be achieved while maintaining embedded optimizations would improve interoperability when other components/modules interact with the interface.
+
+Re-evaluating the current definition of the I2C interface could bring additional functionality or reduce developer overhead. For example, \textbf{expanding the interface} to include \textbf{I2C resource allocation} mechanisms would remove the need for manually defining a function in WIT-files for acquiring an I2C resource. This could enhance capability-based security implementation by providing the developer with best-practice suggestions through optional parameters and provide fine-grained access control.
+
+\section*{Performance and Compatibility Analysis}
+\label{sec:performance-compatibility}
+
+\textbf{Distinguishing pure Preview 1 versus Preview 2 performance characteristics}, independent of runtime choice, would clarify whether observed differences stem from WASI version capabilities or runtime implementation strategies. WAMR only supports Preview 1 features and Wasmtime's internal architecture uses Preview 2 techniques even when loading Preview 1 modules~\cite{wasmtime_and_cranelift_2023}~\cite{wasmtime_p1_crate_docs}~\cite{wasmtime_p2_crate_docs}, making this distinction valuable but also difficult to achieve.
+
+\textbf{Comparative benchmarking across different WASI interfaces} would establish whether I2C performance patterns generalize to other hardware interfaces or represent interface-specific characteristics.
+
+\section*{Security and Hardware Validation}
+\label{sec:security-hardware}
+
+\textbf{Security implementation} and analysis represent an underdeveloped aspect of embedded WebAssembly deployment. Examining capability-based security models for hardware interfaces could establish deployment best practices. This could be even more important with the upcoming async-ready Preview 3.
+
+\textbf{Hardware-level validation} using oscilloscopes to measure electrical signals and verify I2C protocol compliance would confirm that WebAssembly implementations produce correct hardware behavior. This could determine whether peripheral connectivity issues stem from software implementation problems or hardware limitations. In addition, performance of the I2C peripheral could be measured and subtracted from the total latency. This would give more insight into the overhead only caused by the I2C controller, thus achieving even more accurate WebAssembly overhead measurements.
 
 
-- benchmarks die verschillende dingen vergelijken met andere wasi interfaces \\
-- strategies voor het optimaliseren van wasmtime, wamr, ... \\
-- Kijken of met optimalisaties Wasmtime mss toch viable kan zijn voor embedded? \\
-- puur het verschil van P1 en P2 gaan bepalen ipv Wasmtime vs WAMR CATCH: Wasmtime gebruikt wss sowieso P2 technieken, ook al laadt je een P1 module in. \\
-- Effectief implementeren van duidelijke tests en voorbeelde voor het voorstel naar phase 3 te pushen \\
-- Kijken hoe ver async development staat met Preview 3 en de interface daar voor klaarmaken \\
-- Kijken om de interface uit te breiden met een methode om een I2C Resource aan te vragen \\
-- Impact van host-managed vs guest-managed heap \\
-- Ervoor zorgen dat de P1 interface al dan niet CABI compatible is. Dit is niet per sé nodig en kan misschien interessant zijn om mijn implementatie te optimaliseren. ALHOEWEL dit is misschien wel nodig want als andere componenten afhangen van de interface, moet die informatie op de juist manier worden doorgegeven. \\
-- Testen wat er gebeurd in een correcter environment en niet de simpele PingPong \\
-    - Grotere berichten \\
-    - Foute en juiste berichten \\
-    - Hoe errors worden behandeld \\
-- Eens kijken of er meer aandacht kan worden besteed aan het implementeren en analyseren van security \\
-- Testen uitvoeren op hardware niveau? Elektriciteitsignalen meten op de pinnen, manueel software testen schrijven en loggen wanneer exact een request gebeurd en dan zien wat jouw osciloscoop ofz zegt. Dit kan nagaan of de I2C peripheral weldegelijk direct een request kan versturen, mss was de arduino uno gewoon niet genoeg op sommige momenten?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% - strategies voor het optimaliseren van wasmtime, wamr, ... \\
+% - Kijken of met optimalisaties Wasmtime mss toch viable kan zijn voor embedded? \\
+% - Effectief implementeren van duidelijke tests en voorbeelden voor het voorstel naar phase 3 te pushen \\
+% - Impact van host-managed vs guest-managed heap \\
+% - Testen wat er gebeurd in een correcter environment en niet de simpele PingPong \\
+%     - Grotere berichten \\
+%     - Foute en juiste berichten \\
+%     - Hoe errors worden behandeld \\
+% - benchmarks die verschillende dingen vergelijken met andere wasi interfaces die al verder ontwikkeld zijn \\
+% - puur het verschil van P1 en P2 gaan bepalen ipv Wasmtime vs WAMR CATCH: Wasmtime gebruikt wss sowieso P2 technieken, ook al laadt je een P1 module in. \\
+% - Kijken hoe ver async development staat met Preview 3 en de interface daar voor klaarmaken \\
+% - Onderzoeken of de definitie van de interface kan worden uitgebreid: bvb een imported functie definiëren dat een i2c resource als resultaat geeft. \\
+% - Ervoor zorgen dat de P1 interface een versie heeft dat compatibel is met Canonical ABI compatible. Het gebruiken van een standaard brengt veel positieve gevolgen mee. \\
+
+
+
+
+
+
+% - Eens kijken of er meer aandacht kan worden besteed aan het implementeren en analyseren van security \\
+% - Testen uitvoeren op hardware niveau? Elektriciteitsignalen meten op de pinnen, manueel software testen schrijven. Dit kan nagaan of de I2C peripheral weldegelijk direct een request kan versturen, misschien ondervond de arduino uno even wat problemen tijdens metingen en zorgt dit voor instabiele metingen? Men kan zo de tijd dat de peripheral nodig heeft voor requests te verwerken aftrekken van de total meettijd om specifiekere resultaten van de controller te bekomen.

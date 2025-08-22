@@ -58,14 +58,14 @@ The experimental testbed consists of a Raspberry Pi acting as the I2C controller
 
 \textbf{Controller Configuration:}
 \begin{itemize}
-    \item Board: \textit{Raspberry Pi 5}
-    \item Architecture: \textit{ARM64} % TODO: reference pi datasheet
+    \item Board: \textit{Raspberry Pi 5}~\cite{rpi5_specs}
+    \item Architecture: \textit{ARM64}
     \item Operating System: \textit{Raspberry Pi OS (reference 2024-11-19)}~\cite{pi_os}
 \end{itemize}
 
 \textbf{Peripheral Configuration:}
 \begin{itemize}
-    \item Board: \textit{Arduino Uno R3 (ATmega328P)}
+    \item Board: \textit{Arduino Uno R3 (ATmega328P)}~\cite{uno_specs}
     \item Peripheral Address: \textit{0x09}
     \item Serial Interface: \textit{USB serial for correctness verification (disabled during performance tests)}
 \end{itemize}
@@ -97,7 +97,7 @@ The evaluation follows a three-phase methodology to ensure correctness and robus
 Prior to profiling, functional correctness is verified by executing ping-pong operations across all implementations and confirming successful I2C transactions via Arduino serial monitor output.
 
 \subsubsection{Phase 2: Performance Measurement}
-Performance evaluation employs \textbf{Criterion.rs}, a statistical benchmarking framework that provides automatic outlier detection, distribution plotting, calculates achievable sample size prior to measurements during a warm-up phase and provides statistical insights post measurements\cite{criterion_rs}. The tool \texttt{cargo-criterion} provides machine-readable JSON output of those measurements, which allows us to also perform manual analysis and visualizations using Python/Jupyter.
+Performance evaluation employs \textbf{Criterion.rs}, a statistical benchmarking framework that provides automatic outlier detection, distribution plotting, calculates achievable sample size prior to measurements during a warm-up phase and provides statistical insights post measurements~\cite{criterion_docs}. The intermediary tool \texttt{cargo-criterion}~\cite{cargo_criterion_docs} is an extension to Cargo and provides machine-readable JSON output of those measurements, which allows us to also perform manual analysis and visualizations using Python/Jupyter.
 
 The benchmark is divided into three different measurements, referred to as \textbf{Groups}. Each runtime gets evaluated over 100 samples according to the group's implementation:
 \begin{itemize}
@@ -191,7 +191,7 @@ Table~\ref{tab:wasm-execution} compares execution performance between WAMR, Wasm
     \centering
     \includegraphics[width=0.9\textwidth]{images/execution-distribution}
     \caption{Distribution plots, showcasing stability of the measurements.}
-    \label{fig:wasm-setup-distribution}
+    \label{fig:wasm-execution-distribution}
 \end{figure}
 
 \subsection{Analysis}
@@ -275,18 +275,6 @@ Wasmtime's memory profile reflects its sophisticated execution engine architectu
 
 These patterns directly impact deployment feasibility: WAMR's 10KB footprint fits comfortably within typical embedded constraints (even sub-MB microcontrollers), while Wasmtime's multi-megabyte requirements restrict it to more capable embedded Linux platforms. The correlation between memory complexity and setup time (77x difference) suggests that memory allocation overhead contributes significantly to initialization latency.
 
-% TODO: decide on OLD or new content
-% \subsubsection{Setup Memory Analysis:}
-% The memory consumption analysis during runtime setup reveals dramatic differences in resource requirements across implementations, with implications spanning several orders of magnitude. The \textbf{native }implementation demonstrates minimal memory overhead, allocating only 10 bytes in a single allocation block, reflecting the direct hardware access approach with virtually no abstraction layer overhead. This establishes an extremely lean baseline that showcases the efficiency of direct I2C library usage.
-
-% \textbf{WAMR} presents a moderate memory footprint, consuming 10,124 bytes (approximately 10KB) total allocation with a peak usage of 10,080 bytes across 16 allocation blocks. This represents a three-order-of-magnitude increase compared to the native implementation, yet remains within reasonable bounds for embedded applications. The close alignment between total and peak memory usage (10,124 vs 10,080 bytes) demonstrates that WAMR maintains most allocated memory throughout the setup process, indicating a relatively stable memory profile with minimal temporary allocations.
-
-% In stark contrast, \textbf{Wasmtime} exhibits substantially higher memory requirements, allocating 14,247,171 bytes (approximately 14.2 MB) total across 16,686 allocation blocks during setup. However, the peak memory usage of 2,716,728 bytes (approximately 2.7 MB) reveals that roughly 81\% (\(\frac{Total-Peak}{Total}\)) of allocated memory consists of temporary allocations that are freed during the setup process. This pattern indicates intensive memory churning during runtime initialization, likely associated with JIT compilation, module loading, and optimization processes inherent to Wasmtime's sophisticated execution engine.
-
-% The allocation \textbf{block count provides additional insight} into memory management patterns. While the native implementation requires only a single allocation, WAMR uses 16 blocks, suggesting modular memory organization. Wasmtime's 16,686 allocation blocks demonstrate the complex memory management required for its advanced runtime features, including component model support and aggressive optimization strategies.
-
-% From an \textbf{embedded systems perspective}, these results highlight critical deployment considerations. WAMR's 10 KB memory overhead remains feasible for many embedded applications, while Wasmtime's multi-megabyte requirements may exceed available memory in resource-constrained environments. The memory consumption patterns also correlate with the observed setup performance differences, where Wasmtime's extensive memory allocation activity contributes to its longer initialization times, while WAMR's moderate memory footprint aligns with its faster setup performance.
-
 \subsection{Execution}
 
 Table~\ref{tab:memory-execution} presents memory allocation characteristics during the execution of the Ping-Pong routine, revealing the resource requirements for each implementation approach.
@@ -313,27 +301,6 @@ Both runtimes demonstrate remarkable efficiency: WAMR requires 327 bytes across 
 The minimal peak-to-total allocation differences (WAMR: 5\%, Wasmtime: 17\%) indicate stable execution without memory leaks or excessive temporary allocations. This efficiency validates both runtimes for long-running embedded applications where thousands of I2C operations must execute within constrained memory budgets.
 
 Critically, these results demonstrate that the substantial initialization costs --- particularly Wasmtime's 14.2MB --- do not translate to proportional execution overhead. Once initialized, both runtimes operate within hundreds of bytes, making the initialization cost a one-time investment that can be amortized across the application lifetime.
-
-% TODO: Decide on OLD or new content
-% \subsection{Execution Memory Profiling}
-% \label{subsec:memory-execution}
-
-% Table~\ref{tab:memory-execution} analyzes memory allocation patterns during ping-pong execution, focusing on runtime overhead and potential memory leaks.
-
-
-
-% \subsubsection{Execution Memory Efficiency:}
-% The memory consumption during ping-pong execution reveals the incremental memory overhead required for actual I2C operation execution, measured independently from the established runtime footprint. Since these measurements capture only the additional allocations occurring during guest function execution (after runtime initialization is complete), they provide insight into the operational memory efficiency of each approach.
-
-% The \textbf{native} implementation requires 16 bytes in a single allocation block specifically for executing the ping-pong I2C operation. This represents the pure memory cost of the I2C transaction, including data buffers and operation state management without any runtime abstraction overhead.
-
-% \textbf{WAMR} demonstrates remarkably efficient execution memory usage, requiring only 327 bytes total with a peak usage of 311 bytes across 6 allocation blocks. This modest overhead represents the additional memory needed by the WebAssembly runtime to execute the guest function, manage the WASI I2C interface calls, and handle parameter marshaling between the WebAssembly module and the host I2C implementation. The minimal difference between total and peak allocations (16 bytes, approximately 4.9\%) indicates that WAMR maintains very stable memory usage during execution with virtually no temporary allocation churn.
-
-% \textbf{Wasmtime} requires 416 bytes total allocation with a peak usage of 347 bytes distributed across 10 allocation blocks for execution. While this represents the highest overhead among the implementations, the absolute increment remains modest at approximately 26 times the native requirement and only 1.27 times the WAMR requirement. The 69 bytes difference between total and peak usage (16.6\%) suggests slightly more dynamic memory management during execution, potentially related to component model overhead.
-
-% These results are particularly significant because they demonstrate that \textbf{both WebAssembly runtimes achieve very efficient steady-state execution}. After absorbing the substantial initialization costs (especially Wasmtime's 14.2MB setup overhead), the incremental memory required for actual I2C operations remains in the hundreds of bytes range. This profile makes both runtimes highly suitable for embedded applications performing repeated I2C operations, where the setup cost can be amortized and the per-operation overhead remains minimal.
-
-
 
 \subsection{Binary Size}
 \label{subsec:binary-size}
@@ -368,5 +335,3 @@ Wasmtime's more modest 70.4\% reduction to 3.6 MB reflects the inherent complexi
 \textbf{Embedded Systems Deployment Implications:} The binary size analysis reveals a clear architectural trade-off between feature sophistication and deployment flexibility. WAMR's optimized 660 KB footprint remains viable for moderately constrained embedded systems, while still providing WebAssembly isolation and portability benefits. Wasmtime's 3.6 MB minimum requirement restricts itself to deployment on more capable embedded platforms with sufficient flash storage.
 
 The dramatic size reduction potential (93.7\% for WAMR) demonstrates that embedded WebAssembly deployments can achieve reasonable footprints when unnecessary debugging infrastructure and standard library dependencies are eliminated. However, these optimizations require careful consideration of development workflow impacts, as debugging capabilities are significantly reduced in size-optimized builds.
-
-% TODO: Bepalen of we hier de RQ gaan beantwoorden

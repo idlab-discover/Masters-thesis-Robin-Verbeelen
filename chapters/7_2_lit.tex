@@ -1,8 +1,7 @@
 \chapter{Background}
 \label{chap:background}
 
-This chapter provides the essential background knowledge required to understand the implementation and evaluation of the I2C WebAssembly System Interface.
-% TODO: Bepalen of we dit willen en of we dit ook voor andere chapters moeten doen?: The chapter begins with an overview of WebAssembly and its ecosystem, followed by detailed explanations of WASI and its evolution through different preview versions. Subsequently, the chapter explores \acrshort{wit} files and binding generation mechanisms, examines WebAssembly runtimes with particular emphasis on WAMR and Wasmtime, and introduces the I2C protocol and embedded systems context. The chapter concludes with an analysis of the current WASI I2C standardization proposal, a review of Friedrich's foundational work and its limitations, and an overview of existing WebAssembly performance studies.
+This chapter provides the essential background knowledge required to understand the contributions made in this research.
 
 \section{WebAssembly}
 \label{sec:webassembly}
@@ -29,13 +28,13 @@ The WebAssembly ecosystem encompasses multiple components that enable the develo
 
 \textbf{Standards and Governance:} WebAssembly development follows W3C standardization processes, with active community involvement through the WebAssembly Community Group. This ensures that the technology evolves in a consensus-driven manner.
 
-\section{\acrfull{wasi}}
+\section{WebAssembly System Interface}
 \label{sec:wasi}
 
 \subsection{Fundamentals}
 \label{subsec:wasi-fundamentals}
 
-\acrshort{wasi} represents a crucial evolution in WebAssembly's capabilities, extending the platform beyond browser environments to enable execution in servers, edge devices, and embedded systems~\cite{wasi_mozilla_blog}. WASI functions as a system interface for a conceptual operating system, providing a standardized way for WebAssembly modules to interact with system resources while maintaining the security and portability characteristics that define WebAssembly.
+\acrfull{wasi} represents a crucial evolution in WebAssembly's capabilities, extending the platform beyond browser environments to enable execution in servers, edge devices, and embedded systems~\cite{wasi_mozilla_blog}. WASI functions as a system interface for a conceptual operating system, providing a standardized way for WebAssembly modules to interact with system resources while maintaining the security and portability characteristics that define WebAssembly.
 
 WASI emerged from the recognition that code executing outside browsers requires a mechanism to communicate with the underlying system. Traditional approaches, such as Emscripten's POSIX emulation, provided functional solutions but lacked standardization and optimal performance characteristics. WASI addresses these limitations by defining a comprehensive set of APIs that facilitate interaction with filesystems, network connections, cryptographic functions, and hardware interfaces.
 
@@ -131,9 +130,6 @@ The choice between automatic binding generation and manual interface implementat
 
 WebAssembly runtimes serve as the execution environment for WebAssembly modules and components, providing the necessary infrastructure for loading, validating, compiling, and executing WebAssembly code. Different runtimes make varying architectural decisions that significantly impact their performance characteristics, resource usage, and suitability for different deployment scenarios.
 
-% TODO: Add diagram showing general WebAssembly runtime architecture
-% Comment: Include components like module loader, validator, compiler/interpreter, memory manager, host function interface
-
 The fundamental components of a WebAssembly runtime include:
 
 \textbf{Module Loader and Validator:} Responsible for parsing WebAssembly binary format, validating module structure and type safety, and preparing modules for execution. The validation process ensures that modules comply with WebAssembly's safety guarantees.
@@ -157,10 +153,10 @@ Wasmtime represents the reference implementation of WebAssembly and WASI standar
 
 \textbf{Language Integration:} Wasmtime provides high-quality libraries for multiple host languages, including Rust, C/C++, Python, and JavaScript. These libraries enable embedding Wasmtime in existing applications and frameworks.
 
-\subsection{\acrfull{wamr}}
+\subsection{WebAssembly Micro Runtime}
 \label{subsec:wamr}
 
-\acrshort{wamr} is a lightweight, portable WebAssembly runtime specifically designed for embedded devices, IoT applications, and resource-constrained environments\cite{wamr_project}~\cite{wamr_project2}. WAMR's architecture prioritizes minimal resource usage, fast startup, and broad platform compatibility, making it suitable for deployment scenarios where memory and processing resources are limited.
+\acrfull{wamr} is a lightweight, portable WebAssembly runtime specifically designed for embedded devices, IoT applications, and resource-constrained environments\cite{wamr_project}~\cite{wamr_project2}. WAMR's architecture prioritizes minimal resource usage, fast startup, and broad platform compatibility, making it suitable for deployment scenarios where memory and processing resources are limited.
 
 \textbf{Lightweight Design Philosophy:} WAMR is architected to minimize memory footprint and startup overhead, essential characteristics for embedded and IoT deployments. The runtime can operate with memory constraints that would be prohibitive for general-purpose runtimes like Wasmtime.
 
@@ -176,10 +172,8 @@ Wasmtime represents the reference implementation of WebAssembly and WASI standar
 \subsection{I2C Protocol Fundamentals}
 \label{subsec:i2c-fundamentals}
 
-The Inter-Integrated Circuit (I2C) protocol is a multi-controller~\footnote{Modern naming convention states the use of Host/Client instead of the out-dated Master/Slave terminology. This thesis uses the also accepted Controller/Peripheral naming, eliminating ambiguity between the Host/Guest naming used in the context of WebAssembly and virtualization.}, multi-peripheral serial communication bus widely used in embedded systems for connecting microcontrollers with peripheral devices\cite{i2c_specification}. Developed by Philips Semiconductor (now NXP) in the 1980s, I2C has become a fundamental communication protocol in Internet of Things (IoT) ecosystems, sensor networks, and embedded control systems.
-
-% TODO: Add I2C protocol timing diagram
-% Comment: Show START condition, address transmission, data transfer, and STOP condition with proper timing relationships
+The Inter-Integrated Circuit (I2C) protocol is a multi-controller~\footnote{Use of updated terms "controller/target" instead of "master/slave" to align with MIPI I3C
+specification and NXP's Inclusive Language Project~\cite{i2c_specification}}, multi-peripheral serial communication bus widely used in embedded systems for connecting microcontrollers with peripheral devices\cite{i2c_specification}. Developed by Philips Semiconductor (now NXP) in the 1980s, I2C has become a fundamental communication protocol in Internet of Things (IoT) ecosystems, sensor networks, and embedded control systems.
 
 The I2C protocol operates using two bidirectional signal lines:
 
@@ -226,7 +220,7 @@ The WASI I2C proposal represents an ongoing effort to standardize I2C communicat
 \subsection{Proposal Architecture and Design}
 \label{subsec:i2c-proposal-design}
 
-The WASI I2C proposal~\cite{wasi_i2c_proposal} defines interfaces that closely follow the embedded-hal version 1 design principles while adapting to the WebAssembly Component Model's resource-based architecture. The proposal consists of three primary WIT files that implement a modular, composable interface design.
+The WASI I2C proposal~\cite{wasi_i2c_proposal} defines an interface that closely follows the embedded-hal version 1 design principles while adapting to the WebAssembly Component Model's resource-based architecture. The proposal consists of three primary WIT files that implement a modular, composable interface design.
 
 \textbf{Core Interface Components:}
 \begin{itemize}
@@ -234,9 +228,6 @@ The WASI I2C proposal~\cite{wasi_i2c_proposal} defines interfaces that closely f
     \item \textbf{delay.wit:} Provides timing and delay functionality required for I2C protocol compliance and device timing requirements
     \item \textbf{world.wit:} Specifies the complete interface surface that components must implement or import
 \end{itemize}
-
-% TODO: Add code snippet showing WIT interface definition
-% Comment: Include simplified version of i2c.wit showing resource definition and key methods
 
 \textbf{Resource-Based Design:} The proposal implements I2C controllers as first-class resources in the Component Model, enabling proper lifetime management and capability-based security. This design ensures that I2C access is mediated through explicit capability grants rather than ambient authority.
 

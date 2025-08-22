@@ -17,7 +17,7 @@ I2C represents one of the most widely deployed communication protocols in embedd
 \section{Problem Statement and Research Context}
 \label{sec:problem-statement}
 
-Friedrich Vandenberghe's pioneering work established the foundation for WASI I2C standardization by advancing the proposal from its initial conceptual phase to Phase 2 of the official WASI standardization process~\cite{friedrich_thesis}. His investigation included WIT interface design and proof-of-concept implementations mainly targeting WASI Preview 2 environments. Friedrich's work demonstrated the technical feasibility of WASI I2C integration and provided performance characterizations for Wasmtime-based implementations.
+Friedrich Vandenberghe's pioneering work established the foundation for WASI I2C standardization by advancing the proposal from its initial conceptual phase to Phase 2 of the official WASI standardization process~\cite{friedrich_paper}. His investigation included WIT interface design and proof-of-concept implementations mainly targeting WASI Preview 2 environments. Friedrich's work demonstrated the technical feasibility of WASI I2C integration and provided performance characterizations for Wasmtime-based implementations.
 
 However, Friedrich's implementation approach, while technically sound and aligned with the future direction of WebAssembly component model adoption, revealed a critical limitation for immediate embedded system deployment: dependency on WASI Preview 2 and the component model architecture. These technological requirements impose constraints that conflict with the resource limitations prevalent in embedded environments:
 

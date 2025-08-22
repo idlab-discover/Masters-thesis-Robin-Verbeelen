@@ -33,7 +33,7 @@ All implementations in this ecosystem, including the Preview 2 component and Was
 
 This implementation utilizes a simplified version of the WASI I2C interface rather than the complete official specification. The choice to use a reduced interface provides focus on core I2C functionality while demonstrating the essential capabilities needed for I2C communication.
 
-Code Fragments \ref{lst:official-i2c-interface} and \ref{lst:simplified-i2c-interface} showcase the main differences between the official and the simplified interface definition. The complete definition of the interface is available in the proposal's repository. %TODO: refereer naar de repo
+Code Fragments \ref{lst:official-i2c-interface} and \ref{lst:simplified-i2c-interface} showcase the main differences between the official and the simplified interface definition. The complete definition of the interface is available in the proposal's repository~\cite{wasi_i2c_proposal}.
 
 \begin{listing}[H]
     \begin{minted}{rust}
@@ -447,8 +447,7 @@ The resulting binary size demonstrates the effectiveness of this approach: the o
 
 The implementation utilizes guest-managed heap allocation, representing an experimental departure from WAMR's default configuration and the Canonical ABI's specification for host-managed memory allocation. This design choice was more experimental and allowed for insights into the different WAMR Heap strategies. 
 
-%TODO refereer naar Understand the Wamr heaps
-WAMR supports multiple heap management approaches, each with distinct characteristics and use cases:
+WAMR supports multiple heap management approaches~\cite{wamr_heaps}, each with distinct characteristics and use cases:
 
 \begin{itemize}
     \item \textbf{WASI Heap}: Created when modules are built with WASI-LIBC, managed by the wasi-libc memory allocator. Also used by the host to allocate memory in the linear memory of the guest, when the guest module exports malloc/free functions.
@@ -555,98 +554,103 @@ cargo component build --target wasm32-wasip2 --release
 The WAMR host implementation represents the most technically challenging aspect of the system due to the fundamental architectural mismatch between Rust's memory safety model and WAMR's C-based runtime architecture. This implementation must carefully navigate the boundary between safe Rust code and unsafe C FFI operations while maintaining both performance and correctness.
 
 \subsubsection{Runtime Initialization and Function Registration}
+In \autoref{lst:wamr-structure}, the structure field ordering is critical for proper resource cleanup, as Rust drops fields in declaration order for structs. WAMR exhibits weird behavior when runtime resources are destroyed in an incorrect sequence, making this ordering essential for system stability. This happens when the Runtime entity is dropped before it is fully initialized. The PingPongRunner struct encapsulates all the individual components in a specific order, always giving the Runtime entity enough time to fully initialize. With this configuration and no other arguments in the build pipeline defined, WAMR is configured to run in Interpreted mode~\cite{wamr_running_modes}.
 
 \begin{listing}[H]
-\begin{minted}[breaklines]{rust}
-// wamr_impl/src/wamr_manager.rs (structure definition)
-pub struct PingPongRunner {
-    func: Function,
-    instance: Instance,
-    _module: Module,
-    _runtime: Runtime, // Explicit ordering ensures correct destruction sequence
-}
-\end{minted}
-\caption{WAMR runtime structure with carefully ordered fields for proper resource cleanup sequence}
-\label{lst:wamr-structure}
+    \begin{minted}[breaklines]{rust}
+    // wamr_impl/src/wamr_manager.rs (structure definition)
+    pub struct PingPongRunner {
+        func: Function,
+        instance: Instance,
+        _module: Module,
+        _runtime: Runtime, // Explicit ordering ensures correct destruction sequence
+    }
+    \end{minted}
+    \caption{WAMR runtime structure with carefully ordered fields for proper resource cleanup sequence}
+    \label{lst:wamr-structure}
 \end{listing}
+
+\autoref{lst:wamr-initialization} showcases the functions required for creating the runtime and running the guest module. For the creation, the host functions are registered in the runtime so the guests are able to call them, the WebAssembly module file is loaded in, an instance of the guest module is created --- providing its execution environment ---, and the exported function \texttt{\_start} is registered.
 
 \begin{listing}[H]
-\begin{minted}[breaklines]{rust}
-// wamr_impl/src/wamr_manager.rs (initialization implementation)
-impl PingPongRunner {
-    pub fn new() -> Result<PingPongRunner, RuntimeError> {
-        let runtime = Runtime::builder()
-            .use_system_allocator()
-            .register_host_function("host_read", host_functions::read as *mut c_void)
-            .register_host_function("host_write", host_functions::write as *mut c_void)
-            .register_host_function("host_open", host_functions::open as *mut c_void)
-            .register_host_function("host_close", host_functions::close as *mut c_void)
-            .build()?;
-
-        let module = Module::from_file(&runtime, "wasmodules/guestp1.wasm")?;
-        let instance = Instance::new(&runtime, &module, 1024 * 64)?;
-        let func = Function::find_export_func(&instance, "_start")?;
-        
-        Ok(PingPongRunner { 
-            _runtime: runtime, 
-            _module: module, 
-            instance, 
-            func 
-        })
+    \begin{minted}[breaklines]{rust}
+    // wamr_impl/src/wamr_manager.rs (initialization implementation)
+    impl PingPongRunner {
+        pub fn new() -> Result<PingPongRunner, RuntimeError> {
+            let runtime = Runtime::builder()
+                .use_system_allocator()
+                .register_host_function("host_read", host_functions::read as *mut c_void)
+                .register_host_function("host_write", host_functions::write as *mut c_void)
+                .register_host_function("host_open", host_functions::open as *mut c_void)
+                .register_host_function("host_close", host_functions::close as *mut c_void)
+                .build()?;
+    
+            let module = Module::from_file(&runtime, "wasmodules/guestp1.wasm")?;
+            let instance = Instance::new(&runtime, &module, 1024 * 64)?;
+            let func = Function::find_export_func(&instance, "_start")?;
+            
+            Ok(PingPongRunner { 
+                _runtime: runtime, 
+                _module: module, 
+                instance, 
+                func 
+            })
+        }
+    
+        pub fn pingpong(&self) -> Result<(), RuntimeError> {
+            let params: Vec<WasmValue> = vec![];
+            self.func.call(&self.instance, &params)?;
+            Ok(())
+        }
     }
-
-    pub fn pingpong(&self) -> Result<(), RuntimeError> {
-        let params: Vec<WasmValue> = vec![];
-        self.func.call(&self.instance, &params)?;
-        Ok(())
-    }
-}
-\end{minted}
-\caption{WAMR runtime initialization implementing explicit host function registration, module instantiation and exported guest function linking}
-\label{lst:wamr-initialization}
+    \end{minted}
+    \caption{WAMR runtime initialization implementing explicit host function registration, module instantiation and exported guest function linking}
+    \label{lst:wamr-initialization}
 \end{listing}
-
-The structure field ordering is critical for proper resource cleanup, as Rust drops fields in declaration order for structs. WAMR exhibits undefined behavior if runtime resources are destroyed in incorrect sequence, making this ordering essential for system stability.
 
 \subsubsection{Memory Translation and Safety Boundaries}
 
+\autoref{lst:wamr-host-function-pt1} showcases the first part of the registered host function: \texttt{write}. Notice how the first parameter \texttt{exec\_env} is not actually defined anywhere by our interface in FFI bindings defined in \autoref{lst:guest-ffi-declarations}. This parameter is automatically filled through WAMR's stack calling system~\cite{wamr_stacks}. The \sloppy\texttt{wasm\_runtime\_get\_module\_inst(exec\_env)} call allows the host function to find out what module instance called it. The capability-based security system on the host uses this information to validate if the calling instance has access to the (handle of the) I2C resource. If it does, next, the host checks if it has the required permissions for the requested operation.
+
 \begin{listing}[H]
-\begin{minted}[breaklines]{rust}
-// wamr_impl/src/host_functions.rs (write function - part 1)
-pub extern "C" fn write(
-    exec_env: wasm_exec_env_t,
-    handle: I2cResourceHandle,
-    addr: I2cAddress,
-    len: usize,
-    buffer_offset: usize
-) -> u8 {
-    let module_inst = unsafe { wasm_runtime_get_module_inst(exec_env) };
-    if module_inst.is_null() {
-        eprintln!("Host: Failed to get module instance");
-        return ErrorCode::Other.lower();
-    }
-
-    // Validate permissions before proceeding with memory operations
-    let can_write = {
-        let manager = I2C_PERMISSIONS_MANAGER.lock().unwrap();
-        match manager.get_permissions(module_inst, handle) {
-            Some(permissions) => permissions.can_write,
-            None => {
-                eprintln!("Host: Handle {} not found for module instance {:p}", 
-                         handle, module_inst);
-                return ErrorCode::Other.lower();
-            }
+    \begin{minted}[breaklines]{rust}
+    // wamr_impl/src/host_functions.rs (write function - part 1)
+    pub extern "C" fn write(
+        exec_env: wasm_exec_env_t,
+        handle: I2cResourceHandle,
+        addr: I2cAddress,
+        len: usize,
+        buffer_offset: usize
+    ) -> u8 {
+        let module_inst = unsafe { wasm_runtime_get_module_inst(exec_env) };
+        if module_inst.is_null() {
+            eprintln!("Host: Failed to get module instance");
+            return ErrorCode::Other.lower();
         }
-    };
-
-    if !can_write {
-        eprintln!("Host: Access denied - no write permission for handle {}", handle);
-        return ErrorCode::Other.lower();
-    }
-\end{minted}
-\caption{Host function implementation demonstrating comprehensive permission validation and security checks}
-\label{lst:wamr-host-function-pt1}
+    
+        // Validate permissions before proceeding with memory operations
+        let can_write = {
+            let manager = I2C_PERMISSIONS_MANAGER.lock().unwrap();
+            match manager.get_permissions(module_inst, handle) {
+                Some(permissions) => permissions.can_write,
+                None => {
+                    eprintln!("Host: Handle {} not found for module instance {:p}", 
+                             handle, module_inst);
+                    return ErrorCode::Other.lower();
+                }
+            }
+        };
+    
+        if !can_write {
+            eprintln!("Host: Access denied - no write permission for handle {}", handle);
+            return ErrorCode::Other.lower();
+        }
+    \end{minted}
+    \caption{Host function implementation demonstrating comprehensive permission validation and security checks}
+    \label{lst:wamr-host-function-pt1}
 \end{listing}
+
+A pointer used by a WebAssembly module instance just represents the offset from the starting address of its allocated memory. This means there is a difference between native address pointers and the pointers a host function receives from its calling module instance. \autoref{lst:wamr-host-function-pt2} showcases converting such a module address pointer to a native address pointer and validating if it is within allowed bounds. The host function now has all it needs to know where it can read or write data.
 
 \begin{listing}[H]
     \begin{minted}{rust}
@@ -678,8 +682,6 @@ pub extern "C" fn write(
     \caption{Memory-safe host function implementation performing critical WebAssembly to native pointer translation}
     \label{lst:wamr-host-function-pt2}
 \end{listing}
-
-The memory translation process represents a critical safety boundary where WebAssembly's sandboxed linear memory model intersects with native system capabilities. The \texttt{wasm\_runtime\_addr\_app\_to\_native} function performs the essential translation while validating that the provided offset lies within the instantiated guest module's allocated memory space.
 
 \subsubsection{Capability-Based Security and Permission Management}
 
@@ -759,8 +761,6 @@ This permission system demonstrates the foundation for capability-based security
     \item \textbf{Resource Passing}: Enabling secure transfer of I2C handles between components
 \end{itemize}
 
-The system also provides the infrastructure necessary for supporting resource passing between WebAssembly modules, a capability that could enable sophisticated component composition patterns in future I2C interface versions. When resources are passed between modules, the permission system could track ownership transfers and ensure that access control policies are maintained across module boundaries.
-
 \textbf{Note}: The current ACL features serve as architectural examples demonstrating how capability-based security could be implemented. They have not been extensively tested in production scenarios and represent a foundation for future security policy development rather than a complete security solution.
 
 \subsection{Wasmtime Implementation: Component Model Integration}
@@ -818,12 +818,3 @@ impl wasi::i2c::i2c::HostI2c for HostState {
 \end{listing}
 
 The Wasmtime implementation benefits from automatic resource lifecycle management and type-safe binding generation, significantly reducing implementation complexity compared to the manual WAMR approach. However, this convenience comes at the cost of increased runtime requirements that may not be suitable for all embedded deployment scenarios.
-
-% TODO: De pingpong routine stond hier, nu verplaatst naar eval hoofdstuk. Nog zien of er eerder in de text niet verwacht wordt dat pingpong hier uitgelegd wordt.
-
-\section{Viability}
-The implementation successfully demonstrates that WASI Preview 1 provides a viable foundation for I2C communication in resource-constrained WebAssembly environments. The carefully designed binding layer effectively bridges the semantic gap between Preview 1's function-based interface and Preview 2's resource-based component model, enabling embedded systems to participate in the WebAssembly ecosystem while meeting the stringent resource requirements of embedded deployment scenarios.
-
-This work establishes the essential groundwork for the WASI I2C proposal's embedded device support requirements, providing a concrete demonstration that the interface can be successfully adapted to the constraints of resource-limited environments without sacrificing functional capability or semantic correctness.
-
-%TODO bepalen of ik hier in dit chapter de binary sizes wil bespreken en een antwoord in section Viability wil bieden op één van de research questions OF alle info over binary sizes en antwoord op de RQ wil overzetten naar het evaluatie hoofdstuk (leaning towards de tweede optie) sidenote: bekijk de RQ nog eens goed en zie of je echt een vraag opstelt dat kijkt of de binary sizes oké zijn voor de compat crit.
