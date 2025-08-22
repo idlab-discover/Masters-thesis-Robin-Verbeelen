@@ -122,7 +122,7 @@ wit/
             world.wit         // I2C world imports
 \end{minted}
 
-The `deps/wasi-i2c/` directory contains the simplified I2C interface definition along with its world imports. The simplified version has no need for the additional delay.wit and is therefore removed from the directory and the world.wit. This structure enables both guest and host implementations to reference the same interface definitions, ensuring consistency across the entire ecosystem.
+The `deps/wasi-i2c/` directory contains the simplified I2C interface definition along with its world imports. The simplified version has no need for the additional delay.wit and is therefore removed from the directory and the world.wit imports. This structure enables both guest and host implementations to reference the same interface definitions, ensuring consistency across the entire ecosystem.
 
 \subsection{Technical Environment}
 

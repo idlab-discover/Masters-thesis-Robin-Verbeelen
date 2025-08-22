@@ -7,7 +7,9 @@ WebAssembly (Wasm) and its system interface specification, WASI (WebAssembly Sys
 
 The emergence of WASI Preview 2, accompanied by the component model architecture, introduced sophisticated mechanisms for building interoperable WebAssembly libraries, applications, and environments. This component model utilizes \acrfull{wit} files to define interface contracts and enable automatic binding generation between components~\cite{wasi_p2}. However, a critical gap remains in WASI's hardware interface coverage: despite the ubiquity of Inter-Integrated Circuit (I2C) communication in embedded systems, the standardization of the WASI I2C interface is only in very early stages.
 
-I2C represents one of the most widely deployed communication protocols in embedded systems, serving as the backbone for sensor communication, device configuration, and inter-chip data exchange in IoT applications~\cite{i2c_specification}. The protocol's simplicity, addressing efficiency, and multi-host capability have made it indispensable for embedded system designers. Yet, the absence of a standardized WASI I2C interface creates a significant barrier to WebAssembly adoption in embedded environments where I2C communication is fundamental.
+I2C represents one of the most widely deployed communication protocols in embedded systems, serving as the backbone for sensor communication, device configuration, and inter-chip data exchange in IoT applications~\cite{i2c_specification}. The protocol's simplicity, addressing efficiency, and multi-host capability have made it indispensable for embedded system designers. Yet, the early state of the WASI I2C interface creates a significant barrier to WebAssembly adoption in embedded environments where I2C communication is fundamental.
+
+
 
 
 

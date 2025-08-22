@@ -3,3 +3,20 @@
 \addcontentsline{toc}{chapter}{Future Work}  
 
 This chapter explains what the next steps are to continue the research and innovation of your master's thesis. Are there any additional features of research directions that are interesting? Are there ways in which your solution can be improved?
+
+
+- benchmarks die verschillende dingen vergelijken met andere wasi interfaces
+- strategies voor het optimaliseren van wasmtime, wamr, ...
+- Kijken of met optimalisaties Wasmtime mss toch viable kan zijn voor embedded?
+- puur het verschil van P1 en P2 gaan bepalen ipv Wasmtime vs WAMR CATCH: Wasmtime gebruikt wss sowieso P2 technieken, ook al laadt je een P1 module in.
+- Effectief implementeren van duidelijke tests en voorbeelde voor het voorstel naar phase 3 te pushen
+- Kijken hoe ver async development staat met Preview 3 en de interface daar voor klaarmaken
+- Kijken om de interface uit te breiden met een methode om een I2C Resource aan te vragen
+- Impact van host-managed vs guest-managed heap
+- Ervoor zorgen dat de P1 interface al dan niet CABI compatible is. Dit is niet per sé nodig en kan misschien interessant zijn om mijn implementatie te optimaliseren. ALHOEWEL dit is misschien wel nodig want als andere componenten afhangen van de interface, moet die informatie op de juist manier worden doorgegeven.
+- Testen wat er gebeurd in een correcter environment en niet de simpele PingPong
+    - Grotere berichten
+    - Foute en juiste berichten
+    - Hoe errors worden behandeld
+- Eens kijken of er meer aandacht kan worden besteed aan het implementeren en analyseren van security
+- Testen uitvoeren op hardware niveau? Elektriciteitsignalen meten op de pinnen, manueel software testen schrijven en loggen wanneer exact een request gebeurd en dan zien wat jouw osciloscoop ofz zegt. Dit kan nagaan of de I2C peripheral weldegelijk direct een request kan versturen, mss was de arduino uno gewoon niet genoeg op sommige momenten?
