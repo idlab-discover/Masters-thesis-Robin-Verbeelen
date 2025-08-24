@@ -4,7 +4,7 @@
 \section{Introduction}
 \label{sec:eval-intro}
 
-The WASI I2C proposal's progression to Phase 3 requires demonstrated compatibility with embedded device constraints as defined by the portability criteria Table~\ref{tab:portability_criteria}. These specify resource-constrained platforms including the Nucleo F412ZG with only 256 KB SRAM and 1 MB Flash memory, representing the minimal viable embedded deployment target. For WebAssembly to succeed in embedded I2C applications, implementations must operate efficiently within these stringent memory and performance constraints.
+The WASI I2C proposal's progression to Phase 3 requires demonstrated compatibility with embedded device constraints as defined by the portability criteria Table~\ref{tab:portability_criteria}. These specify resource-constrained platforms including the Nucleo F412ZG with only \SIi{256}{\kilo\byte} SRAM and \SIi{1}{\mega\byte} Flash memory, representing the minimal viable embedded deployment target. For WebAssembly to succeed in embedded I2C applications, implementations must operate efficiently within these stringent memory and performance constraints.
 
 This chapter presents a comprehensive experimental evaluation of the I2C WASI interface implementations developed for the WAMR and Wasmtime runtimes, with particular emphasis on their \textbf{performance characteristics} and \textbf{resource utilization} in embedded deployment scenarios. It encompasses \textbf{timing analysis} across multiple execution phases and comprehensive \textbf{memory profiling} to track allocation patterns. This data is then used for statistical analysis to ensure reliable and reproducible results. By systematically measuring \textbf{runtime setup overhead}, \textbf{execution latency}, and \textbf{memory consumption}, this experimental evaluation provides quantitative insights into the use of the WASI I2C interface in these constrained environments.
 
@@ -122,13 +122,13 @@ Table~\ref{tab:wasm-setup} presents the initialization overhead for \acrshort{wa
     \centering
     \caption{Runtime Setup overhead comparison, showcasing absolute differences between implementations.}
     \label{tab:wasm-setup}
-    \begin{tabular}{lccccc}
+    \begin{tabular}{l|S[table-format=5.2]|S[table-format=5.2]|S[table-format=5.2]|S[table-format=6.2]@{\, ; \,}S[table-format=5.3]}
         \toprule
-        \textbf{Implementation} & \textbf{Mean (µs)} & \textbf{Median (µs)} & \textbf{Std Dev (ns)} & \textbf{95\% CI (µs)} & \textbf{CI Range (µs)} \\
+        \textbf{Implementation} & \textbf{Mean (\si{\micro\second})} & \textbf{Median (\si{\micro\second})} & \textbf{Std Dev (\si{\nano\second})} & \multicolumn{2}{c}{\textbf{95\% CI (\si{\micro\second})}} \\
         \midrule
-        Native      & 1.9466 & 1.9483 & 10.5846 & [1.9445 ; 1.9487] & 0.0042 \\
-        WAMR        & 253.1126 & 253.1301 & 258.4145 & [253.0613 ; 253.1638] & 0.1025 \\
-        Wasmtime    & 19,559.1592 & 19,559.8473 & 11,656.5225 & [19,556.8463 ; 19,561.4721] & 4.6258 \\
+        Native      & 1.9466 & 1.9483 & 10.5846 & [ 1.9445 & 1.9487 ] \\
+        WAMR        & 253.1126 & 253.1301 & 258.4145 & [ 253.0613 & 253.1638 ] \\
+        Wasmtime    & 19559.1592 & 19559.8473 & 11656.5225 & [ 19556.8463 & 19561.4721 ] \\
         \bottomrule
     \end{tabular}
 \end{table}
@@ -141,7 +141,7 @@ Table~\ref{tab:wasm-setup} presents the initialization overhead for \acrshort{wa
 \end{figure}
 
 \subsection{Analysis}
-The results reveal a dramatic performance disparity between the two WebAssembly runtimes. \acrshort{wamr} achieves setup initialization in approximately 253 μs, representing a 130x overhead compared to the native implementation. However, Wasmtime exhibits substantially higher initialization costs at 19.6 ms, creating a just over 10,000x overhead relative to the native implementation and a 77x overhead compared to the \acrshort{wamr} implementation. Figure~\ref{fig:wasm-setup-relative} gives a visualization of the dramatic differences.
+The results reveal a dramatic performance disparity between the two WebAssembly runtimes. \acrshort{wamr} achieves setup initialization in approximately \SIi{253}{\micro\second}, representing a \SIi{130}{\times} overhead compared to the native implementation. However, Wasmtime exhibits substantially higher initialization costs at \SIi{19.6}{\milli\second}, creating a just over \SIi{10000}{\times} overhead relative to the native implementation and a \SIi{77}{\times} overhead compared to the \acrshort{wamr} implementation. Figure~\ref{fig:wasm-setup-relative} gives a visualization of the dramatic differences.
 
 \begin{figure}[h]
     \centering
@@ -172,17 +172,19 @@ Table~\ref{tab:wasm-execution} compares execution performance between WAMR, Wasm
     \centering
     \caption{WebAssembly Execution Performance Comparison}
     \label{tab:wasm-execution}
-    \begin{tabular}{llcccc}
+    \begin{tabular}{c|l|S[table-format=4.2]|S[table-format=4.2]|S[table-format=4.2]|S[table-format=5.2]@{\, ; \,}S[table-format=4.3]}
         \toprule
-        \textbf{Execution} & \textbf{Implementation} & \textbf{Mean (µs)} & \textbf{Median (µs)} & \textbf{Std Dev (ns)} & \textbf{95\% CI (µs)} \\
+        \textbf{Execution} & \textbf{Implementation} & \textbf{Mean (\si{\micro\second})} & \textbf{Median (\si{\micro\second})} & \textbf{Std Dev (\si{\nano\second})} & \multicolumn{2}{c}{\textbf{95\% CI (\si{\micro\second})}} \\
         \midrule
-                & Native    & 594.5275 & 594.5636 & 281.8579 & [594.4715 ; 594.5834] \\
-        Cold    & WAMR      & 1,211.0415 & 1,210.9849 & 5,144.4222 & [1,210.0207 ; 1,212.0622] \\
-                & Wasmtime  & 1,301.8975 & 1,300.5868 & 4,895.5251 & [1,300.9262 ; 1,302.8689] \\
+        \multirow{3}{*}{Cold}
+            & Native    & 594.5275 & 594.5636 & 281.8579 & [594.4715 & 594.5834] \\
+            & WAMR      & 1211.0415 & 1210.9849 & 5144.4222 & [1210.0207 & 1212.0622] \\
+            & Wasmtime  & 1301.8975 & 1300.5868 & 4895.5251 & [1300.9262 & 1302.8689] \\
         \hline
-                & Native    & 589.0368 & 589.0307 & 69.9196 & [589.0230 ; 589.0507] \\
-        Hot     & WAMR      & 1,185.4778 & 1,185.8310 & 673.0608 & [1,185.3442 ; 1,185.6113] \\
-                & Wasmtime  & 1,184.4430 & 1,184.2941 & 522.5048 & [1,184.3393 ; 1,184.5467] \\
+        \multirow{3}{*}{Hot}
+            & Native    & 589.0368 & 589.0307 & 69.9196 & [589.0230 & 589.0507] \\
+            & WAMR      & 1185.4778 & 1185.8310 & 673.0608 & [1185.3442 & 1185.6113] \\
+            & Wasmtime  & 1184.4430 & 1184.2941 & 522.5048 & [1184.3393 & 1184.5467] \\
         \bottomrule
     \end{tabular}
 \end{table}
@@ -190,7 +192,7 @@ Table~\ref{tab:wasm-execution} compares execution performance between WAMR, Wasm
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.9\textwidth]{images/execution-distribution}
-    \caption{Distribution plots, showcasing stability of the measurements.}
+    \caption{Distribution plots showcasing stability of the measurements.}
     \label{fig:wasm-execution-distribution}
 \end{figure}
 
@@ -204,11 +206,11 @@ Table~\ref{tab:wasm-execution} compares execution performance between WAMR, Wasm
 \end{figure}
 
 \begin{enumerate}
-    \item \textbf{Convergent Steady-State Performance:} Both WAMR and Wasmtime achieve remarkably similar hot execution performance with a 2x native overhead, despite their architectural differences.
+    \item \textbf{Convergent Steady-State Performance:} Both WAMR and Wasmtime achieve remarkably similar hot execution performance with a \SIi{2}{\times} native overhead, despite their architectural differences.
     
-    \item \textbf{Cold/Hot Differences:} Minimal cold/hot differences for WAMR (2.1\% improvement), with Wasmtime showing moderate optimization benefits (9.0\% improvement), suggesting some caching or similar optimization effects.
+    \item \textbf{Cold/Hot Differences:} Minimal cold/hot differences for WAMR (\SI[round-precision=1]{2.1}{\percent} improvement), with Wasmtime showing moderate optimization benefits (\SI[round-precision=1]{9}{\percent} improvement), suggesting some caching or similar optimization effects.
     
-    \item \textbf{Consistent WebAssembly Overhead:} Both implementations exhibit approximately 2x overhead compared to native execution, representing the cost of WebAssembly instruction execution and host function call marshalling.
+    \item \textbf{Consistent WebAssembly Overhead:} Both implementations exhibit approximately \SIi{2}{\times} overhead compared to native execution, representing the cost of WebAssembly instruction execution and host function call marshalling.
 \end{enumerate}
 
 \subsection{Performance Variability Assessment}
@@ -238,7 +240,7 @@ Table~\ref{tab:variability} presents Coefficient of Variation (CV) metrics to as
     \label{fig:variability-comparison}
 \end{figure}
 
-The performance variability analysis reveals distinct consistency patterns across the three implementations. During the setup phase, the native implementation exhibits the highest variability (0.54\% CV), suggesting that direct hardware initialization is less predictable or stable, while Wasmtime demonstrates the most consistent setup behavior (0.06\% CV). This pattern reverses during cold execution, where both WebAssembly runtimes show significantly higher variability (WAMR: 0.42\%, Wasmtime: 0.38\%) compared to the native implementation (0.047\%). This increased variability can be attributed to the complex initialization and optimization processes within the WebAssembly runtimes during first execution. However, during hot execution, all implementations converge to low variability levels, with the native implementation achieving the highest consistency (0.012\% CV), followed by Wasmtime (0.044\%) and WAMR (0.057\%). Importantly, all Coefficient of Variation values remain well below 1\%, indicating that despite relative differences between implementations, all approaches demonstrate excellent measurement consistency and predictable performance characteristics.
+The performance variability analysis reveals distinct consistency patterns across the three implementations. During the setup phase, the native implementation exhibits the highest variability (\SI[round-precision=2]{0.54}{\percent} CV), suggesting that direct hardware initialization is less predictable or stable, while Wasmtime demonstrates the most consistent setup behavior (\SI[round-precision=2]{0.06}{\percent} CV). This pattern reverses during cold execution, where both WebAssembly runtimes show significantly higher variability (WAMR: \SI[round-precision=2]{0.42}{\percent}, Wasmtime: \SI[round-precision=2]{0.38}{\percent}) compared to the native implementation (\SI[round-precision=3]{0.047}{\percent}). This increased variability can be attributed to the complex initialization and optimization processes within the WebAssembly runtimes during first execution. However, during hot execution, all implementations converge to low variability levels, with the native implementation achieving the highest consistency (\SI[round-precision=3]{0.012}{\percent} CV), followed by Wasmtime (\SI[round-precision=3]{0.044}{\percent}) and WAMR (\SI[round-precision=3]{0.057}{\percent}). Importantly, all Coefficient of Variation values remain well below \SI[round-precision=0]{1}{\percent}, indicating that despite relative differences between implementations, all approaches demonstrate excellent measurement consistency and predictable performance characteristics.
 
 \section{Memory Usage Analysis}
 \label{sec:eval-memory}
@@ -267,13 +269,13 @@ Table~\ref{tab:memory-setup} presents memory allocation characteristics during r
 
 \subsubsection{Analysis}
 
-The memory allocation patterns during runtime initialization reveal fundamental architectural differences between the implementations. The native implementation establishes a minimal baseline with just 10 bytes allocated, reflecting direct hardware access without abstraction overhead.
+The memory allocation patterns during runtime initialization reveal fundamental architectural differences between the implementations. The native implementation establishes a minimal baseline with just \SIi{10}{\byte} allocated, reflecting direct hardware access without abstraction overhead.
 
-WAMR demonstrates embedded-friendly resource consumption, requiring approximately 10KB across 16 allocation blocks. This three-order-of-magnitude increase over native remains acceptable for most embedded systems, particularly given that 99.6\% of allocated memory persists throughout the runtime lifecycle—indicating efficient, stable memory management without excessive allocation churn.
+WAMR demonstrates embedded-friendly resource consumption, requiring approximately \SIi{10}{\kilo\byte} across 16 allocation blocks. This three-order-of-magnitude increase over native remains acceptable for most embedded systems, particularly given that \SI[round-precision=1]{99.6}{\percent} of allocated memory persists throughout the runtime lifecycle—indicating efficient, stable memory management without excessive allocation churn.
 
-Wasmtime's memory profile reflects its sophisticated execution engine architecture. While total allocations reach 14.2MB during initialization, the runtime maintains only 2.7MB at peak usage. This 81\% temporary allocation ratio reveals intensive memory operations during JIT compilation and module optimization. The 16,686 allocation blocks (over 1,000x more than WAMR) further illustrate the complexity of component model instantiation and type system initialization. Most importantly, Wasmtime's peak memory usage crosses the RAM limitations of both the ESP32-C3 (400KB) and the Nucleo (256KB) of the Portability Criteria from Table~\ref{tab:portability_criteria_specs}. Further optimization strategies were not researched, so will not be discussed.
+Wasmtime's memory profile reflects its sophisticated execution engine architecture. While total allocations reach \SI{14.25}{\mega\byte} during initialization, the runtime maintains only \SI{2.72}{\mega\byte} at peak usage. This \SI[round-precision=1]{81}{\percent} temporary allocation ratio reveals intensive memory operations during JIT compilation and module optimization. The \num[round-precision=0]{16686} allocation blocks (over \SIi{1000}{\times} more than WAMR) further illustrate the complexity of component model instantiation and type system initialization. Most importantly, Wasmtime's peak memory usage crosses the RAM limitations of both the ESP32-C3 (\SIi{400}{\kilo\byte}) and the Nucleo (\SIi{256}{\kilo\byte}) of the Portability Criteria from Table~\ref{tab:portability_criteria_specs}. Further optimization strategies were not researched, so will not be discussed.
 
-These patterns directly impact deployment feasibility: WAMR's 10KB footprint fits comfortably within typical embedded constraints (even sub-MB microcontrollers), while Wasmtime's multi-megabyte requirements restrict it to more capable embedded Linux platforms. The correlation between memory complexity and setup time (77x difference) suggests that memory allocation overhead contributes significantly to initialization latency.
+These patterns directly impact deployment feasibility: WAMR's \SIi{10}{\kilo\byte} footprint fits comfortably within typical embedded constraints (even sub-MB microcontrollers), while Wasmtime's multi-megabyte requirements restrict it to more capable embedded Linux platforms. The correlation between memory complexity and setup time (\SIi{77}{\times} difference) suggests that memory allocation overhead contributes significantly to initialization latency.
 
 \subsection{Execution}
 
@@ -296,11 +298,11 @@ Table~\ref{tab:memory-execution} presents memory allocation characteristics duri
 
 \subsubsection{Analysis}
 
-Both runtimes demonstrate remarkable efficiency: WAMR requires 327 bytes across 6 allocations, while Wasmtime uses 416 bytes across 10 allocations --- a negligible 89-byte difference despite their architectural disparities. Compared to the 16-byte native baseline, this represents approximately 20-26x overhead, primarily attributable to WASI interface marshalling and guest-host communication buffers.
+Both runtimes demonstrate remarkable efficiency: WAMR requires \SIi{327}{\byte} across 6 allocations, while Wasmtime uses \SIi{416}{\byte} across 10 allocations --- a negligible \SIi{89}{\byte} difference despite their architectural disparities. Compared to the \SIi{16}{\byte} native baseline, this represents approximately \SIrange[round-precision=0]{20}{26}{\times} overhead respectively, primarily attributable to WASI interface marshalling and guest-host communication buffers.
 
-The minimal peak-to-total allocation differences (WAMR: 5\%, Wasmtime: 17\%) indicate stable execution without memory leaks or excessive temporary allocations. This efficiency validates both runtimes for long-running embedded applications where thousands of I2C operations must execute within constrained memory budgets.
+The minimal peak-to-total allocation differences (WAMR: \SI[round-precision=0]{5}{\percent}, Wasmtime: \SI[round-precision=0]{17}{\percent}) indicate stable execution without memory leaks or excessive temporary allocations. This efficiency validates both runtimes for long-running embedded applications where thousands of I2C operations must execute within constrained memory budgets.
 
-Critically, these results demonstrate that the substantial initialization costs --- particularly Wasmtime's 14.2MB --- do not translate to proportional execution overhead. Once initialized, both runtimes operate within hundreds of bytes, making the initialization cost a one-time investment that can be amortized across the application lifetime.
+Critically, these results demonstrate that the substantial initialization costs --- particularly Wasmtime's \SI{14.25}{\mega\byte} --- do not translate to proportional execution overhead. Once initialized, both runtimes operate within hundreds of bytes, making the initialization cost a one-time investment that can be amortized across the application lifetime.
 
 \subsection{Binary Size}
 \label{subsec:binary-size}
@@ -324,14 +326,14 @@ Wasmtime            & 12.20 & 3,609 & 70.4 \\
 \end{tabular}
 \end{table}
 
-The standard builds include full runtime initialization capabilities with debugging support and standard library linking, while optimized builds embed the guest module directly within the host binary and apply comprehensive size reduction optimizations. For the WAMR implementation, the Preview 1 guest module contributes 38 KB in standard builds and 4.8 KB in optimized builds. The Wasmtime Preview 2 component remains at 16.2 KB, as \texttt{no\_std} compilation is not compatible with runtime binding generation tools providing Preview 2 support. Manual interference could solve that issue, but it defeats the desire for the enhanced developer experience.
+The standard builds include full runtime initialization capabilities with debugging support and standard library linking, while optimized builds embed the guest module directly within the host binary and apply comprehensive size reduction optimizations. For the WAMR implementation, the Preview 1 guest module contributes \SIi{38}{\kilo\byte} in standard builds and \SIi{4.8}{\kilo\byte} in optimized builds. The Wasmtime Preview 2 component remains at \SIi{16.2}{\kilo\byte} on its own, as \texttt{no\_std} compilation is not compatible with runtime binding generation tools providing Preview 2 support. Manual interference could solve that issue, but it defeats the desire for the enhanced developer experience.
 
-\textbf{Standard Build Analysis:} The unoptimized builds reveal the base overhead of each runtime architecture. Wasmtime's 12.2 MB footprint reflects its sophisticated compilation infrastructure and component model support, representing a 69\% increase over the native baseline. WAMR's 10.4 MB binary demonstrates a more modest 44\% overhead, aligning with its embedded-focused design philosophy that prioritizes resource efficiency over feature completeness.
+\textbf{Standard Build Analysis:} The unoptimized builds reveal the base overhead of each runtime architecture. Wasmtime's \SIi{12.2}{\mega\byte} footprint reflects its sophisticated compilation infrastructure and component model support, representing a \SI[round-precision=1]{69}{\percent} increase over the native baseline. WAMR's \SIi{10.4}{\mega\byte} binary demonstrates a more modest \SI[round-precision=1]{44}{\percent} overhead, aligning with its embedded-focused design philosophy that prioritizes resource efficiency over feature completeness. Either way, without optimizations or careful design without the standard library, these sizes are too large for constrained embedded devices.
 
-\textbf{Optimized Build Analysis:} The size reduction potential through aggressive optimization varies significantly across implementations. Native implementations achieve the most dramatic compression (95.2\% reduction to 348 KB), demonstrating that direct hardware access patterns are highly amenable to dead code elimination and static linking optimizations. WAMR follows closely with 93.7\% reduction to 660 KB, indicating that its architecture remains compatible with embedded optimization strategies.
+\textbf{Optimized Build Analysis:} The size reduction potential through aggressive optimization varies significantly across implementations. Native implementations achieve the most dramatic compression (\SI[round-precision=1]{95.2}{\percent} reduction to \SIi{348}{\kilo\byte}), demonstrating that direct hardware access patterns are highly amenable to dead code elimination and static linking optimizations. WAMR follows closely with \SI[round-precision=1]{93.7}{\percent} reduction to \SIi{660}{\kilo\byte}, indicating that its architecture remains compatible with embedded optimization strategies.
 
-Wasmtime's more modest 70.4\% reduction to 3.6 MB reflects the inherent complexity of the component model and WIT binding infrastructure, which resists aggressive optimization due to dynamic type system requirements. This 3.6 MB minimum footprint significantly exceeds the flash memory constraints of the Nucleo F412ZG (1 MB flash), defined in the Portability Criteria.
+Wasmtime's more modest \SI[round-precision=1]{70.4}{\percent} reduction to \SI{3.609}{\mega\byte} reflects the inherent complexity of the component model and WIT binding infrastructure, which resists aggressive optimization due to dynamic type system requirements. This minimum achievable footprint significantly exceeds the flash memory constraints of the Nucleo F412ZG (\SIi{1}{\mega\byte} flash), defined in the Portability Criteria.
 
-\textbf{Embedded Systems Deployment Implications:} The binary size analysis reveals a clear architectural trade-off between feature sophistication and deployment flexibility. WAMR's optimized 660 KB footprint remains viable for moderately constrained embedded systems, while still providing WebAssembly isolation and portability benefits. Wasmtime's 3.6 MB minimum requirement restricts itself to deployment on more capable embedded platforms with sufficient flash storage.
+\textbf{Embedded Systems Deployment Implications:} The binary size analysis reveals a clear architectural trade-off between feature sophistication and deployment flexibility. WAMR's optimized \SIi{660}{\kilo\byte} footprint remains viable for moderately constrained embedded systems, while still providing WebAssembly isolation and portability benefits. Wasmtime's \SI{3.609}{\mega\byte} minimum requirement restricts itself to deployment on more capable embedded platforms with sufficient flash storage.
 
-The dramatic size reduction potential (93.7\% for WAMR) demonstrates that embedded WebAssembly deployments can achieve reasonable footprints when unnecessary debugging infrastructure and standard library dependencies are eliminated. However, these optimizations require careful consideration of development workflow impacts, as debugging capabilities are significantly reduced in size-optimized builds.
+The dramatic size reduction potential (\SI[round-precision=1]{93.7}{\percent} for WAMR) demonstrates that embedded WebAssembly deployments can achieve reasonable footprints when unnecessary debugging infrastructure and standard library dependencies are eliminated. However, these optimizations require careful consideration of development workflow impacts, as debugging capabilities are significantly reduced in size-optimized builds.

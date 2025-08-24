@@ -20,6 +20,16 @@
 \usepackage{subcaption}
 \usepackage[toc,page]{appendix}
 \usepackage{fontspec}
+\usepackage{siunitx}
+\sisetup{
+    locale = US,
+    group-separator = {,},
+    group-minimum-digits = 4,
+    round-mode = places,
+    separate-uncertainty = true,
+}
+\newcommand{\SIi}[2]{\SI[round-precision=0]{#1}{#2}}
+\usepackage{multirow}
 
 % Don't indent table of contents, list of figures, and list of tables
 \usepackage{tocloft}

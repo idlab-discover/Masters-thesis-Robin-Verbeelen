@@ -53,7 +53,7 @@ This investigation acknowledges several limitations that constrain the generaliz
 
 \textbf{Runtime-Preview Coupling:} The comparison conflates Preview version differences with runtime implementation differences. While the intention is to compare Preview 1 versus Preview 2 approaches, the evaluation necessarily uses different runtimes (WAMR for Preview 1, Wasmtime for Preview 2), making it impossible to isolate whether observed performance differences stem from Preview version characteristics or runtime-specific implementation choices and optimizations.
 
-
+\textbf{Non-Standard ABI Implementation:} For experimental purposes, the Preview 1 I2C interface implementation deliberately deviates from the Canonical ABI, which defines standardized data transfer mechanisms between host and guest environments and between WebAssembly modules. While this simplification facilitates focused evaluation of core I2C functionality, it compromises interoperability with other WebAssembly components that expect standard ABI compliance, limiting the implementation's integration potential in production WebAssembly ecosystems.
 
 
 
