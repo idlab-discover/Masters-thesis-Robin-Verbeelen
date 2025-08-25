@@ -1,7 +1,7 @@
 \chapter{Background}
 \label{chap:background}
 
-This chapter provides the essential background knowledge required to understand the contributions made in this research.
+This chapter provides the essential background knowledge required to understand the contributions of this research, with particular attention to \acrshort{wasm}, \acrshort{wasi}, the \acrshort{i2c} communication protocol, and relevant runtime environments.
 
 \section{WebAssembly}
 \label{sec:webassembly}
@@ -9,79 +9,80 @@ This chapter provides the essential background knowledge required to understand 
 \subsection{Overview and Motivation}
 \label{subsec:wasm-overview}
 
-WebAssembly (WASM) is a binary instruction format for a stack-based virtual machine designed as a portable compilation target for programming languages\cite{rossberg2018webassembly}. Originally developed to enable near-native performance execution of code in web browsers, WebAssembly emerged from a collaborative effort by engineers from the four major browser vendors (Mozilla, Google, Microsoft, and Apple) to address JavaScript's performance limitations while preserving the security and portability characteristics essential for web execution.
+\acrfull{wasm} is a binary instruction format for a stack-based virtual machine designed as a portable compilation target for programming languages~\cite{rossberg2018webassembly, wasm_specs, w3c2022wasm2}. It was originally developed to enable near-native execution performance of code in web browsers. \acrshort{wasm} emerged from a collaborative effort by engineers from the four major browser vendors (Mozilla, Google, Microsoft, and Apple) to address the performance limitations of JavaScript while preserving the security and portability characteristics essential for web execution.
 
-However, developers quickly recognized that WebAssembly's unique combination of performance, security, and portability extended far beyond browser environments. The technology's sandboxed execution model delivers near-native performance across diverse hardware architectures while maintaining strict security guarantees—characteristics that proved particularly valuable for embedded systems and IoT devices where code must run safely on resource-constrained hardware. The introduction of the WebAssembly System Interface (WASI) marked the pivotal transition from web-centric to general-purpose computing, providing standardized APIs for filesystem access, networking, and system interactions that enabled WebAssembly modules to operate independently of browsers. The capability-based security model inherent in WASI further addresses critical concerns in embedded deployments, where unauthorized access to hardware peripherals could compromise device functionality or user safety.
+However, developers quickly recognized that \acrshort{wasm}'s unique combination of performance, security, and portability extended far beyond browser environments. Its sandboxed execution model enables near-native performance across diverse hardware architectures while maintaining strict security guarantees. These properties proved particularly valuable for embedded systems and \acrshort{iot} devices, where code must execute safely on resource-constrained hardware.
 
-This evolution has proven timely, as critical infrastructure software and consumer products—ranging from baby monitors to smart-watches—have created unprecedented demand for technology that is secure, reliable, and easily updatable while requiring minimal overhead. Regulatory frameworks such as the European Parliament's Cyber Resilience Act~\cite{eu_cyber_res_act} have further emphasized this need, obligating manufacturers to handle vulnerabilities effectively during support periods and provide security updates throughout a product's expected lifespan. WebAssembly's ability to deliver secure, cross-platform execution with straightforward update mechanisms positions it as an ideal solution for these emerging requirements in safety-critical and resource-constrained environments.
+The introduction of the \acrfull{wasi} marked a pivotal transition from web-centric to general-purpose computing. \acrshort{wasi} provides standardized \acrshort{api} for functionalities such as filesystem access, clocks, and proposals for networking and system interactions, enabling \acrshort{wasm} modules to operate independently of browsers. The capability-based security model inherent in \acrshort{wasi} further addresses critical concerns in embedded deployments, where unauthorized access to hardware peripherals could compromise device functionality or user safety.
 
-\subsection{WebAssembly Ecosystem}
+This evolution has proven timely. Critical infrastructure software and consumer products --- ranging from baby monitors to smartwatches --- have created unprecedented demand for technology that is secure, reliable, and easily updatable while requiring minimal overhead. Regulatory frameworks such as the European Parliament's Cyber Resilience Act~\cite{eu_cyber_res_act} further emphasize this need, as they oblige manufacturers to handle vulnerabilities effectively during support periods and to provide security updates throughout a product's expected lifespan. \acrshort{wasm}'s ability to deliver secure, cross-platform execution with straightforward update mechanisms positions it as a promising solution for these emerging requirements in safety-critical and resource-constrained environments.
+
+\subsection{The WebAssembly Ecosystem}
 \label{subsec:wasm-ecosystem}
 
-The WebAssembly ecosystem encompasses multiple components that enable the development, compilation, and execution of WebAssembly applications. The ecosystem includes:
+The \acrshort{wasm} ecosystem comprises several components that enable the development, compilation, and execution of \acrshort{wasm} applications. These components include:
 
-\textbf{Compilation Toolchains:} Various compilers can target WebAssembly, including but not limited to: Emscripten for C/C++~\cite{emscripten_git}, Tier 2 support by the Rust compiler~\cite{rust_wasm_target}, wasi-sdk~\cite{wasisdk} and specialized tools like AssemblyScript~\cite{assemblyscript_git}. These toolchains handle the translation from high-level languages to WebAssembly bytecode while managing language-specific runtime requirements.
+\textbf{Compilation Toolchains:} Several compilers can target \acrshort{wasm}, including Emscripten for C/C++~\cite{emscripten_git}, the Rust compiler with Tier~2 support~\cite{rust_wasm_target}, \texttt{wasi-sdk}~\cite{wasisdk}, and specialized tools such as AssemblyScript~\cite{assemblyscript_git}. These toolchains translate high-level languages into \acrshort{wasm} bytecode while managing language-specific runtime requirements.
 
-\textbf{Runtime Environments:} WebAssembly can execute in browsers through built-in JavaScript engines, but also in standalone runtimes designed for server-side and embedded applications. These runtimes provide the execution environment and implement the WebAssembly specification.
+\textbf{Runtime Environments:} \acrshort{wasm} can execute in browsers through built-in JavaScript engines such as V8~\cite{v8_wasm}. In addition, standalone runtimes like \acrshort{wamr}, Wasmtime, and Wasmer support server-side and embedded applications. These runtimes provide the execution environment and implement the \acrshort{wasm} specification~\cite{wasm_specs}.
 
-\textbf{Development Tools:} The ecosystem includes debugging tools, profilers, and analysis frameworks that support WebAssembly development. Tools like wasm-tools~\cite{wasm_tools_git} and WABT (WebAssembly Binary Toolkit)~\cite{wabt_git} provide utilities for working with WebAssembly binaries.
+\textbf{Development Tools:} The ecosystem includes debugging tools, profilers, and analysis frameworks that support \acrshort{wasm} development. Utilities such as \texttt{wasm-tools}~\cite{wasm_tools_git} and WABT (WebAssembly Binary Toolkit)~\cite{wabt_git} enable tasks like validation, disassembly, and binary inspection of \acrshort{wasm} modules.
 
-\textbf{Standards and Governance:} WebAssembly development follows W3C standardization processes, with active community involvement through the WebAssembly Community Group. This ensures that the technology evolves in a consensus-driven manner.
+\textbf{Standards and Governance:} \acrshort{wasm} development follows the W3C standardization process. Its evolution is coordinated through the WebAssembly Community Group and the W3C WebAssembly Working Group, ensuring that the technology advances in a consensus-driven and vendor-neutral manner.
 
-\section{WebAssembly System Interface}
+\section{The WebAssembly System Interface}
 \label{sec:wasi}
 
 \subsection{Fundamentals}
 \label{subsec:wasi-fundamentals}
 
-\acrfull{wasi} represents a crucial evolution in WebAssembly's capabilities, extending the platform beyond browser environments to enable execution in servers, edge devices, and embedded systems~\cite{wasi_mozilla_blog}. WASI functions as a system interface for a conceptual operating system, providing a standardized way for WebAssembly modules to interact with system resources while maintaining the security and portability characteristics that define WebAssembly.
+\acrfull{wasi} represents a crucial evolution in \acrshort{wasm}'s capabilities, extending the platform beyond browser environments to enable execution in servers, edge devices, and embedded systems~\cite{wasi_mozilla_blog}. \acrshort{wasi} functions as a system interface for a conceptual operating system, providing a standardized way for \acrshort{wasm} modules to interact with system resources while preserving the security and portability characteristics that define the technology.
 
-WASI emerged from the recognition that code executing outside browsers requires a mechanism to communicate with the underlying system. Traditional approaches, such as Emscripten's POSIX emulation, provided functional solutions but lacked standardization and optimal performance characteristics. WASI addresses these limitations by defining a comprehensive set of APIs that facilitate interaction with filesystems, network connections, cryptographic functions, and hardware interfaces.
+\acrshort{wasi} emerged from the need for \acrshort{wasm} programs outside the browser to interact with the underlying system. \acrshort{wasi} aims to provide this by defining a modular set of \acrshort{api}s --- through proposals --- that enable access to filesystems, networking, cryptographic functions, hardware interfaces, and more~\cite{wasi_proposals}.
 
-The design philosophy of WASI centers on capability-based security principles, where access to system resources is mediated through explicitly granted capabilities rather than ambient authority. This approach ensures that WebAssembly modules can only access resources that have been explicitly provided by the host environment, maintaining strong security boundaries even in server and embedded contexts.
+The design philosophy of \acrshort{wasi} centers on capability-based security, where access to system resources is mediated through explicitly granted permissions rather than implicit, ambient authority (such as unrestricted filesystem access). This ensures that \acrshort{wasm} modules can only interact with resources explicitly provided by the host environment, thereby maintaining strong isolation and security even in server and embedded contexts.
 
 \subsection{WASI Preview 1}
 \label{subsec:wasi-preview1}
-Preview 1 represents the initial stabilized release of the WebAssembly System Interface, launched with a focus on establishing fundamental system interaction capabilities. Preview 1 employs WITX~\cite{witx_docs} as its \acrfull{idl}, an experimental interface definition language originally developed specifically for expressing WASI APIs. WITX is based on S-expressions and the WebAssembly Text (WAT) format, following a function-based interface model that closely mirrors traditional system call interfaces.
+Preview 1 was the first stabilized release of \acrfull{wasi}, focused on providing fundamental system interaction capabilities. It employed WITX~\cite{witx_docs} as its \acrfull{idl}~\cite{idl}, an experimental language designed specifically for expressing \acrshort{wasi} \acrshort{api}s. WITX, based on S-expressions~\cite{sexpressions} and inspired by the WebAssembly Text (WAT) format~\cite{wat}, followed a function-oriented model closely resembling traditional system call interfaces. Although effective, WITX has since been deprecated in favor of the more flexible \acrshort{wit} format.
 
-The Preview 1 design draws heavily from POSIX influences, implementing familiar concepts such as file descriptors, path-based file operations, and process-centric resource management. The API covers essential system operations including file system operations (open, close, read, write), clock and time functions, random number generation, environment variable access, and command-line argument handling.
+The design of Preview 1 drew heavily from POSIX conventions, implementing familiar concepts such as file descriptors, path-based file operations, and process-centric resource management. Its \acrshort{api} included essential system operations such as file handling (open, close, read, write), clocks and timers, random number generation, environment variable access, and command-line argument parsing.
 
-Preview 1 achieved widespread adoption due to its practical utility and stability guarantees. However, the WITX-based design exposed several fundamental limitations that drove the WASI Subgroup's migration toward the more sophisticated \acrshort{wit} format and Preview 2 for subsequent versions:
+Preview 1 saw widespread adoption thanks to its stability and practical utility. However, the WITX-based design revealed several fundamental limitations, including limited expressiveness and lack of modularity. These shortcomings motivated the \acrshort{wasi} Subgroup to transition toward the more sophisticated \acrshort{wit} format and the Preview 2 architecture:
 
-\textbf{Limited Language Support:} WITX primarily targets C-like languages and lacks the expressiveness needed to support diverse programming language paradigms effectively. The interface design assumptions make it challenging to provide idiomatic bindings for languages with different memory models or type systems.
+\textbf{Limited Language Support:} WITX primarily targeted C-like languages and lacked the expressiveness to support a broader range of programming paradigms. Its design assumptions made it difficult to generate idiomatic bindings for languages with richer memory models, type systems, or runtime features.
 
-\textbf{Restricted Type Expressiveness:} While WITX provides basic type safety with limited support for strings and arrays, it cannot express complex return types beyond simple scalar values. Functions can only return success/failure indicators through the \texttt{expected} mechanism, with actual data passed through pointer parameters—a pattern that complicates memory management and API design.
 
-\textbf{Monolithic Structure:} Preview 1 presents a relatively monolithic API surface that cannot be easily extended, composed, or virtualized. The lack of modularity prevents fine-grained capability management and makes it difficult to create specialized API subsets for specific use cases.
+\textbf{Restricted Type Expressiveness:} WITX offered only basic type safety, with limited support for strings and arrays, and no way to model complex return values. Functions typically returned success or failure via the \texttt{expected} construct, while actual data was passed through pointer parameters. This C-style pattern complicated memory management and hindered the design of clean, language-agnostic \acrshort{api}s.
 
-\textbf{Limited Async and Virtualization Support:} WITX lacks comprehensive mechanisms for integrating asynchronous behavior or API virtualization, features that became increasingly important as WASI expanded beyond simple system call wrappers towards more sophisticated component-based architectures.
+\textbf{Monolithic Structure:} Preview 1 exposed a relatively monolithic API surface that was difficult to extend, compose, or virtualize. This lack of modularity prevented fine-grained capability management and made it impossible to define specialized subsets of the \acrshort{api} for targeted use cases.
 
-These limitations necessitated the development of the more powerful WIT format and the component model for WASI Preview 2, which provides significantly enhanced type expressiveness, better language support, and comprehensive virtualization capabilities. WITX is considered legacy.
+These shortcomings led to the introduction of the more powerful \acrshort{wit} format and the component model in \acrshort{wasi} Preview 2. With this transition, WITX is now considered a legacy format and is no longer actively maintained.
 
 \subsection{WASI Preview 2 and the Component Model}
 \label{subsec:wasi-preview2}
 
-Preview 2 represents a comprehensive redesign that addresses the fundamental limitations identified in Preview 1 while introducing advanced capabilities for component composition and virtualization.
+Preview 2 constitutes a comprehensive redesign of \acrshort{wasi}. Whereas Preview 1 suffered from limited type expressiveness, poor language support, and a monolithic \acrshort{api} surface, Preview 2 introduces a modular architecture with advanced capabilities for component composition, virtualization, and language interoperability.
 
-\textbf{Component Model:} Preview 2 defined the Component Model~\cite{wasi_component_model} to enable the composition of WebAssembly modules with well-defined interfaces. Components can export and import functionality through standardized interfaces, enabling complex application architectures with multiple interacting components.
+\textbf{Component Model:} A central innovation of Preview 2 is the Component Model~\cite{wasi_component_model}, which enables the composition of \acrshort{wasm} modules through well-defined interfaces. Components can both export and import functionality via standardized \acrshort{wit}-based descriptions, facilitating language interoperability and supporting complex application architectures with multiple interacting components.
 
-\textbf{Resource-Based Design:} Unlike Preview 1's function-based approach, Preview 2 implements a resource-based design where system entities are represented as first-class resources with associated methods. This approach provides better encapsulation, automatic resource management, and improved type safety.
+\textbf{Resource-Based Design:} Unlike Preview 1’s function-oriented \acrshort{api}s, Preview 2 adopts a resource-based design in which system entities (e.g., files, sockets, or \acrshort{i2c} devices) are modeled as first-class resources with associated methods. This model improves encapsulation, enables automatic resource management, strengthens type safety, and aligns with capability-based security principles.
 
-\textbf{WIT Interface Definition:} Preview 2 uses the \acrshort{wit} format for defining interfaces. \acrshort{wit} supports complex data structures, resource types, and interface composition mechanisms.
+\textbf{WIT Interface Definition:} Preview 2 adopts the \acrshort{wit} format for defining interfaces. \acrshort{wit} supports complex data structures, resource types, and interface composition. Tooling such as \sloppy\texttt{wit-bindgen} can automatically generate idiomatic bindings for multiple programming languages, thereby improving developer productivity and interoperability.
 
-\textbf{Capability-Based Security Enhancement:} The component model enhances \acrshort{wasi}'s capability-based security by providing fine-grained control over resource access and enabling capability delegation between components. This enables use cases such as capability attenuation, resource multiplexing, and policy enforcement.
+\textbf{Capability-Based Security Enhancement:} The component model extends \acrshort{wasi}'s capability-based security by introducing fine-grained control over resource access and enabling explicit capability delegation between components. This design supports advanced scenarios such as capability attenuation, resource multiplexing, and policy enforcement—features particularly relevant in multi-tenant or embedded \acrshort{iot} environments.
 
-\subsection{Preview Differences and Trade-offs}
+\subsection{Differences and Trade-offs between Preview 1 and Preview 2}
 \label{subsec:preview-differences}
-The evolution from Preview 1 to Preview 2 involves significant trade-offs that affect implementation complexity, performance characteristics, and deployment scenarios:
+The transition from Preview 1 to Preview 2 introduces significant differences and trade-offs. While Preview 2 improves expressiveness, modularity, and language interoperability, these advances also affect runtime implementation complexity, performance characteristics, and deployment scenarios:
 
-\textbf{Memory Architecture:} Preview 1 and Preview 2 employ fundamentally different approaches to memory management and inter-module communication. Preview 1 follows a shared memory model inherited from POSIX, where modules communicate through exported linear memory and raw pointer manipulation. APIs mutating data operate directly on caller-provided buffers using pointers to mutable data, requiring modules to share memory space for data exchange. In contrast, Preview 2 implements a strict shared-nothing architecture where each component instance fully encapsulates its core WebAssembly module, including memory, tables, globals, and functions. Components communicate exclusively through well-defined import and export boundaries using high-level data types defined in \acrshort{wit}, eliminating the need for direct memory sharing between components.
+\textbf{Memory Architecture:} Preview 1 and Preview 2 adopt fundamentally different approaches to memory management and inter-module communication. Preview 1 follows a shared-memory model, where modules exchange data through exported linear memory and raw pointer manipulation. \acrshort{api}s mutate caller-provided buffers directly, which requires modules to share a memory space for data exchange. In contrast, Preview 2 implements a strict shared-nothing architecture: each component instance encapsulates its own memory, tables, globals, and functions. Components interact exclusively through import/export boundaries defined in \acrshort{wit}, ensuring safer isolation, better type safety, and improved language interoperability.
 
-\textbf{Implementation Complexity:} Preview 2's component model introduces substantial complexity in runtime implementation. Supporting component instantiation, interface resolution, resource management, and the shared-nothing linking model requires sophisticated runtime infrastructure compared to Preview 1's straightforward function dispatching with shared memory access. The transition from pointer-based interfaces to high-level type abstractions necessitates additional translation layers and Canonical \acrshort{abi} implementation.
+\textbf{Implementation Complexity:} The component model in Preview 2 introduces significant complexity for runtime implementers. Supporting component instantiation, interface resolution, resource management, and the shared-nothing linking model requires a more sophisticated infrastructure than Preview 1’s relatively simple function dispatch with shared memory access. Furthermore, the transition from raw pointer-based interfaces to high-level type abstractions necessitates additional translation layers and the full implementation of the Canonical \acrfull{abi}~\cite{abi}~\cite{cabi}, which may increase runtime overhead.
 
-\textbf{Development Experience:} Preview 2 provides a superior development experience through automatic binding generation, improved type safety, and better tooling support. The elimination of raw pointer manipulation reduces common security vulnerabilities such as buffer overflows and out-of-bounds memory access. However, this comes at the cost of increased build complexity, toolchain requirements, and the need to understand component model concepts rather than familiar POSIX-style interfaces.
+\textbf{Development Experience:} For developers, Preview 2 offers a significantly enhanced experience through automatic binding generation, improved type safety, and stronger tooling support. By eliminating raw pointer manipulation, it mitigates common security vulnerabilities such as buffer overflows and out-of-bounds memory access.
 
-\textbf{Performance Implications:} The architectural differences create distinct performance characteristics. Preview 1's shared memory approach enables efficient data exchange through direct pointer manipulation and zero-copy operations within the shared address space. Preview 2's shared-nothing model introduces a different approach to data transfer through the Canonical \acrshort{abi}, which defines how high-level component types are represented in terms of low-level WebAssembly types. While the specification describes lifting and lowering operations that appear to create intermediate copies, real implementations are designed to fuse these operations into efficient direct copies between component memory spaces when possible. The Canonical \acrshort{abi} is optimized to minimize copying where possible, particularly for immutable data structures that can be passed between components without duplication. However, performance characteristics depend heavily on data types, mutability requirements, and the specific component implementations involved. Lastly, the resource-based design and component instantiation overhead can impact startup performance compared to Preview 1's direct function call approach.
+\textbf{Performance Implications:} The contrasting architectures of Preview 1 and Preview 2 lead to distinct performance characteristics. Preview 1’s shared-memory model allows efficient data exchange through direct pointer manipulation and zero-copy operations within a common address space. By contrast, Preview 2 employs the Canonical \acrshort{abi}, which specifies how high-level component types are represented as low-level \acrshort{wasm} types. Although the specification describes lifting and lowering operations that may seem to introduce intermediate copies, practical implementations often fuse these into efficient direct transfers between component memory spaces. The Canonical \acrshort{abi} is further optimized to avoid redundant copying, especially for immutable data structures that can be shared safely. Nonetheless, actual performance depends strongly on the chosen data types, mutability requirements, and component design. In addition, Preview 2’s resource-based model and component instantiation overhead can increase startup latency compared to Preview 1’s direct function-call approach, an effect particularly relevant in constrained environments and short-lived workloads.
 
 \section{Binding Generation}
 \label{sec:wit-binding}
@@ -89,38 +90,61 @@ The evolution from Preview 1 to Preview 2 involves significant trade-offs that a
 \subsection{Binding Generation Process}
 \label{subsec:binding-generation}
 
-Binding generation transforms \acrshort{wit} interface definitions into language-specific code that provides type-safe access to WebAssembly component functionality. The process involves several stages that ensure correct marshaling of data between component boundaries while maintaining the semantic properties defined in the \acrshort{wit} interface.
+Binding generation transforms \acrshort{wit} interface definitions into language-specific code that enables type-safe access to WebAssembly component functionality. This process typically involves multiple stages that ensure correct data marshaling (encoding/serialization and decoding/deserialization) across component boundaries while preserving the semantic properties defined in the \acrshort{wit} interface. In practice, tools such as \texttt{wit-bindgen} automate this workflow for a wide range of programming languages~\cite{wit_bindgen_git}.
 
-\textbf{Interface Analysis:} The binding generator parses WIT definitions to extract type information, resource dependencies, and interface relationships. This analysis phase validates the interface definition and constructs an intermediate representation suitable for code generation.
+\textbf{Interface Analysis:} The binding generator parses \acrshort{wit} definitions to extract type information, resource dependencies, and interface relationships. This analysis phase validates the interface definition and constructs an intermediate representation suitable for code generation.
 
-\textbf{Type Mapping:} WIT types are mapped to appropriate representations in the target language. This mapping must preserve semantic properties such as value semantics, reference semantics, and lifetime requirements while providing idiomatic interfaces for the target language.
+\textbf{Type Mapping:} In the second stage, \acrshort{wit} types are mapped to idiomatic representations in the target language. For example, a \texttt{u32} in \acrshort{wit} may be mapped to \texttt{u32} in Rust, \texttt{int} in C, or \texttt{number} in JavaScript. The goal is to balance semantic fidelity with a natural developer experience in the chosen language.
 
-\textbf{Marshaling Code Generation:} The generator produces code responsible for converting between language-native types and the Canonical \acrfull{abi}~\cite{abi}~\cite{cabi} representation used for inter-component communication. This includes handling complex types, resource references, and error conditions.
+\textbf{Marshaling Code Generation:} In this stage, the generator produces code that converts between language-native types and their Canonical \acrshort{abi} representations for inter-component communication. This marshaling is bidirectional, ensuring that both host-to-guest and guest-to-host calls are correctly translated. It includes handling of complex data structures, resource handles, and error propagation across component boundaries.
 
-\textbf{Resource Management Integration:} For languages with automatic memory management, the generator integrates resource lifecycle management with the language's resource management system (e.g., Rust's ownership system).
+\textbf{Resource Management Integration:} Finally, the generator aligns resource lifecycle management with the conventions of the target language. In garbage-collected languages such as Java or Python, this involves integrating with the runtime’s memory management system. In contrast, languages like Rust rely on explicit ownership and \acrfull{raii} semantics, where the generator ensures that imported and exported resources are correctly created, transferred, and dropped at well-defined points in the program’s execution.
 
 Popular binding generation tools include:
 
 \begin{itemize}
-    \item \textbf{wit-bindgen:} The reference implementation supporting multiple target languages including Rust, C, JavaScript, and Python~\cite{wit_bindgen_git}
-    \item \textbf{Wasmtime bindgen macro:} Rust-specific integration that generates bindings at compile time~\cite{wasmtime_bindgen_docs}
-    \item \textbf{jco:} JavaScript-focused tooling for component development and execution~\cite{jco_docs}
+    \item \textbf{wit-bindgen:} The primary reference implementation that generates idiomatic bindings for multiple target languages including Rust, C, JavaScript, and Python~\cite{wit_bindgen_git}. It is widely adopted in the component model ecosystem.
+    \item \textbf{Wasmtime bindgen macro:} A Rust-specific integration that provides compile-time binding generation directly within the Wasmtime runtime, enabling seamless use of \acrshort{wit}-defined interfaces in Rust projects~\cite{wasmtime_bindgen_docs}.
+    \item \textbf{jco:} A JavaScript-focused tool that simplifies component development and execution in Node.js and browser environments~\cite{jco_docs}.
+    \item \textbf{wasm-tools:} A broader toolkit maintained by the Bytecode Alliance that provides validation, parsing, and transformation utilities, including support for \acrshort{wit} integration~\cite{wasm_tools_git}.
 \end{itemize}
 
 \subsection{Binding Generation vs Manual Implementation}
 \label{subsec:binding-comparison}
 
-The choice between automatic binding generation and manual interface implementation involves trade-offs between development efficiency, runtime performance, and implementation complexity:
+The decision between relying on automatic binding generation and opting for manual interface implementation introduces trade-offs across multiple dimensions, including development efficiency, runtime performance, and overall implementation complexity. While automatic tools provide rapid development and reduce the likelihood of errors, manual implementations allow for fine-grained control at the cost of increased effort and potential maintenance overhead.
 
-\textbf{Development Efficiency:} Automatic binding generation significantly reduces development time by eliminating the need to manually implement marshaling code, type conversions, and error handling. The generated code is typically more reliable and maintainable than handwritten alternatives.
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|C{2.1cm}|C{6cm}|C{6cm}|}
+    \hline
+            & \textbf{Automatic Binding Generation} & \textbf{Manual Implementation} \\
+    \hline
+    \textbf{Development Efficiency} & Eliminates manual interface interpretation, prone to errors. Enables rapid prototyping and higher reliability. & Requires handwritten marshaling logic and careful error handling. Higher initial effort and increased chance of bugs. \\
+    \hline
+    \textbf{Type Safety} & Provides compile-time type safety guarantees. & Relies on developer discipline to ensure correct type conversions. \\
+    \hline
+    \textbf{Performance} & May include some abstraction overhead, but benefits from systematic optimization in the generator. & Can be optimized for specific use cases and low-level constraints, potentially achieving lower overhead. \\
+    \hline
+    \textbf{Maintenance} & Automatically adapts to interface changes when regenerating bindings. & Requires manual updates whenever the interface evolves. Long-term maintenance burden. \\
+    \hline
+    \textbf{Runtime Compatibility} & May require sophisticated runtime capabilities (e.g., Preview 2 features) & Can be tailored to specific runtimes, \acrshort{wasi} versions or environments, offering maximal flexibility. \\
+    \hline
+    \end{tabular}
+    \caption{Comparison between automatic binding generation and manual implementation approaches.}
+    \label{tab:binding-vs-manual}
+\end{table}
 
-\textbf{Type Safety:} Generated bindings provide compile-time type safety guarantees that prevent common interface usage errors. Manual implementations require careful attention to type correctness and \acrshort{abi} compliance.
 
-\textbf{Performance Characteristics:} Manual implementations can be optimized for specific use cases and may achieve lower overhead than generated code. However, generated code benefits from systematic optimization and is less prone to implementation errors.
 
-\textbf{Maintenance Burden:} Interface evolution requires updating manual implementations to reflect changes, while generated bindings automatically adapt to interface modifications.
 
-\textbf{Runtime Compatibility:} Manual implementations can be tailored to specific runtime environments and WASI preview versions, while generated bindings may require specific runtime capabilities.
+
+
+
+
+
+
+
 
 \section{WebAssembly Runtimes}
 \label{sec:wasm-runtimes}
@@ -128,138 +152,127 @@ The choice between automatic binding generation and manual interface implementat
 \subsection{Runtime Architecture and Design Principles}
 \label{subsec:runtime-architecture}
 
-WebAssembly runtimes serve as the execution environment for WebAssembly modules and components, providing the necessary infrastructure for loading, validating, compiling, and executing WebAssembly code. Different runtimes make varying architectural decisions that significantly impact their performance characteristics, resource usage, and suitability for different deployment scenarios.
+WebAssembly runtimes provide the execution environment for \acrshort{wasm} modules and components, offering infrastructure for loading, validating, compiling, and executing code. Architectural decisions differ between runtimes and strongly influence performance, resource usage, and deployment suitability~\cite{wasm_features_support}.
 
-The fundamental components of a WebAssembly runtime include:
+The fundamental components of a typical WebAssembly runtime include:
 
-\textbf{Module Loader and Validator:} Responsible for parsing WebAssembly binary format, validating module structure and type safety, and preparing modules for execution. The validation process ensures that modules comply with WebAssembly's safety guarantees.
-
-\textbf{Execution Engine:} Implements the WebAssembly virtual machine, either through interpretation, \acrfull{jit} compilation, or \acrfull{aot} compilation. The choice of execution strategy impacts memory usage, startup time and steady-state performance.
-
-\textbf{Memory Management:} Manages WebAssembly linear memory, including allocation, bounds checking, etc.
-
-\textbf{Host Integration Interface:} Provides mechanisms for WebAssembly modules to call host functions and for hosts to invoke WebAssembly functions. This interface must handle data marshaling, error propagation, and resource management.
-
-\textbf{WASI Implementation:} For runtimes supporting WASI, additional infrastructure implements system interfaces, capability management, and resource virtualization.
+\begin{itemize}
+    \item \textbf{Module Loader and Validator:} Parses the WebAssembly binary format, validates module structure and type safety, and ensures compliance with WebAssembly’s security guarantees.
+    \item \textbf{Execution Engine:} Implements WebAssembly’s execution semantics through interpretation, \acrfull{jit} compilation, or \acrfull{aot} compilation. The chosen strategy affects startup latency, memory footprint, and steady-state performance.
+    \item \textbf{Memory Management:} Manages WebAssembly’s linear memory model, including allocation, growth, and bounds checking. Linear memory differs from conventional memory layouts by exposing a single contiguous address space to the guest.
+    \item \textbf{Host Interface:} Provides controlled access to system resources via \acrshort{wasi} or custom host functions, enabling I/O and integration with native libraries.
+    \item \textbf{Security Sandbox:} Enforces isolation between the WebAssembly module and the host, preventing out-of-bounds memory access and restricting system calls to a well-defined capability model.
+\end{itemize}
 
 \subsection{Wasmtime}
 \label{subsec:wasmtime}
 
-Wasmtime represents the reference implementation of WebAssembly and WASI standards, developed by the Bytecode Alliance as a production-ready runtime~\cite{wasmtime_project}. Wasmtime's architecture emphasizes standards compliance, security, and developer experience, making it the primary runtime for WebAssembly component development and WASI Preview 2 applications.
+Wasmtime is a production-ready runtime maintained by the Bytecode Alliance and is widely regarded as the reference implementation for \acrshort{wasi} and the WebAssembly Component Model~\cite{wasmtime_project}. Its architecture emphasizes standards compliance, security, and developer experience, making it the primary choice for developing \acrshort{wasi} Preview~2 applications.
 
-\textbf{Cranelift Code Generation:} Wasmtime uses Cranelift, a fast, secure, relatively simple and innovative compiler backend~\cite{cranelift}. Cranelift prioritizes security and compilation speed while providing competitive runtime performance. The compiler supports both \acrshort{jit} compilation for dynamic scenarios and \acrshort{aot} compilation for deployment scenarios requiring minimal startup overhead.
+\textbf{Cranelift Code Generation:} Wasmtime uses Cranelift, a compiler backend designed for security and fast compilation speed while providing competitive runtime performance~\cite{cranelift}. Cranelift supports both \acrshort{jit} compilation for dynamic workloads and \acrshort{aot} compilation for deployment scenarios requiring lower startup latency.
 
-\textbf{Component Model Support:} Wasmtime provides comprehensive support for the WebAssembly Component Model, including component instantiation, interface resolution, resource management, and capability-based security enforcement. This support enables sophisticated application architectures and is essential for WASI Preview 2 applications.
-
-\textbf{Language Integration:} Wasmtime provides high-quality libraries for multiple host languages, including Rust, C/C++, Python, and JavaScript. These libraries enable embedding Wasmtime in existing applications and frameworks.
+\textbf{Language Integration:} Wasmtime provides high-quality libraries for multiple host languages, including Rust, C/C++, Python, and JavaScript. This broad ecosystem integration facilitates embedding Wasmtime into diverse application environments and frameworks.
 
 \subsection{WebAssembly Micro Runtime}
 \label{subsec:wamr}
 
-\acrfull{wamr} is a lightweight, portable WebAssembly runtime specifically designed for embedded devices, IoT applications, and resource-constrained environments\cite{wamr_project}~\cite{wamr_project2}. WAMR's architecture prioritizes minimal resource usage, fast startup, and broad platform compatibility, making it suitable for deployment scenarios where memory and processing resources are limited.
+\acrfull{wamr} is a lightweight and portable WebAssembly runtime specifically designed for embedded devices, \acrshort{iot} applications, and resource-constrained environments~\cite{wamr_project, wamr_project2}. Its architecture prioritizes minimal resource usage, fast startup, and broad platform compatibility, making it suitable for deployment scenarios where memory and processing resources are limited.
 
-\textbf{Lightweight Design Philosophy:} WAMR is architected to minimize memory footprint and startup overhead, essential characteristics for embedded and IoT deployments. The runtime can operate with memory constraints that would be prohibitive for general-purpose runtimes like Wasmtime.
+\textbf{Lightweight Design Philosophy:} WAMR minimizes memory footprint and startup overhead, which are essential for embedded deployments. This distinguishes it from general-purpose runtimes such as Wasmtime.
 
-\textbf{Execution Engine Options:} WAMR supports multiple execution strategies including interpretation, (fast) \acrshort{jit} compilation, and \acrshort{aot} compilation. The choice of execution engine can be configured based on the specific requirements of the target platform and use case.
+\textbf{Execution Engine Options:} WAMR supports multiple execution strategies, including interpretation, Classic \acrshort{jit}, Fast \acrshort{jit}, and \acrshort{aot} compilation. The execution mode can be configured to match the performance and resource constraints of the target device. For example, \acrshort{aot} compilation is often preferred for microcontrollers, where runtime compilation would be impractical.
 
-\textbf{Platform Portability:} WAMR supports a wide range of platforms including various microcontroller architectures, real-time operating systems, and constrained Linux environments. This broad compatibility makes it suitable for diverse embedded applications.
+\textbf{Platform Portability:} WAMR runs on a wide range of platforms, including popular microcontroller architectures (e.g., ARM Cortex-M, RISC-V), real-time operating systems such as Zephyr and FreeRTOS, and constrained Linux environments. This versatility enables adoption in diverse embedded use cases.
 
-\textbf{WASI Preview 1 Focus:} WAMR primarily supports WASI Preview 1, which aligns with the stability and simplicity requirements of embedded applications. While Preview 2 support is under consideration and development, Preview 1 remains the primary interface for production embedded deployments.
+\textbf{WASI Preview 1 Focus:} WAMR primarily supports \acrshort{wasi} Preview~1, which aligns with the stability and simplicity requirements of embedded applications. While Preview~2 support is under consideration, Preview~1 remains the main interface for production deployments. This Preview~1 focus is a key reason for using WAMR in this research, since it necessitates the development of custom bindings for the \acrshort{i2c} interface.
 
-\section{I2C Protocol and Embedded Systems}
+
+\section{I\textsuperscript{2}C Protocol and Embedded Systems}
 \label{sec:i2c-embedded}
 
-\subsection{I2C Protocol Fundamentals}
+\subsection{Protocol Fundamentals}
 \label{subsec:i2c-fundamentals}
 
-The Inter-Integrated Circuit (I2C) protocol is a multi-controller~\footnote{Use of updated terms "controller/target" instead of "master/slave" to align with MIPI I3C
-specification and NXP's Inclusive Language Project~\cite{i2c_specification}}, multi-peripheral serial communication bus widely used in embedded systems for connecting microcontrollers with peripheral devices\cite{i2c_specification}. Developed by Philips Semiconductor (now NXP) in the 1980s, I2C has become a fundamental communication protocol in Internet of Things (IoT) ecosystems, sensor networks, and embedded control systems.
+The \acrfull{i2c} protocol is a multi-controller\footnote{Following the updated terminology "controller/target" instead of "master/slave" to align with the MIPI I3C specification and NXP's Inclusive Language Project~\cite{i2c_specification}.}, multi-target serial communication bus widely used in embedded systems for connecting microcontrollers with peripheral devices~\cite{i2c_specification}. Developed by Philips Semiconductor (now part of NXP Semiconductors) in the early 1980s, \acrshort{i2c} has become a fundamental communication protocol in \acrshort{iot} ecosystems, sensor networks, and embedded control systems. Although the specification allows for multiple controllers, most practical implementations rely on a single controller with multiple targets.
 
-The I2C protocol operates using two bidirectional signal lines:
-
-\textbf{Serial Data Line (SDA):} Carries the actual data being transmitted between devices. The line is bidirectional and shared among all devices on the bus.
-
-\textbf{Serial Clock Line (SCL):} Provides the clock signal that synchronizes data transmission. The clock is controlled by the controller initiating the communication.
-
-Both signal lines are open-drain outputs that require pull-up resistors to define the high logic level. This configuration enables multiple devices to share the bus while preventing electrical conflicts.
+The protocol operates over two bidirectional signal lines: the \textbf{Serial Data Line (SDA)}, which carries the data being transmitted, and the \textbf{Serial Clock Line (SCL)}, which provides the clock signal controlled by the initiating controller. Both lines are implemented as open-drain outputs with pull-up resistors, enabling multiple devices to share the same bus safely.
 
 \subsection{I2C Communication Mechanisms}
 \label{subsec:i2c-communication}
 
-I2C communication follows a structured protocol that enables reliable data exchange between controller and peripheral devices:
+\textbf{Device Addressing:} Each target device on the \acrshort{i2c} bus has a unique address, typically 7 bits in length. Although a 10-bit addressing mode exists, it is less common in practice.
 
-\textbf{Device Addressing:} Each peripheral device on the I2C bus has a unique address, typically 7 bits in length (though 10-bit addressing is also supported). The controller initiates communication by transmitting the target device's address along with a read/write bit.
+\textbf{START, Repeated START, and STOP Conditions:} Communication sessions begin with a START condition and end with a STOP condition, both defined by transitions on SDA while SCL is high. A repeated START allows a controller to retain bus control without releasing it, which is frequently used in read transactions.
 
-\textbf{START and STOP Conditions:} Communication sessions are delimited by START and STOP conditions, which are special signal patterns that indicate the beginning and end of a transaction. These conditions are generated by transitioning SDA while SCL is high.
+\textbf{Acknowledgment Mechanism:} Each transmitted byte must be acknowledged (ACK) by the receiving device. A missing acknowledgment (NACK) indicates either that no device responded at the specified address, or that the controller has signaled the end of the transfer.
 
-\textbf{Acknowledgment Mechanism:} Each byte transmitted over the I2C bus must be acknowledged by the receiving device. The acknowledgment (ACK) or negative acknowledgment (NACK) signals provide flow control and error detection capabilities.
 
-\textbf{Multi-Controller Support:} The I2C protocol supports multiple controller devices on the same bus through arbitration mechanisms. When multiple controllers attempt to access the bus simultaneously, the arbitration process determines which controller actually gains control without corrupting data.
+
+
+
+\textbf{Multi-Controller Support:} The \acrshort{i2c} protocol includes arbitration mechanisms allowing multiple controllers to coexist on the same bus. Arbitration ensures that when two controllers attempt simultaneous communication, only one retains control without corrupting data. In practice, however, most \acrshort{i2c} systems are deployed with a single controller~\cite{i2c_specification}.
 
 \subsection{Hardware Abstraction Layers}
 \label{subsec:hal-embedded}
 
-Embedded systems development relies heavily on \acrfull{hal} to provide portable interfaces for accessing hardware peripherals, including I2C controllers~\cite{hal}. \acrshort{hal}s abstract device-specific implementation details behind generic APIs, enabling driver code to work across different microcontroller families and platforms.
+\acrfull{hal}s provide portable interfaces to access hardware peripherals, abstracting device-specific details behind generic \acrshort{api}s. This decoupling allows driver code to operate across different microcontroller families and platforms~\cite{hal}.  
 
-\textbf{Embedded \acrshort{hal} Ecosystem:} In the Rust embedded ecosystem, the \texttt{embedded-hal} crate provides standardized traits for common peripherals, including I2C, SPI, GPIO, and UART. This standardization enables driver crates to support multiple hardware platforms through a common interface.
+In the Rust ecosystem, the \texttt{embedded-hal} crate~\cite{embedded_hal_crate} has become the de facto standard, defining traits for common peripherals such as I2C, SPI, GPIO, and UART. Numerous driver crates build on these traits, ensuring cross-platform portability. Platform-specific implementations include \texttt{linux-embedded-hal}~\cite{linux_embedded_hal_crate} for Linux systems and other crates targeting Raspberry Pi~\cite{rppal_crate} or STM32 microcontrollers~\cite{stm_hal_crate}.
 
-\textbf{Platform Implementations:} Various driver crates implement embedded-hal traits for specific sensors, actuators, microcontroller families, operating systems, etc. Examples include the \texttt{linux-embedded-hal} crate for Linux-based systems.
-
-\section{WASI I2C Standardization Proposal}
+\section{WASI I\textsuperscript{2}C Standardization Proposal}
 \label{sec:wasi-i2c-proposal}
 
 \subsection{Standardization Process and Current Status}
 \label{subsec:i2c-standardization-process}
 
-The WASI I2C proposal represents an ongoing effort to standardize I2C communication interfaces within the WebAssembly System Interface specification\cite{wasi_i2c_proposal}. The proposal follows the WASI Sub-Group's standardization process, which consists of distinct phases designed to ensure thorough evaluation, implementation validation, and community consensus before final standardization.
+The \acrshort{wasi} \acrshort{i2c} proposal is part of the ongoing effort to standardize hardware communication interfaces within the \acrshort{wasi} specification~\cite{wasi_i2c_proposal}. Standardization in the \acrshort{wasi} subgroup follows a structured process with multiple phases: conceptual start (Phase 0), exploratory design (Phase 1), prototyping and specification drafting (Phase 2), implementation and integration (Phase 3), and final standardization (Phase 4-5).  
 
-\textbf{Current Phase Status:} The WASI I2C proposal currently resides in Phase 2 of the standardization process, having progressed from its initial pre-proposal state through the feature proposal phase.
-
-\textbf{Phase 2 Requirements and Progress:} To advance from Phase 2 to Phase 3, the proposal must satisfy specific criteria, including comprehensive test suite coverage, resolution of open design issues, and demonstration of implementation feasibility. Current work focuses on addressing these requirements through prototype implementations and iterative design refinement.
+The I2C proposal is currently in Phase~2, focusing on prototyping, implementation feasibility, and iterative design refinement. To advance to Phase~3, it must demonstrate comprehensive test coverage, resolve open design questions, and show multiple independent implementations.
 
 \subsection{Proposal Architecture and Design}
 \label{subsec:i2c-proposal-design}
 
-The WASI I2C proposal~\cite{wasi_i2c_proposal} defines an interface that closely follows the embedded-hal version 1 design principles while adapting to the WebAssembly Component Model's resource-based architecture. The proposal consists of three primary WIT files that implement a modular, composable interface design.
+The \acrshort{wasi} \acrshort{i2c} proposal~\cite{wasi_i2c_proposal} defines an interface inspired by the design principles of \texttt{embedded-hal} v1~\cite{hal}, while adapting them to the \acrshort{wasm} Component Model's resource-based architecture. The proposal consists of three primary \acrshort{wit} files that together form a modular and composable interface design:
 
 \textbf{Core Interface Components:}
 \begin{itemize}
-    \item \textbf{i2c.wit:} Defines the primary I2C communication interface including transaction operations, read/write methods, and error handling
-    \item \textbf{delay.wit:} Provides timing and delay functionality required for I2C protocol compliance and device timing requirements
-    \item \textbf{world.wit:} Specifies the complete interface surface that components must implement or import
+    \item \textbf{i2c.wit:} Defines the primary \acrshort{i2c} communication interface, including transaction operations, read/write methods, and error handling.
+    \item \textbf{delay.wit:} Provides timing and delay functionality required for \acrshort{i2c} protocol compliance and device timing requirements.
+    \item \textbf{world.wit:} Specifies the complete interface surface that components must either implement or import.
 \end{itemize}
 
-\textbf{Resource-Based Design:} The proposal implements I2C controllers as first-class resources in the Component Model, enabling proper lifetime management and capability-based security. This design ensures that I2C access is mediated through explicit capability grants rather than ambient authority.
+\textbf{Resource-Based Design:} The proposal implements \acrshort{i2c} controllers as first-class resources in the Component Model, enabling proper lifetime management and capability-based security. This design ensures that \acrshort{i2c} access is mediated through explicit capability grants rather than ambient authority.
 
-\textbf{Error Handling Strategy:} The interface defines comprehensive error types that cover common I2C failure modes including bus errors, arbitration loss, acknowledgment failures, and device-specific conditions. This detailed error modeling enables robust error recovery and diagnostic capabilities.
+\textbf{Error Handling Strategy:} The interface defines comprehensive error types that cover common \acrshort{i2c} failure modes such as bus errors, arbitration loss, and acknowledgment failures. In addition, device-specific conditions (e.g., a non-existent register address being accessed or a timeout during EEPROM operations) are modeled explicitly. This detailed error modeling enables robust error recovery and diagnostic capabilities.
 
-\textbf{Operation Support:} The interface supports both simple read/write operations and complex transaction sequences, enabling efficient communication patterns required by various I2C devices and protocols.
+\textbf{Operation Support:} The interface supports both simple read/write operations and complex transaction sequences, enabling efficient communication patterns required by various \acrshort{i2c} devices and protocols.
 
 \subsection{Portability Criteria}
 \label{subsec:i2c-portability}
 
-The WASI I2C proposal must satisfy specific portability criteria that demonstrate the interface's viability across diverse implementation environments and use cases. These criteria ensure that the standardized interface can be practically implemented and deployed in real-world scenarios.
+To be viable as a standardized interface, the \acrshort{wasi} \acrshort{i2c} proposal must satisfy portability criteria that demonstrate applicability across diverse implementation environments and hardware platforms. Table~\ref{tab:portability_criteria} summarizes the minimal platforms selected to validate cross-architecture support.
 
-\begin{table}[h]
-	\centering
-	\captionsetup{justification=centering}
-	\caption{Portability criteria showcasing minimal implementation requirements for advancing the I2C Proposal}
-	\label{tab:portability_criteria}
-	\begin{tabular}{lll}
-		\toprule
-		\textbf{Platform} & \textbf{Architecture} & \textbf{Reference Hardware} \\
+\begin{table}[H]
+    \centering
+    \captionsetup{justification=centering}
+    \caption{Minimal hardware platforms selected as portability criteria for advancing the I\textsuperscript{2}C proposal}
+    \label{tab:portability_criteria}
+    \begin{tabular}{lll}
+        \toprule
+        \textbf{Platform} & \textbf{Architecture} & \textbf{Reference Hardware} \\
         \midrule
-		Linux & ARM & Raspberry Pi 3 Model B \\
-		RTOS (NuttX or Zephyr) & RISC-V & ESP32-C3 \\
+        Linux & ARM & Raspberry Pi 3 Model B \\
+        RTOS (NuttX or Zephyr) & RISC-V & ESP32-C3 \\
         RTOS (Zephyr or FreeRTOS) & ARM32 & Nucleo F412ZG \\
-		\bottomrule
-	\end{tabular}
+        \bottomrule
+    \end{tabular}
 \end{table}
 
-Table~\ref{tab:portability_criteria_specs} showcases the constraint resources of the referenced hardware in the portability criteria. The RAM and storage limitations of the Nucleo Platform form a challenge.
-\begin{table}[h]
+Table~\ref{tab:portability_criteria_specs} provides detailed hardware specifications of the selected platforms. The limited RAM and Flash memory of the Nucleo board pose a particular challenge for implementing the full proposal.
+
+\begin{table}[H]
     \centering
-    \caption{Hardware specifications of the Portability Criteria required for the I2C proposal advancements}
+    \caption{Hardware specifications of the platforms used in the portability criteria}
     \label{tab:portability_criteria_specs}
     \begin{tabular}{lL{4cm}L{2cm}L{3cm}L{1.5cm}}
         \toprule
@@ -274,25 +287,27 @@ Table~\ref{tab:portability_criteria_specs} showcases the constraint resources of
         ESP32-C3 & 
         Single-core 32-bit RISC-V (RV32IMC) @ 160 MHz & 
         400 KB SRAM & 
-        384 KB ROM + 2-8 MB external flash & 
+        384 KB ROM + 2--8 MB external flash & 
         22 pins \\
         \hline
         Nucleo F412ZG & 
-        ARM Cortex-M4F met FPU @ 100 MHz & 
+        ARM Cortex-M4F with FPU @ 100 MHz & 
         256 KB SRAM & 
         1 MB Flash memory & 
-        114 I/O pins \\
+        114 I/O pins\footnote{Not all GPIO pins are available through the Nucleo board headers.} \\
         \bottomrule
     \end{tabular}
 \end{table}
 
+
+
 \subsection{Integration with Embedded-HAL Principles}
 \label{subsec:i2c-embedded-hal-integration}
 
-The WASI I2C proposal deliberately aligns with embedded-hal design principles to ensure compatibility with the existing Rust embedded ecosystem and to leverage proven interface design patterns. This alignment facilitates adoption by embedded developers and enables reuse of existing driver implementations.
+The \acrshort{wasi} \acrshort{i2c} proposal deliberately aligns with the design principles of the \acrshort{hal} project~\cite{hal}, ensuring compatibility with the existing Rust embedded ecosystem and leveraging proven interface abstractions. This alignment facilitates adoption by embedded developers and enables reuse of existing device driver implementations.
 
-\textbf{Trait Compatibility:} The WIT interface design maps closely to embedded-hal I2C traits, enabling straightforward adaptation of existing drivers to work with WASI I2C interfaces through minimal wrapper implementations.
+\textbf{Trait Compatibility:} The \acrshort{wit}-based interface design closely maps to the \texttt{embedded-hal} \acrshort{i2c} traits. This enables straightforward adaptation of existing drivers to the \acrshort{wasi} \acrshort{i2c} interface through thin wrapper implementations, minimizing the need for substantial code changes.
 
-\textbf{Error Model Alignment:} The proposal's error handling approach follows embedded-hal conventions while extending error information to support the richer diagnostic capabilities possible in WebAssembly environments.
+\textbf{Error Model Alignment:} The proposal’s error handling strategy follows the conventions established in \texttt{embedded-hal}, while extending error categories to support richer diagnostics in a \acrshort{wasm} environment. For example, errors can include additional context such as bus arbitration failures or timeouts that may not be captured by traditional embedded traits.
 
-\textbf{Operation Semantics:} Transaction semantics, addressing models, and timing requirements align with embedded-hal expectations, ensuring that porting existing embedded applications to WebAssembly requires minimal interface adaptation.
+\textbf{Operation Semantics:} Transaction semantics, addressing models, and timing requirements are defined in close correspondence with \texttt{embedded-hal} expectations. In particular, the use of the dedicated \texttt{delay.wit} interface mirrors the \texttt{DelayUs} and \texttt{DelayMs} traits, ensuring that timing-sensitive communication can be modeled consistently across both embedded and WebAssembly environments.

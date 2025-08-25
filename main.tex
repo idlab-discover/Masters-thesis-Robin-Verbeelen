@@ -44,10 +44,6 @@
 \usepackage{lipsum}
 
 
-% \setmainfont{Arial}
-%
-% UGent style guide
-% zet onderstaande lijnen uit commentaar om het font in te stellen
 \setmainfont[
 	Path=fonts/,
 	BoldFont      =UGentPannoText-SemiBold.ttf,
@@ -108,6 +104,7 @@
 \usepackage{hyperref}
 \usepackage{url}
 
+
 \usepackage[numbers]{natbib}       % For bibliography; use numeric citations
 \bibliographystyle{IEEEtran}
 \usepackage[nottoc]{tocbibind}     % Put Bibliography in ToC
@@ -140,6 +137,16 @@
 
 \usepackage[toc,acronym]{glossaries}  % for list of acronyms
 \makeglossaries                       % start internal list of acronyms
+
+
+
+% \usepackage[backend=biber, style=ieee, doi=true, url=true, isbn=false]{biblatex}
+% \addbibresource{references.bib}
+
+% \DefineBibliographyStrings{english}{%
+%   urlseen = {Accessed:},
+%   bibliography = {References},
+% }
 
 % TODO: Bepalen of ik dit wel wil. Text dan met iets meer "spaties" tussen woorden, maar vermijdt wel ongemakkelijke woordafbrekingen.
 % \hyphenpenalty=5000

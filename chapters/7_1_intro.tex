@@ -3,7 +3,7 @@
 
 Modern embedded systems face unprecedented challenges. They must balance security, reliability, and updatability requirements while operating under strict resource constraints. The European Union's Cyber Resilience Act, enacted in March 2024, mandates effective vulnerability management and long-term security updates throughout a product's expected lifespan~\cite{eu_cyber_res_act}. In parallel, the automotive industry is rapidly adopting \acrfull{ota} software distribution, which requires robust rollback mechanisms when updates fail~\cite{automotive_ota, iso24089}. These regulatory and industrial developments highlight a fundamental challenge: enabling secure, reliable, and updatable software for resource-constrained \acrfull{iot} devices.
 
-\acrfull{wasm} and its modular system interface specification, \acrfull{wasi}, represent a promising response to these challenges. Originally designed to execute binary code within web browsers, \acrshort{wasm} has evolved into a portable, secure, and efficient runtime technology for diverse environments~\cite{wasm_spec}. \acrshort{wasi} complements this by providing a standardized interface for interacting with filesystems, networks, and hardware resources. Crucially, it preserves \acrshort{wasm}'s strong security model by enforcing capability-based access control, which ensures that modules can only access resources that are explicitly granted.
+\acrfull{wasm} and its modular system interface specification, \acrfull{wasi}, represent a promising response to these challenges. Originally designed to execute binary code within web browsers, \acrshort{wasm} has evolved into a portable, secure, and efficient runtime technology for diverse environments~\cite{wasm_features_support}. \acrshort{wasi} complements this by providing a standardized interface for interacting with filesystems, networks, and hardware resources. Crucially, it preserves \acrshort{wasm}'s strong security model by enforcing capability-based access control, which ensures that modules can only access resources that are explicitly granted.
 
 The release of \acrshort{wasi} Preview~2, together with the component model architecture, introduced new mechanisms for building modular and interoperable \acrshort{wasm} libraries, applications, and runtimes. The component model employs \acrfull{wit} files to define interface contracts between components and to enable automatic binding generation for programming languages~\cite{wasi_p2}. Nevertheless, an important gap remains in \acrshort{wasi}'s hardware interface coverage: despite the ubiquity of \acrfull{i2c} communication in embedded systems, the standardization of this protocol is only in very early stages. This thesis directly addresses closing that gap.
 
@@ -52,7 +52,8 @@ How do Preview~1 and Preview~2 compare in terms of developer experience, maintai
 This question evaluates the trade-offs between manually implementing bindings and using automatic code generation, with a focus on development effort and long-term maintainability.
 
 \begin{researchquestion}\label{rq3}
-What are the performance differences between \acrshort{wasi} Preview~2 and Preview~1 in embedded \acrshort{i2c} applications?
+% TODO: Mogelijke andere formulering: What are the performance differences between \acrshort{wasi} Preview~2 and Preview~1 in embedded \acrshort{i2c} applications?
+What are the startup latency, additional memory consumption, and execution overhead between \acrshort{wasi} Preview~2 and Preview~1 in embedded \acrshort{i2c} applications?
 \end{researchquestion}
 
 This question focuses on a quantitative comparison between \acrshort{wamr} (Preview~1) and Wasmtime (Preview~2) across multiple performance dimensions. It examines startup latency, steady-state execution overhead, memory consumption, and resource utilization efficiency to provide empirical evidence of their performance characteristics.
@@ -97,6 +98,7 @@ This thesis is structured to progressively address the research questions throug
 
 \textbf{Chapter~\ref{chap:eval}} details the experimental methodology and presents comprehensive performance evaluation results. Through controlled hardware experiments using Raspberry Pi and Arduino-based platforms, this chapter provides a quantitative statistical analysis of timing characteristics, memory utilization patterns, and resource efficiency. The empirical findings directly address \textbf{\autoref{rq3}} by quantifying the performance implications of different \acrshort{wasm} runtime approaches for embedded \acrshort{i2c} applications.
 
+% TODO: Problemen met de referenties naar hoofdstukken die niet als nieuw hoofdstuk gezien worden...
 \textbf{Chapter~\ref{chap:conclusion}} synthesizes the experimental findings and implementation insights to provide well-substantiated answers to all research questions. It examines the broader implications for embedded \acrshort{wasm} deployment, discusses the limitations of the current approach, and outlines the impact on ongoing \acrshort{wasi} \acrshort{i2c} standardization efforts.
 
 
