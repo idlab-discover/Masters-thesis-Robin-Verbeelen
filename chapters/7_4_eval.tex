@@ -135,7 +135,7 @@ Table~\ref{tab:wasm-setup} presents the initialization overhead for \acrshort{wa
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.9\textwidth]{images/setup-distribution}
+    \includegraphics[width=\textwidth]{images/setup-distribution}
     \caption{Distribution plots, showcasing relatively stable measurements.}
     \label{fig:wasm-setup-distribution}
 \end{figure}
@@ -191,7 +191,7 @@ Table~\ref{tab:wasm-execution} compares execution performance between WAMR, Wasm
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.9\textwidth]{images/execution-distribution}
+    \includegraphics[width=\textwidth]{images/execution_distribution}
     \caption{Distribution plots showcasing stability of the measurements.}
     \label{fig:wasm-execution-distribution}
 \end{figure}
@@ -267,6 +267,13 @@ Table~\ref{tab:memory-setup} presents memory allocation characteristics during r
     \end{tabular}
 \end{table}
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/mem_runtime.png}
+    \caption{Comparison of memory allocations during Runtime Setup on a logarithmic scale, highlighting the much higher memory consumption of Wasmtime}
+    \label{fig:mem_runtime}
+\end{figure}
+
 \subsubsection{Analysis}
 
 The memory allocation patterns during runtime initialization reveal fundamental architectural differences between the implementations. The native implementation establishes a minimal baseline with just \SIi{10}{\byte} allocated, reflecting direct hardware access without abstraction overhead.
@@ -295,6 +302,13 @@ Table~\ref{tab:memory-execution} presents memory allocation characteristics duri
         \bottomrule
     \end{tabular}
 \end{table}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/mem_execution_all.png}
+    \caption{Comparison of memory allocations during execution of the PingPong functionality, with both \acrshort{wasm} runtimes showcasing similar peak memory requirements.}
+    \label{fig:mem_pingpong}
+\end{figure}
 
 \subsubsection{Analysis}
 

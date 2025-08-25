@@ -1,37 +1,37 @@
 \chapter{Implementation}
 \label{chap:implementation}
 
-This chapter presents the implementation details of a WASI Preview 1 I2C interface designed specifically for \acrshort{wamr}, addressing the critical requirement for embedded device support in the WASI I2C standardization proposal. Building upon Friedrich's foundational work~\cite{friedrich_paper}~\cite{friedrich_impl}, this implementation establishes a comprehensive Preview 1 setup that enables resource-constrained embedded systems to participate in the I2C standardization effort.
+This chapter presents the implementation details of a \acrshort{wasi} Preview~1 \acrshort{i2c} interface, designed specifically for \acrshort{wamr}. This addresses a critical requirement: ensuring embedded device support within the ongoing \acrshort{wasi} \acrshort{i2c} standardization proposal. Building upon Friedrich's foundational work~\cite{friedrich_paper, friedrich_impl}, the implementation establishes a comprehensive Preview~1 setup that enables resource-constrained embedded systems to actively participate in the \acrshort{i2c} standardization effort.
 
-The implementation serves as an exploration of how the WASI I2C interface could be adapted for Preview 1 environments, providing essential groundwork for the proposal's progression to the next standardization phase, which requires demonstrated compatibility with embedded device constraints.
+The implementation serves as an exploration of how the \acrshort{wasi} \acrshort{i2c} interface can be adapted for Preview~1 environments. It provides essential groundwork for supporting the proposal’s transition to the next standardization phase, which requires demonstrated compatibility with embedded device constraints.
 
 \section{System Overview \& Architecture}
 \label{sec:system-overview}
 
 \subsection{Implementation Context and Scope}
 
-The development effort encompasses five core implementations that collectively demonstrate Preview 1 I2C interface feasibility:
+The development effort encompasses five core projects that collectively demonstrate Preview~1 \acrshort{i2c} interface feasibility. Each project plays a specific role in the ecosystem:  
+\begin{itemize}
+    \item \textbf{wasip1-i2c-lib:} provides hand-written bindings for \acrshort{wasi} Preview~1.  
+    \item \textbf{wasip1-i2c-guest:} is a guest module compiled to \texttt{wasm32-wasip1}, intended for execution in \acrshort{wamr}.  
+    \item \textbf{wasip2-i2c-guest:} represents the Preview~2 counterpart, relying on auto-generated bindings.  
+    \item \textbf{wamr\_impl:} hosts and executes the Preview~1 module in \acrshort{wamr}.  
+    \item \textbf{wasmtime\_impl:} provides a Preview~2 host implementation using Wasmtime.
+\end{itemize}
 
-\begin{minted}{text}
-    wasip1-i2c-lib/          // Manual Preview 1 bindings library
-    wasip1-i2c-guest/        // Core WASM module (target: wasm32-wasip1)
-    wasip2-i2c-guest/        // WASM component (target: wasm32-wasip2)
-    wamr_impl/               // WAMR host runtime implementation
-    wasmtime_impl/           // Wasmtime host runtime implementation
-\end{minted}
+All implementations in this ecosystem, including the Preview~2 component and the Wasmtime host, represent original contributions developed specifically for this research~\cite{wamr-wasi-i2c}. The system design enables direct comparison between Preview~1 and Preview~2 approaches while maintaining functional equivalence in \acrshort{i2c} communication capabilities.
 
-\begin{figure}[h]
-	\centering
-	\includegraphics[width=\textwidth]{images/project schema.png}
-	\caption{Overview of the project structure, showcasing the structure and interaction between different components}
-	\label{fig:project_schema}
+\autoref{fig:project_schema} showcases how different projects rely on or interact with each other, representing the complete infrastructure used for this research.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{images/project_schema.png}
+    \caption{Overview of the project structure, showing the interaction between Preview~1 and Preview~2 components.}
+    \label{fig:project_schema}
 \end{figure}
-
-All implementations in this ecosystem, including the Preview 2 component and Wasmtime host, represent original contributions developed specifically for this research. The system design enables direct comparison between Preview 1 and Preview 2 approaches while maintaining functional equivalence in I2C communication capabilities.
 
 \subsection{I2C Interface Implementation: Simplified vs. Official Specification}
 
-This implementation utilizes a simplified version of the WASI I2C interface rather than the complete official specification. The choice to use a reduced interface provides focus on core I2C functionality while demonstrating the essential capabilities needed for I2C communication.
+This implementation utilizes a simplified version of the \acrshort{wasi} \acrshort{i2c} interface rather than the complete official specification. The choice to use a reduced interface provides focus on core \acrshort{i2c} functionality while demonstrating the essential capabilities needed for \acrshort{i2c} communication.
 
 Code Fragments \ref{lst:official-i2c-interface} and \ref{lst:simplified-i2c-interface} showcase the main differences between the official and the simplified interface definition. The complete definition of the interface is available in the proposal's repository~\cite{wasi_i2c_proposal}.
 
@@ -63,7 +63,7 @@ Code Fragments \ref{lst:official-i2c-interface} and \ref{lst:simplified-i2c-inte
         }
     }
     \end{minted}
-    \caption{Official WASI I2C interface specification with comprehensive transaction support}
+    \caption{Official \acrshort{wasi} \acrshort{i2c} interface specification with ``transaction'' and ``WriteRead'' support.}
     \label{lst:official-i2c-interface}
 \end{listing}
 
@@ -86,13 +86,18 @@ Code Fragments \ref{lst:official-i2c-interface} and \ref{lst:simplified-i2c-inte
     \label{lst:simplified-i2c-interface}
 \end{listing}
 
-The simplified interface excludes the transaction and write-read methods, concentrating on the fundamental read and write operations that form the basis of I2C communication. This approach provides sufficient functionality for validating the Preview 1 adaptation approach while reducing implementation complexity. The error handling remains comprehensive, preserving all essential I2C protocol error conditions and their semantic information.
+In summary, the simplified interface excludes the transaction and write-read methods, concentrating on the fundamental read and write operations that form the basis of \acrshort{i2c} communication. This approach provides sufficient functionality for validating the Preview 1 adaptation approach while reducing implementation complexity. The error handling remains comprehensive, preserving all essential \acrshort{i2c} protocol error conditions and their semantic information.
 
-\subsection{Pingpong World and WIT Structure Organization}
+\subsection{PingPong World and WIT Structure Organization}
+\label{subsec:pingpong}
 
-The pingpong world serves as the primary application interface that demonstrates the use of the (simplified) I2C interface. This world defines the contract between guest components and their host environment, establishing the essential imports and exports needed for I2C communication validation.
+To validate the functionality of the simplified \acrshort{i2c} interface, a minimal example application, named \emph{PingPong}, was developed.
 
-\begin{listing}[H]
+The PingPong world serves as the primary application interface. This world defines the contract between guest components and their host environment, establishing the essential imports and exports needed for \acrshort{i2c} communication validation.
+
+\autoref{lst:pingpong-world} showcases how the world imports the simplified \acrshort{i2c} interface as a dependency and provides a `get-i2c-bus` function that returns an \acrshort{i2c} resource. The world exports a single `run` function that serves as the application's entry point, enabling straightforward execution of the complete \acrshort{i2c} communication cycle.
+
+\begin{listing}[htbp]
     \begin{minted}{rust}
     // Pingpong world using simplified I2C interface
     package my:pingpong;
@@ -105,24 +110,27 @@ The pingpong world serves as the primary application interface that demonstrates
         export run: func();
     }
     \end{minted}
-    \caption{Pingpong world definition demonstrating I2C resource acquisition and application entry point}
+    \caption{Pingpong world definition demonstrating \acrshort{i2c} resource acquisition and application entry point}
     \label{lst:pingpong-world}
 \end{listing}
 
-The pingpong world imports the simplified I2C interface and provides a `get-i2c-bus` function that returns an I2C resource. The world exports a single `run` function that serves as the application's entry point, enabling straightforward validation of the complete I2C communication cycle.
+\autoref{lst:wit-organization} showcases the organizational structure of the WIT files --- following the standard pattern established by the component model.
+\begin{listing}[H]
+    \begin{minted}{text}
+    wit/
+    |    pingpong.wit                   // Main world definition
+    |    deps/                          // Dependencies
+    |    |    wasi-i2c/                 // Name of the package
+    |    |    |    i2c.wit              // Simplified I2C interface
+    |    |    |    world.wit            // I2C world imports
+    \end{minted}
+    \caption{\acrshort{wit} files are organized in a standard pattern, separating dependencies.}
+    \label{lst:wit-organization}
+\end{listing}
 
-The WIT directory structure follows the standard organization pattern established by the component model ecosystem:
+This modular organization provides a clear separation of concerns. The \acrshort{i2c} operations are encapsulated in their own namespace, ensuring that the interface can easily be reused in other guest applications. At the same time, the \texttt{pingpong} world remains deliberately minimal, making it well-suited as a reference example.  
 
-\begin{minted}{text}
-wit/
-    pingpong.wit              // Main world definition
-    deps/
-        wasi-i2c/
-            i2c.wit           // Simplified I2C interface
-            world.wit         // I2C world imports
-\end{minted}
-
-The `deps/wasi-i2c/` directory contains the simplified I2C interface definition along with its world imports. The simplified version has no need for the additional delay.wit and is therefore removed from the directory and the world.wit imports. This structure enables both guest and host implementations to reference the same interface definitions, ensuring consistency across the entire ecosystem.
+By executing the functionally same PingPong application in both the \acrshort{wamr} environment (Preview~1) and the Wasmtime runtime (Preview~2), it becomes possible to validate not only functional correctness but also the portability of the design across different \acrshort{wasi} versions. This dual-runtime setup will later serve as a baseline for performance and memory profiling experiments.
 
 \subsection{Technical Environment}
 
@@ -139,6 +147,8 @@ The implementation targets the following runtime environment specifications:
 \subsection{Preview 1 vs Preview 2 Architectural Differences}
 
 The fundamental challenge lies in adapting Preview 2's sophisticated resource-based component model to Preview 1's minimalist function-based interface system. This adaptation requires careful consideration of how high-level abstractions can be preserved while working within Preview 1's limited type system.
+
+\autoref{lst:preview-comparison} showcases how Preview 2's component model provides automatic resource lifecycle management, type-safe binding generation, and sophisticated error handling mechanisms. In contrast, Preview 1 requires manual implementation of all these features through carefully designed function interfaces and explicit resource tracking systems.
 
 \begin{listing}[H]
     \begin{minted}{rust}
@@ -162,14 +172,12 @@ The fundamental challenge lies in adapting Preview 2's sophisticated resource-ba
     \label{lst:preview-comparison}
 \end{listing}
 
-Preview 2's component model provides automatic resource lifecycle management, type-safe binding generation, and sophisticated error handling mechanisms. In contrast, Preview 1 requires manual implementation of all these features through carefully designed function interfaces and explicit resource tracking systems.
-
 \section{Canonical ABI Adaptation and Design Choices}
 \label{sec:canonical-abi-adaptation}
 
 \subsection{Canonical ABI Compatibility and Implementation Options}
 
-The WebAssembly Component Model defines a Canonical Application Binary Interface (ABI) that specifies how WIT definitions are translated to bits and bytes for inter-component communication. This ABI provides standardized mechanisms for passing complex data structures, managing resources, and handling errors between WebAssembly components and their host environments.
+The WebAssembly Component Model defines a Canonical \acrfull{abi} that specifies how \acrshort{wit} definitions are translated to bits and bytes for inter-component communication. This ABI provides standardized mechanisms for passing complex data structures, managing resources, and handling errors between WebAssembly components and their host environments.
 
 \subsection{Context-Driven ABI Design Decisions}
 
@@ -177,7 +185,7 @@ Rather than indicating a limitation or incompatibility, the departure from stric
 
 \textbf{Error Handling Optimization}: The Canonical ABI represents errors using a discriminated union approach, where the error type discriminant and error-specific data (such as NoAcknowledgeSource) would be stored in separate fields, similar to C union structures. The Preview 1 implementation consolidates this information into a single byte using bit manipulation, providing an errno-like interface that reduces memory usage and simplifies error propagation in resource-constrained environments.
 
-\textbf{Memory Management Adaptation}: While the Canonical ABI specifies host-managed memory allocation as the standard, this implementation makes use of guest-managed allocations to showcase the flexibility of Preview 1.
+\textbf{Memory Management Adaptation}: While the Canonical ABI specifies host-managed memory allocation as the standard, this implementation makes use of guest-managed allocations for experimental reasons and to showcase the flexibility of Preview 1.
 
 \subsection{Trade-offs of Context-Specific Optimization}
 
@@ -220,7 +228,7 @@ The \texttt{wasip1-i2c-lib} crate represents the core innovation of this impleme
     \label{lst:conditional-compilation}
 \end{listing}
 
-The \texttt{guest-utils} feature flag determines whether guest-specific functionality is compiled, allowing the same codebase to serve multiple deployment scenarios. When enabled, the library provides high-level resource management abstractions for guest modules. When disabled, it provides only the type definitions and utility functions needed by host implementations.
+The \texttt{guest-utils} feature flag determines whether guest-specific functionality is compiled, allowing the same codebase to serve multiple deployment scenarios. When enabled, the library provides high-level resource management abstractions for guest modules. When disabled, it provides only the type definitions and utility functions needed by host implementations. Therefore, this library represents bindings that provide more than what automated tools would generate, as it provides functionality in multiple application types. This comes at a binary size overhead, which is discussed in \autoref{chap:eval}.
 
 \subsection{Type System Design and WIT Compatibility}
 
@@ -256,7 +264,7 @@ The type system design preserves the semantic richness of WIT specifications whi
 
 \subsection{Error Encoding and Recovery Mechanisms}
 
-The error handling system represents the most sophisticated aspect of the type translation challenge. WIT's rich error types are encoded into single-byte values for efficiency, using a carefully designed bit-packing scheme that preserves all semantic information. An additional \texttt{ErrorCode::None} was added to support the earlier discussed errno-style reporting for when the call is successful.
+The error handling system represents the most sophisticated aspect of the type translation challenge. WIT's rich error types are encoded into single-byte values for efficiency, using a carefully designed bit-packing scheme that preserves all semantic information. An additional \texttt{ErrorCode::None} was added to support the earlier discussed errno-style reporting for when the call is successful. Important to note, this does not follow the Canonical ABI rule, where complex enums should follow C-style union representation~\cite{c_union}.
 
 \begin{listing}[H]
     \begin{minted}{rust}
@@ -298,11 +306,11 @@ The error handling system represents the most sophisticated aspect of the type t
     \label{lst:error-encoding}
 \end{listing}
 
-This encoding scheme utilizes the upper three bits for error type classification and the lower five bits for error-specific information, ensuring that no semantic information is lost during the Preview 1 translation process.
+This encoding scheme utilizes the upper three bits for error type classification and the lower five bits for error-specific information, ensuring that no semantic information is lost during the Preview 1 translation process. The \texttt{ErrorCode} now fits in a \texttt{u8}, which is a datatype that WebAssembly directly supports, allowing the error to be a return value of a function. This halves the amount of bits required for error reporting, compared to the union-style representation.
 
 \subsection{Guest-Side Resource Management}
 
-The guest-side resource management system provides lifecycle management based on \acrfull{raii}. It mirrors the automatic resource handling available in Preview 2 components:
+The guest-side resource management system provides lifecycle management based on \acrshort{raii}. It mirrors the automatic resource handling available in Preview 2 components:
 
 \begin{listing}[H]
     \begin{minted}{rust}
@@ -384,7 +392,9 @@ The guest-side resource management system provides lifecycle management based on
     \label{lst:guest-resource-management}
 \end{listing}
 
-The \acrshort{raii} pattern ensures that I2C resources are automatically cleaned up when they go out of scope, preventing resource leaks that could be particularly problematic in embedded environments where resource recovery might be limited.
+The \acrshort{raii} pattern, showcased in \autoref{lst:guest-ffi-declarations}, ensures that I2C resources are automatically cleaned up when they go out of scope, preventing resource leaks that could be particularly problematic in embedded environments where resource recovery might be limited. Both the write and read functions --- imported from the host as \acrfull{ffi}~\cite{ffi_wiki} --- return a \texttt{u8} value, representing the earlier discussed experimental \texttt{ErrorCode} optimization.
+
+In \autoref{lst:guest-resource-management}, guest functions use the return value to get feedback from the host about the success or failure of their request. The guest \texttt{read} function also showcases guest-managed heap allocation behind the scenes through the use of \texttt{Vec::with\_capacity}. This, again, derives from the Canonical ABI specification to showcase the flexibility allowed by Preview 1.
 
 \section{Guest Implementations}
 \label{sec:guest-implementations}
@@ -402,9 +412,7 @@ The decision to use \texttt{\#![no\_std]} fundamentally impacts both the impleme
     // wasip1-i2c-guest/src/lib.rs (essential structure)
     #![no_std]
     #![no_main]
-    
-    use wasip1_i2c_lib::{common::I2cAddress, guest::I2cResource};
-    
+        
     extern crate alloc;
     use lol_alloc::{AssumeSingleThreaded, FreeListAllocator};
     
@@ -419,15 +427,18 @@ The decision to use \texttt{\#![no\_std]} fundamentally impacts both the impleme
         loop {}
     }
     \end{minted}
-    \caption{Essential infrastructure for no\_std WebAssembly module requiring explicit allocator and panic handler provision}
+    \caption{Essential infrastructure for no\_std WebAssembly module requiring explicit allocator and panic handler provision.}
     \label{lst:no-std-infrastructure}
 \end{listing}
 
-The \texttt{no\_std} configuration requires explicit provision of memory allocation and panic handling mechanisms that are normally provided by the standard library. The choice of \texttt{lol\_alloc} reflects embedded systems requirements where traditional heap allocators may be inappropriate due to their memory overhead or real-time characteristics.
+The \texttt{no\_std} configuration requires explicit provision of memory allocation and panic handling mechanisms that are normally provided by the standard library. The choice of \texttt{lol\_alloc} reflects embedded systems requirements where traditional heap allocators may be inappropriate due to their memory overhead or real-time characteristics~\cite{lol_alloc_git}.
 
+\autoref{lst:preview1-main-functionality} showcases the simple \texttt{run} function that gets exported by the PingPong world. In the actual implementation, this function is called \texttt{\_start}, following naming conventions defined by \acrshort{wasi} for Preview 1~\cite{wasi_start_convention}.
 \begin{listing}[H]
     \begin{minted}{rust}
     // wasip1-i2c-guest/src/lib.rs (main functionality)
+    use wasip1_i2c_lib::{common::I2cAddress, guest::I2cResource};
+    
     #[unsafe(no_mangle)]
     pub extern "C" fn _start() {
         let data = [0x68u8, 0x65, 0x6c, 0x6c, 0x6f]; // ASCII "hello"
@@ -437,11 +448,11 @@ The \texttt{no\_std} configuration requires explicit provision of memory allocat
         let _ = device.read(slave_addr, data.len());
     }
     \end{minted}
-    \caption{Complete I2C ping-pong implementation demonstrating resource creation, bidirectional communication, and automatic cleanup}
+    \caption{Complete I2C Ping-Pong implementation demonstrating resource creation, bidirectional communication, and automatic cleanup}
     \label{lst:preview1-main-functionality}
 \end{listing}
 
-The resulting binary size demonstrates the effectiveness of this approach: the optimized Preview 1 module compiles to 4.8KB, compared to a significantly larger binary of 38KB that results from standard library inclusion.
+The resulting binary size demonstrates the effectiveness of this approach: the optimized Preview 1 module compiles to 4.8KB, compared to a significantly larger binary of 38KB that results from standard library inclusion and the more customized \texttt{wasip1-i2c-lib} crate.
 
 \subsubsection{Memory Allocation Strategy: Guest-Managed vs Host-Managed Heap}
 
@@ -450,7 +461,7 @@ The implementation utilizes guest-managed heap allocation, representing an exper
 WAMR supports multiple heap management approaches~\cite{wamr_heaps}, each with distinct characteristics and use cases:
 
 \begin{itemize}
-    \item \textbf{WASI Heap}: Created when modules are built with WASI-LIBC, managed by the wasi-libc memory allocator. Also used by the host to allocate memory in the linear memory of the guest, when the guest module exports malloc/free functions.
+    \item \textbf{WASI Heap}: Created when modules are built with WASI-LIBC~\cite{wasi_libc_git}, managed by the wasi-libc memory allocator. Also used by the host to allocate in the linear memory of the guest, when the guest module exports malloc/free functions.
     \item \textbf{Host-Managed Heap}: Created and managed by WAMR's embedded memory system (ems) allocator. The host runtime controls all memory allocation decisions and provides memory to the guest on request.
 \end{itemize}
 
@@ -524,25 +535,25 @@ The component configuration metadata demonstrates how WASI interfaces could be m
 
 Unlike the Preview 1 implementation, Preview 2 components cannot utilize \texttt{\#![no\_std]} configuration due to fundamental dependencies within the \texttt{wit-bindgen} runtime system. The component model's automatic binding generation relies on standard library facilities for memory management, error handling, and runtime reflection capabilities that are incompatible with \texttt{no\_std} environments.
 
-This architectural limitation means that Preview 2 components inherently require larger binary sizes and more sophisticated runtime environments, making them less suitable for the most resource-constrained embedded applications. The trade-off provides significant development productivity improvements and automatic correctness guarantees at the cost of increased resource requirements.
+This architectural limitation means that Preview 2 components inherently require larger binary sizes and more sophisticated runtime environments, making them less suitable for the most resource-constrained embedded applications. The trade-off provides significant development productivity improvements and automatic correctness guarantees at the cost of increased resource requirements. Optimizations are discussed later, but they take away from the advanced developer experience that Preview 2 aims to provide.
 
 \subsection{Compilation Process}
 
 \begin{listing}[H]
 \begin{minted}[breaklines]{bash}
 # Preview 1 compilation: produces minimal WebAssembly Module
-cargo build --target wasm32-wasip1 --release
+cd wasip1-i2c-guest && cargo build --target wasm32-wasip1 --release
 \end{minted}
-\caption{Preview 1 compilation producing resource-efficient WebAssembly module}
+\caption{Preview 1 compilation producing resource-efficient WebAssembly module with built-in support from the Rust compiler}
 \label{lst:preview1-compilation}
 \end{listing}
 
 \begin{listing}[H]
 \begin{minted}[breaklines]{bash}
 # Preview 2 compilation: produces feature-rich WebAssembly Component
-cargo component build --target wasm32-wasip2 --release
+cd wasip2-i2c-guest && cargo component build --target wasm32-wasip2 --release
 \end{minted}
-\caption{Preview 2 compilation via \texttt{cargo-component} producing comprehensive WebAssembly component with metadata}
+\caption{Preview 2 compilation via external tool \texttt{cargo-component} producing a comprehensive WebAssembly component}
 \label{lst:preview2-compilation}
 \end{listing}
 
@@ -551,7 +562,7 @@ cargo component build --target wasm32-wasip2 --release
 
 \subsection{WAMR Implementation: Low-Level Runtime Integration}
 
-The WAMR host implementation represents the most technically challenging aspect of the system due to the fundamental architectural mismatch between Rust's memory safety model and WAMR's C-based runtime architecture. This implementation must carefully navigate the boundary between safe Rust code and unsafe C FFI operations while maintaining both performance and correctness.
+The WAMR host implementation represents the most technically challenging aspect of the system due to the fundamental architectural mismatch between Rust's memory safety model and WAMR's C-based runtime architecture. This implementation must carefully navigate the boundary between safe Rust code and unsafe C \acrshort{ffi} operations while maintaining both performance and correctness.
 
 \subsubsection{Runtime Initialization and Function Registration}
 In \autoref{lst:wamr-structure}, the structure field ordering is critical for proper resource cleanup, as Rust drops fields in declaration order for structs. WAMR exhibits weird behavior when runtime resources are destroyed in an incorrect sequence, making this ordering essential for system stability. This happens when the Runtime entity is dropped before it is fully initialized. The PingPongRunner struct encapsulates all the individual components in a specific order, always giving the Runtime entity enough time to fully initialize. With this configuration and no other arguments in the build pipeline defined, WAMR is configured to run in Interpreted mode~\cite{wamr_running_modes}.
@@ -610,7 +621,7 @@ In \autoref{lst:wamr-structure}, the structure field ordering is critical for pr
 
 \subsubsection{Memory Translation and Safety Boundaries}
 
-\autoref{lst:wamr-host-function-pt1} showcases the first part of the registered host function: \texttt{write}. Notice how the first parameter \texttt{exec\_env} is not actually defined anywhere by our interface in FFI bindings defined in \autoref{lst:guest-ffi-declarations}. This parameter is automatically filled through WAMR's stack calling system~\cite{wamr_stacks}. The \sloppy\texttt{wasm\_runtime\_get\_module\_inst(exec\_env)} call allows the host function to find out what module instance called it. The capability-based security system on the host uses this information to validate if the calling instance has access to the (handle of the) I2C resource. If it does, next, the host checks if it has the required permissions for the requested operation.
+\autoref{lst:wamr-host-function-pt1} showcases the first part of the registered host function: \texttt{write}. Notice how the first parameter \texttt{exec\_env} is not actually defined anywhere by our interface in \acrshort{ffi} bindings defined in \autoref{lst:guest-ffi-declarations}. This parameter is automatically filled through WAMR's stack calling system~\cite{wamr_stacks}. The \sloppy\texttt{wasm\_runtime\_get\_module\_inst(exec\_env)} call allows the host function to find out what module instance called it. The capability-based security system on the host uses this information to validate if the calling instance has access to the (handle of the) I2C resource. If it does, next, the host checks if it has the required permissions for the requested operation.
 
 \begin{listing}[H]
     \begin{minted}[breaklines]{rust}
@@ -768,53 +779,59 @@ This permission system demonstrates the foundation for capability-based security
 The Wasmtime implementation serves as both a reference point for functional comparison and a demonstration of how the same I2C interface semantics can be expressed through different WebAssembly runtime architectures:
 
 \begin{listing}[H]
-\begin{minted}[breaklines]{rust}
-// wasmtime_impl/src/wasmtime_manager.rs (I2C interface implementation)
-impl wasi::i2c::i2c::Host for HostState {}
-
-impl wasi::i2c::i2c::HostI2c for HostState {
-    fn read(&mut self, res: Resource<wasi::i2c::i2c::I2c>, address: wasi::i2c::i2c::Address,
-            len: u64) -> Result<Vec<u8>, wasi::i2c::i2c::ErrorCode> {
-        let resource_id = res.rep();
-        let i2c_res = self.i2c_devices.get(&resource_id)
-            .ok_or(wasi::i2c::i2c::ErrorCode::Other)?;
-
-        if !i2c_res.acl.can_read {
-            return Err(wasi::i2c::i2c::ErrorCode::Other);
-        }
-
-        let mut buffer = vec![0u8; len as usize];
-        let mut i2c = I2C_BUS.lock().unwrap();
-        let addr_7bit = (address & 0x7f) as u8;
-
-        match i2c.read(addr_7bit, &mut buffer) {
-            Ok(_) => Ok(buffer),
-            Err(e) => Err(e.into()),
+    \begin{minted}[breaklines]{rust}
+    // wasmtime_impl/src/wasmtime_manager.rs (I2C interface implementation - Part 1)
+    impl wasi::i2c::i2c::HostI2c for HostState {
+        fn read(&mut self, res: Resource<wasi::i2c::i2c::I2c>, address: wasi::i2c::i2c::Address, len: u64) -> Result<Vec<u8>, wasi::i2c::i2c::ErrorCode> {
+            let resource_id = res.rep();
+            let i2c_res = self.i2c_devices.get(&resource_id)
+                .ok_or(wasi::i2c::i2c::ErrorCode::Other)?;
+    
+            if !i2c_res.acl.can_read {
+                return Err(wasi::i2c::i2c::ErrorCode::Other);
+            }
+    
+            let mut buffer = vec![0u8; len as usize];
+            let mut i2c = I2C_BUS.lock().unwrap();
+            let addr_7bit = (address & 0x7f) as u8;
+    
+            match i2c.read(addr_7bit, &mut buffer) {
+                Ok(_) => Ok(buffer),
+                Err(e) => Err(e.into()),
+            }
         }
     }
-
-    fn write(&mut self, res: Resource<wasi::i2c::i2c::I2c>, address: wasi::i2c::i2c::Address,
-             data: Vec<u8>) -> Result<(), wasi::i2c::i2c::ErrorCode> {
-        let resource_id = res.rep();
-        let i2c_res = self.i2c_devices.get(&resource_id)
-            .ok_or(wasi::i2c::i2c::ErrorCode::Other)?;
-
-        if !i2c_res.acl.can_write {
-            return Err(wasi::i2c::i2c::ErrorCode::Other);
-        }
-
-        let mut i2c = I2C_BUS.lock().unwrap();
-        let addr_7bit = (address & 0x7f) as u8;
-
-        match i2c.write(addr_7bit, &data) {
-            Ok(_) => Ok(()),
-            Err(e) => Err(e.into()),
-        }
-    }
-}
-\end{minted}
-\caption{Wasmtime component model implementation leveraging automatic resource management and type-safe binding generation}
-\label{lst:wasmtime-implementation}
+    \end{minted}
+    \caption{Wasmtime component model implementation leveraging automatic resource management and type-safe binding generation, showcasing \acrshort{i2c} read functionality.}
+    \label{lst:wasmtime-implementation}
 \end{listing}
 
-The Wasmtime implementation benefits from automatic resource lifecycle management and type-safe binding generation, significantly reducing implementation complexity compared to the manual WAMR approach. However, this convenience comes at the cost of increased runtime requirements that may not be suitable for all embedded deployment scenarios.
+
+\begin{listing}[H]
+    \begin{minted}[breaklines]{rust}
+    // wasmtime_impl/src/wasmtime_manager.rs (I2C interface implementation - Part 2)
+    impl wasi::i2c::i2c::HostI2c for HostState {
+        fn write(&mut self, res: Resource<wasi::i2c::i2c::I2c>, address: wasi::i2c::i2c::Address, data: Vec<u8>) -> Result<(), wasi::i2c::i2c::ErrorCode> {
+            let resource_id = res.rep();
+            let i2c_res = self.i2c_devices.get(&resource_id)
+                .ok_or(wasi::i2c::i2c::ErrorCode::Other)?;
+    
+            if !i2c_res.acl.can_write {
+                return Err(wasi::i2c::i2c::ErrorCode::Other);
+            }
+    
+            let mut i2c = I2C_BUS.lock().unwrap();
+            let addr_7bit = (address & 0x7f) as u8;
+    
+            match i2c.write(addr_7bit, &data) {
+                Ok(_) => Ok(()),
+                Err(e) => Err(e.into()),
+            }
+        }
+    }
+    \end{minted}
+    \caption{Follow-up implementation, showcasing \acrshort{i2c} write functionality, provided by the host.}
+    \label{lst:wasmtime-implementation-p2}
+\end{listing}
+
+The Wasmtime implementation benefits from automatic resource lifecycle management and type-safe automatic binding generation, significantly reducing implementation complexity compared to the manual WAMR approach. However, this convenience comes at the cost of increased runtime requirements that may not be suitable for all embedded deployment scenarios.
