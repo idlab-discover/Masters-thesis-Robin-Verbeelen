@@ -37,14 +37,14 @@ The impact of \textbf{host-managed versus guest-managed heap} implementations re
 \section*{Interface Development}
 \label{sec:interface-development}
 
-The current implementation's relationship to \textbf{Canonical ABI compliance} warrants investigation. Determining whether Canonical ABI compatibility can be achieved while maintaining embedded optimizations would improve interoperability when other components/modules interact with the interface.
+The current Preview 1 implementation, provided by this research, relationship to \textbf{Canonical ABI compliance} requires more investigation. Determining whether Canonical ABI compatibility can be achieved while maintaining embedded optimizations would improve interoperability when other components/modules interact with the interface.
 
 Re-evaluating the current definition of the \acrshort{i2c} interface could bring additional functionality or reduce developer overhead. For example, \textbf{expanding the interface} to include \textbf{\acrshort{i2c} resource acquisition} would remove the need for manually defining a function in WIT-files for acquiring an \acrshort{i2c} resource. This could enhance capability-based security implementation by providing the developer with best-practice suggestions through optional parameters and provide fine-grained access control.
 
 \section*{Performance and Compatibility Analysis}
 \label{sec:performance-compatibility}
 
-\textbf{Distinguishing pure Preview 1 versus Preview 2 performance characteristics}, independent of runtime choice, would clarify whether observed differences stem from WASI version capabilities or runtime implementation strategies. WAMR only supports Preview 1 features and Wasmtime's internal architecture uses Preview 2 techniques even when loading Preview 1 modules~\cite{wasmtime_and_cranelift_2023}~\cite{wasmtime_p1_crate_docs}~\cite{wasmtime_p2_crate_docs}, making this distinction valuable but also difficult to achieve.
+\textbf{Distinguishing pure Preview 1 versus Preview 2 performance characteristics}, independent of runtime choice, would clarify whether observed differences stem from WASI version capabilities or runtime implementation strategies. WAMR only supports Preview 1 features and Wasmtime's internal architecture uses Preview 2 techniques even when loading Preview 1 modules~\cite{wasmtime_and_cranelift_2023, wasmtime_p1_crate_docs, wasmtime_p2_crate_docs}, making this distinction valuable but also difficult to achieve.
 
 \textbf{Comparative benchmarking across different WASI interfaces} would establish whether \acrshort{i2c} performance patterns generalize to other hardware interfaces or represent interface-specific characteristics.
 
@@ -58,60 +58,3 @@ Re-evaluating the current definition of the \acrshort{i2c} interface could bring
 \section*{Other WebAssembly Runtimes}
 
 Research can be extended to other WebAssembly Runtimes, like Wasmer~\cite{wasmer_git}. What do they do differently? What is their take on WASI? What problems do they address? How does their performance relate to other runtimes when using the WASI \acrshort{i2c} interface?
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-% - strategies voor het optimaliseren van wasmtime, wamr, ... \\
-% - Kijken of met optimalisaties Wasmtime mss toch viable kan zijn voor embedded? \\
-% - Effectief implementeren van duidelijke tests en voorbeelden voor het voorstel naar phase 3 te pushen \\
-% - Impact van host-managed vs guest-managed heap \\
-% - Testen wat er gebeurd in een correcter environment en niet de simpele PingPong \\
-%     - Grotere berichten \\
-%     - Foute en juiste berichten \\
-%     - Hoe errors worden behandeld \\
-% - benchmarks die verschillende dingen vergelijken met andere wasi interfaces die al verder ontwikkeld zijn \\
-% - puur het verschil van P1 en P2 gaan bepalen ipv Wasmtime vs WAMR CATCH: Wasmtime gebruikt wss sowieso P2 technieken, ook al laadt je een P1 module in. \\
-% - Kijken hoe ver async development staat met Preview 3 en de interface daar voor klaarmaken \\
-% - Onderzoeken of de definitie van de interface kan worden uitgebreid: bvb een imported functie definiëren dat een i2c resource als resultaat geeft. \\
-% - Ervoor zorgen dat de P1 interface een versie heeft dat compatibel is met Canonical ABI compatible. Het gebruiken van een standaard brengt veel positieve gevolgen mee. \\
-
-
-
-
-
-
-% - Eens kijken of er meer aandacht kan worden besteed aan het implementeren en analyseren van security \\
-% - Testen uitvoeren op hardware niveau? Elektriciteitsignalen meten op de pinnen, manueel software testen schrijven. Dit kan nagaan of de I2C peripheral weldegelijk direct een request kan versturen, misschien ondervond de arduino uno even wat problemen tijdens metingen en zorgt dit voor instabiele metingen? Men kan zo de tijd dat de peripheral nodig heeft voor requests te verwerken aftrekken van de total meettijd om specifiekere resultaten van de controller te bekomen.

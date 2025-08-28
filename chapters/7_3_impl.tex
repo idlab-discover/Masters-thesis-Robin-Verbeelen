@@ -144,6 +144,8 @@ The implementation targets the following runtime environment specifications:
     \item \textbf{Component Tooling}: \texttt{cargo-component} v0.21.1 for Preview 2 builds
 \end{itemize}
 
+\textbf{Unit Conventions:} Throughout this thesis, binary prefixes follow SI decimal conventions unless explicitly stated otherwise. For example, \si{\kilo\byte} denotes kilobytes (1000 bytes). When referring to binary units, the standard binary prefixes \si{\kibi\byte} (Kibibytes, 1024 bytes), \si{\mebi\byte} (Mebibytes, $1024^2$ bytes) are used explicitly.
+
 \subsection{Preview 1 vs Preview 2 Architectural Differences}
 
 The fundamental challenge lies in adapting Preview 2's sophisticated resource-based component model to Preview 1's minimalist function-based interface system. This adaptation requires careful consideration of how high-level abstractions can be preserved while working within Preview 1's limited type system.
@@ -814,4 +816,6 @@ The Wasmtime implementation serves as both a reference point for functional comp
     \label{lst:wasmtime-implementation-p2}
 \end{listing}
 
-The Wasmtime implementation benefits from automatic resource lifecycle management and type-safe automatic binding generation, significantly reducing implementation complexity compared to the manual WAMR approach. However, this convenience comes at the cost of increased runtime requirements that may not be suitable for all embedded deployment scenarios.
+The Wasmtime implementation benefits from automatic resource lifecycle management and type-safe automatic binding generation, significantly reducing implementation complexity compared to the manual WAMR approach. Code Fragments~\ref{lst:wasmtime-implementation, lst:wasmtime-implementation-p2} both showcase how context of the calling component is directly available in the functions. However, this convenience comes at the cost of increased runtime requirements that may not be suitable for all embedded deployment scenarios.
+
+Full Wasmtime implementation can be viewed in the repository~\cite{wamr-wasi-i2c}. Wasmtime is also configured to run in interpreted mode, matching the WAMR implementation.

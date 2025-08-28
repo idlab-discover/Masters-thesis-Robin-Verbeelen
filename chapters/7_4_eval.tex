@@ -270,7 +270,7 @@ Table~\ref{tab:memory-setup} presents memory allocation characteristics during r
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\textwidth]{images/mem_runtime.png}
-    \caption{Comparison of memory allocations during Runtime Setup on a logarithmic scale, highlighting the much higher memory consumption of Wasmtime}
+    \caption{Comparison of memory allocations during Runtime Setup on a logarithmic scale, highlighting the much higher memory consumption of Wasmtime compared to WAMR, but also WAMR compared to Native.}
     \label{fig:mem_runtime}
 \end{figure}
 
@@ -339,6 +339,15 @@ Table~\ref{tab:binary-sizes} presents the binary size characteristics across all
     \bottomrule
     \end{tabular}
 \end{table}
+
+Figure~\ref{fig:bin_size_comp} gives a visualization of the compiled binary size. The binary size reduction is desired for embedded system use-cases and allows for compliance with devices with a lower flash memory sizes.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/bin_size.png}
+    \caption{Comparison of compiled binary sizes, again highlighting shortcomings of Wasmtime compared to WAMR, but now, WAMR showcasing similar behavior to Native.}
+    \label{fig:bin_size_comp}
+\end{figure}
 
 The standard builds include full runtime initialization capabilities with debugging support and standard library linking, while optimized builds embed the guest module directly within the host binary and apply comprehensive size reduction optimizations. For the WAMR implementation, the Preview 1 guest module contributes \SIi{38}{\kilo\byte} in standard builds and \SIi{4.8}{\kilo\byte} in optimized builds. The Wasmtime Preview 2 component remains at \SIi{16.2}{\kilo\byte} on its own, as \texttt{no\_std} compilation is not compatible with runtime binding generation tools providing Preview 2 support. Manual interference could solve that issue, but it defeats the desire for the enhanced developer experience.
 
