@@ -1,5 +1,7 @@
-\chapter{Introduction}
+\chapter*{Introduction}
 \label{chap:introduction}
+\chaptermark{Introduction}
+\addcontentsline{toc}{chapter}{Introduction}  
 
 Modern embedded systems face unprecedented challenges. They must balance security, reliability, and updatability requirements while operating under strict resource constraints. The European Union's Cyber Resilience Act, enacted in March 2024, mandates effective vulnerability management and long-term security updates throughout a product's expected lifespan~\cite{eu_cyber_res_act}. In parallel, the automotive industry is rapidly adopting \acrfull{ota} software distribution, which requires robust rollback mechanisms when updates fail~\cite{automotive_ota, iso24089}. These regulatory and industrial developments highlight a fundamental challenge: enabling secure, reliable, and updatable software for resource-constrained \acrfull{iot} devices.
 
@@ -9,14 +11,14 @@ The release of \acrshort{wasi} Preview~2, together with the component model arch
 
 \acrshort{i2c} is one of the most widely deployed communication protocols in embedded systems. It serves as the backbone for sensor communication, device configuration, and inter-chip data exchange in \acrshort{iot} applications~\cite{i2c_specification}. Its simplicity, addressing efficiency, and multi-controller capability have made it indispensable for embedded system designers. However, the early state of the \acrshort{wasi} \acrshort{i2c} proposal poses a barrier to broader \acrshort{wasm} adoption in embedded environments where \acrshort{i2c} communication is essential.
 
-This work therefore investigates how the proposed WASI I2C interface can be realized and evaluated in practice.
+This work therefore investigates how the proposed WASI \acrshort{i2c} interface can be realized and evaluated in practice.
 
 
 
 
 
 
-\section{Problem Statement and Research Context}
+\section*{Problem Statement and Research Context}
 \label{sec:problem-statement}
 
 The prior work of Friedrich Vandenberghe~\cite{friedrich_paper} laid the foundation for \acrshort{wasi} \acrshort{i2c} standardization by advancing the proposal from its initial conceptual phase to Phase~2 of the official \acrshort{wasi} standardization process~\cite{wasi_phases}. His investigation included the design of \acrshort{wit} interfaces and proof-of-concept implementations primarily targeting \acrshort{wasi} Preview~2 environments. This work demonstrated the technical feasibility of \acrshort{wasi} \acrshort{i2c} integration and provided performance evaluations focused on Wasmtime-based implementations.
@@ -34,7 +36,7 @@ These limitations highlight a mismatch between the advanced developer experience
 
 
 
-\section{Research Questions}
+\section*{Research Questions}
 \label{sec:research-questions}
 
 This thesis addresses the following research questions, which together assess the feasibility of the \acrshort{wasi} \acrshort{i2c} proposal in resource-constrained embedded systems:
@@ -52,8 +54,7 @@ How do Preview~1 and Preview~2 compare in terms of developer experience, maintai
 This question evaluates the trade-offs between manually implementing bindings and using automatic code generation, with a focus on development effort and long-term maintainability.
 
 \begin{researchquestion}\label{rq3}
-% TODO: Mogelijke andere formulering: What are the performance differences between \acrshort{wasi} Preview~2 and Preview~1 in embedded \acrshort{i2c} applications?
-What are the startup latency, additional memory consumption, and execution overhead between \acrshort{wasi} Preview~2 and Preview~1 in embedded \acrshort{i2c} applications?
+What are the performance differences between \acrshort{wasi} Preview~2 and Preview~1 in embedded \acrshort{i2c} applications?
 \end{researchquestion}
 
 This question focuses on a quantitative comparison between \acrshort{wamr} (Preview~1) and Wasmtime (Preview~2) across multiple performance dimensions. It examines startup latency, steady-state execution overhead, memory consumption, and resource utilization efficiency to provide empirical evidence of their performance characteristics.
@@ -65,12 +66,12 @@ Based on these research questions, the following contributions were made.
 
 
 
-\section{Contributions and Thesis Structure}
+\section*{Contributions and Thesis Structure}
 \label{sec:contributions-structure}
 
-This thesis makes several key contributions to the \acrshort{wasi} \acrshort{i2c} standardization effort and embedded \acrshort{wasm} deployment by developing a comprehensive Preview~1 implementation ecosystem that bridges the gap between resource-constrained embedded systems and the emerging WebAssembly component model standards.
+This thesis makes several key contributions to the \acrshort{wasi} \acrshort{i2c} standardization effort and embedded \acrshort{wasm} deployment by developing a comprehensive Preview~1 implementation kit that bridges the gap between resource-constrained embedded systems and the emerging WebAssembly component model standards.
 
-\subsection{Research Contributions}
+\subsection*{Research Contributions}
 \label{subsec:research-contributions}
 
 The primary research contributions of this thesis are as follows:
@@ -87,23 +88,22 @@ The primary research contributions of this thesis are as follows:
     \item \textbf{Performance Evaluation Methodology}: Design and implementation of a benchmarking framework that measures startup latency, execution overhead, memory utilization, and resource efficiency across multiple runtime approaches, providing empirical data to guide embedded \acrshort{wasm} deployment decisions.
 \end{enumerate}
 
-\subsection{Thesis Organization}
+\subsection*{Thesis Organization}
 \label{subsec:thesis-organization}
 
 This thesis is structured to progressively address the research questions through a combination of background presentation, implementation development, and empirical evaluation:
 
 \textbf{Chapter~\ref{chap:background}} establishes the technical foundation necessary for understanding the implementation challenges. It covers \acrshort{wasm} fundamentals, \acrshort{wasi} architecture, the evolution from Preview~1 to Preview~2, \acrshort{wit} interface definition and binding generation mechanisms, the \acrshort{wasm} runtime ecosystem, \acrshort{i2c} protocol specifications, and the ongoing \acrshort{wasi} \acrshort{i2c} standardization proposal.
 
-\textbf{Chapter~\ref{chap:implementation}} presents the complete development of the Preview~1 \acrshort{i2c} ecosystem, detailing the manual bindings library design, \acrshort{wamr} host integration approaches, and the comparative Preview~2 implementation. This chapter directly addresses \textbf{\autoref{rq1}} by demonstrating how Preview~2 interface semantics can be systematically adapted for Preview~1 environments, and contributes to \textbf{\autoref{rq2}} by examining the trade-offs in implementation complexity and developer experience between manual and automatically generated bindings.
+\textbf{Chapter~\ref{chap:implementation}} presents the complete development of the Preview~1 \acrshort{i2c} kit, detailing the manual bindings library design, \acrshort{wamr} host integration approaches, and the comparative Preview~2 implementation. This chapter directly addresses \textbf{\autoref{rq1}} by demonstrating how Preview~2 interface semantics can be systematically adapted for Preview~1 environments, and contributes to \textbf{\autoref{rq2}} by examining the trade-offs in implementation complexity and developer experience between manual and automatically generated bindings.
 
 \textbf{Chapter~\ref{chap:eval}} details the experimental methodology and presents comprehensive performance evaluation results. Through controlled hardware experiments using Raspberry Pi and Arduino-based platforms, this chapter provides a quantitative statistical analysis of timing characteristics, memory utilization patterns, and resource efficiency. The empirical findings directly address \textbf{\autoref{rq3}} by quantifying the performance implications of different \acrshort{wasm} runtime approaches for embedded \acrshort{i2c} applications.
 
-% TODO: Problemen met de referenties naar hoofdstukken die niet als nieuw hoofdstuk gezien worden...
-\textbf{Chapter~\ref{chap:conclusion}} synthesizes the experimental findings and implementation insights to provide well-substantiated answers to all research questions. It examines the broader implications for embedded \acrshort{wasm} deployment, discusses the limitations of the current approach, and outlines the impact on ongoing \acrshort{wasi} \acrshort{i2c} standardization efforts.
+\textbf{\hyperref[chap:conclusion]{Conclusion}} synthesizes the experimental findings and implementation insights to provide well-substantiated answers to all research questions. It examines the broader implications for embedded \acrshort{wasm} deployment, discusses the limitations of the current approach, and outlines the impact on ongoing \acrshort{wasi} \acrshort{i2c} standardization efforts.
 
 
-\textbf{Chapter~\ref{chap:future-work}} identifies promising research directions that extend this work in the direction of production-ready deployment scenarios.
+\textbf{\hyperref[chap:future-work]{Future work}} identifies promising research directions that extend this work in the direction of production-ready deployment scenarios.
 
-\textbf{Chapter~\ref{chap:ethics}} provides a brief examination of the ethical considerations surrounding \acrshort{wasm} for \acrshort{i2c} standardization and its potential impact on technological accessibility and environmental sustainability.
+\textbf{\hyperref[chap:ethics]{Societal Reflection}} provides a brief examination of the ethical considerations surrounding \acrshort{wasm} for \acrshort{i2c} standardization and its potential impact on technological accessibility and environmental sustainability.
 
 This investigation provides practical guidance for embedded system developers considering \acrshort{wasm} adoption while directly supporting the \acrshort{wasi} \acrshort{i2c} standardization effort through the demonstration of embedded system compatibility. The findings inform ongoing standardization discussions regarding the balance between advanced developer experiences and resource-constrained deployment requirements. Ultimately, this work contributes to the advancement of \acrshort{wasm}-based solutions in embedded computing environments.

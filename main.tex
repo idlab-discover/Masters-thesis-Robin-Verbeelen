@@ -1,4 +1,3 @@
-% TODO: Consider using modern I2C terms: "controller" & "peripheral"/"target" vs. "master" & "slave"
 % Note: remove `openany` for printed version
 \documentclass[12pt,a4paper,openany,dutch,english]{extbook}
 \usepackage[a4paper,includeheadfoot,margin=2.50cm]{geometry}
@@ -104,10 +103,21 @@
 \usepackage{hyperref}
 \usepackage{url}
 
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    anchorcolor=black,
+    citecolor=black,
+    filecolor=black,
+    urlcolor=black,
+    pdftitle={Refining the I2C proposal for WebAssembly System Interface},
+    pdfauthor={Robin Verbeelen}
+}
 
-\usepackage[numbers]{natbib}       % For bibliography; use numeric citations
-\bibliographystyle{IEEEtran}
-\usepackage[nottoc]{tocbibind}     % Put Bibliography in ToC
+
+% \usepackage[numbers]{natbib}       % For bibliography; use numeric citations
+% \bibliographystyle{IEEEtran}
+% \usepackage[nottoc]{tocbibind}     % Put Bibliography in ToC
 
 %
 % Defines \checkmark to draw a checkmark
@@ -139,18 +149,17 @@
 \makeglossaries                       % start internal list of acronyms
 
 
+\usepackage[backend=biber, style=ieee, doi=true, url=true, isbn=false]{biblatex}
+\addbibresource{references.bib}
 
-% \usepackage[backend=biber, style=ieee, doi=true, url=true, isbn=false]{biblatex}
-% \addbibresource{references.bib}
-
-% \DefineBibliographyStrings{english}{%
-%   urlseen = {Accessed:},
-%   bibliography = {References},
-% }
+\DefineBibliographyStrings{english}{%
+  urlseen = {Accessed:},
+  bibliography = {References},
+}
 
 % TODO: Bepalen of ik dit wel wil. Text dan met iets meer "spaties" tussen woorden, maar vermijdt wel ongemakkelijke woordafbrekingen.
-% \hyphenpenalty=5000
-% \tolerance=1000
+\hyphenpenalty=5000
+\tolerance=1000
 
 %
 % Set the title and your name
@@ -169,18 +178,26 @@
 \frontmatter
 \pagestyle{empty}
 
-% Download the cover sheet from Plato
 \includepdf{cover-sheet.pdf}
 
-\include{chapters/1_confidentiality.tex}
 \include{chapters/2_acknowledgment.tex}
 \include{chapters/3_disclaimer-oral-exam.tex}
 \include{chapters/4_abstract.tex}
 \include{chapters/5_extended_abstract.tex}
 \tableofcontents\newpage
+
+\phantomsection
+\addcontentsline{toc}{chapter}{List of Figures}
 \listoffigures\newpage
+
+\phantomsection
+\addcontentsline{toc}{chapter}{List of Tables}
 \listoftables\newpage
+
 \include{chapters/6_list_of_acronyms.tex}
+
+\phantomsection
+\addcontentsline{toc}{chapter}{List of Code Fragments}
 \listoflistings\newpage
 
 %
@@ -188,17 +205,18 @@
 % Note: it's best to avoid spaces in filenames as Latex might complain about them.
 %
 \mainmatter
-\pagestyle{fancy} % Use header
+\pagestyle{numberless}
 \include{chapters/7_1_intro.tex}
+\pagestyle{fancy}
 \include{chapters/7_2_lit.tex}
 \include{chapters/7_3_impl.tex}
 \include{chapters/7_4_eval.tex}
+\pagestyle{numberless} 
 \include{chapters/8_conclusion.tex}
 \include{chapters/9_future-work.tex}
 \include{chapters/10_ethical-reflection.tex}
 \include{chapters/11_bibliography.tex}
 
-\pagestyle{numberless} 
 \pagestyle{empty}
 \include{chapters/12_appendices.tex}
 

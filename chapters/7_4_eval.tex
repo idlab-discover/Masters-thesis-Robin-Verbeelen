@@ -4,11 +4,11 @@
 \section{Introduction}
 \label{sec:eval-intro}
 
-The WASI I2C proposal's progression to Phase 3 requires demonstrated compatibility with embedded device constraints as defined by the portability criteria Table~\ref{tab:portability_criteria}. These specify resource-constrained platforms including the Nucleo F412ZG with only \SIi{256}{\kilo\byte} SRAM and \SIi{1}{\mega\byte} Flash memory, representing the minimal viable embedded deployment target. For WebAssembly to succeed in embedded I2C applications, implementations must operate efficiently within these stringent memory and performance constraints.
+The WASI \acrshort{i2c} proposal's progression to Phase 3 requires demonstrated compatibility with embedded device constraints as defined by the portability criteria Table~\ref{tab:portability_criteria}. These specify resource-constrained platforms including the Nucleo F412ZG with only \SIi{256}{\kilo\byte} SRAM and \SIi{1}{\mega\byte} Flash memory, representing the minimal viable embedded deployment target. For WebAssembly to succeed in embedded \acrshort{i2c} applications, implementations must operate efficiently within these stringent memory and performance constraints.
 
-This chapter presents a comprehensive experimental evaluation of the I2C WASI interface implementations developed for the WAMR and Wasmtime runtimes, with particular emphasis on their \textbf{performance characteristics} and \textbf{resource utilization} in embedded deployment scenarios. It encompasses \textbf{timing analysis} across multiple execution phases and comprehensive \textbf{memory profiling} to track allocation patterns. This data is then used for statistical analysis to ensure reliable and reproducible results. By systematically measuring \textbf{runtime setup overhead}, \textbf{execution latency}, and \textbf{memory consumption}, this experimental evaluation provides quantitative insights into the use of the WASI I2C interface in these constrained environments.
+This chapter presents a comprehensive experimental evaluation of the \acrshort{i2c} WASI interface implementations developed for the WAMR and Wasmtime runtimes, with particular emphasis on their \textbf{performance characteristics} and \textbf{resource utilization} in embedded deployment scenarios. It encompasses \textbf{timing analysis} across multiple execution phases and comprehensive \textbf{memory profiling} to track allocation patterns. This data is then used for statistical analysis to ensure reliable and reproducible results. By systematically measuring \textbf{runtime setup overhead}, \textbf{execution latency}, and \textbf{memory consumption}, this experimental evaluation provides quantitative insights into the use of the WASI \acrshort{i2c} interface in these constrained environments.
 
-WAMR's results are particularly critical because it represents the primary runtime architecture capable of meeting these embedded constraints. Unlike feature-rich runtimes designed for server environments, WAMR's embedded-optimized architecture directly targets the resource limitations specified in the portability criteria. If WAMR cannot demonstrate acceptable performance and memory efficiency, the Preview 1 approach --- and by extension, the entire embedded WebAssembly I2C ecosystem --- would lack a viable deployment foundation for resource-constrained systems.\\
+WAMR's results are particularly critical because it represents the primary runtime architecture capable of meeting these embedded constraints. Unlike feature-rich runtimes designed for server environments, WAMR's embedded-optimized architecture directly targets the resource limitations specified in the portability criteria. If WAMR cannot demonstrate acceptable performance and memory efficiency, the Preview 1 approach --- and by extension, the entire embedded WebAssembly \acrshort{i2c} concept --- would lack a viable deployment foundation for resource-constrained systems.
 
 \section{Evaluation Setup}
 \label{sec:eval-methodology}
@@ -16,7 +16,7 @@ WAMR's results are particularly critical because it represents the primary runti
 \subsection{The Ping-Pong Routine: Comprehensive System Validation}
 \label{subsec:ping-pong-routine}
 
-The Ping-Pong routine represents more than a simple I2C communication test; it serves as a comprehensive validation of the entire WebAssembly I2C ecosystem, exercising every critical component of the system in a minimal, reproducible manner. Importantly, the routine encompasses the complete resource lifecycle, including resource creation, usage, and destruction.
+The Ping-Pong routine represents more than a simple \acrshort{i2c} communication test; it serves as a comprehensive validation of the entire WebAssembly \acrshort{i2c} implementation, exercising every critical component of the system in a minimal, reproducible manner. Importantly, the routine encompasses the complete resource lifecycle, including resource creation, usage, and destruction.
 
 \begin{listing}[H]
     \begin{minted}[breaklines]{rust}
@@ -35,7 +35,7 @@ The Ping-Pong routine represents more than a simple I2C communication test; it s
             // Phase 4: Automatic Resource Cleanup (via Drop trait)
         }  // device.drop() called here, triggering host_close() and handle deallocation
     \end{minted}
-    \caption{Complete ping-pong implementation demonstrating resource creation, bidirectional I2C communication, and automatic cleanup within a single operation}
+    \caption{Complete ping-pong implementation demonstrating resource creation, bidirectional \acrshort{i2c} communication, and automatic cleanup within a single operation}
     \label{lst:complete-pingpong}
 \end{listing}
 
@@ -45,28 +45,28 @@ The ping-pong routine exercises the following critical system components:
 
 \textbf{Memory Boundary Transitions}: Both write and read operations require careful translation between WebAssembly linear memory and native memory spaces, testing the memory safety mechanisms implemented in the host functions and validating the pointer translation logic.
 
-\textbf{Error Handling Pathways}: The routine exercises the complete error lifting and lowering pipeline, ensuring that I2C protocol errors are correctly propagated from hardware through the host implementation to the guest application without loss of semantic information.
+\textbf{Error Handling Pathways}: The routine exercises the complete error lifting and lowering pipeline, ensuring that \acrshort{i2c} protocol errors are correctly propagated from hardware through the host implementation to the guest application without loss of semantic information.
 
 \textbf{Bidirectional Communication}: The sequence tests both host-to-guest parameter passing (addresses, lengths) and guest-to-host data transfer (message buffers), validating the complete communication infrastructure including memory allocation and data marshalling.
 
-\textbf{Hardware Integration}: The actual I2C communication with the target device ensures that the entire software stack correctly interfaces with real hardware, validating the embedded HAL integration and confirming that the abstraction layers do not interfere with proper I2C protocol implementation.
+\textbf{Hardware Integration}: The actual \acrshort{i2c} communication with the target device ensures that the entire software stack correctly interfaces with real hardware, validating the embedded HAL integration and confirming that the abstraction layers do not interfere with proper \acrshort{i2c} protocol implementation.
 
 \subsection{Hardware Configuration}
 \label{subsec:eval-setup-hw}
 
-The experimental testbed consists of a Raspberry Pi acting as the I2C controller, connected to an Arduino Uno serving as the I2C peripheral.
+The experimental testbed consists of a Raspberry Pi acting as the \acrshort{i2c} controller, connected to an Arduino Uno serving as the \acrshort{i2c} target.
 
-\textbf{Controller Configuration:}
+\textbf{\acrshort{i2c} Controller Configuration:}
 \begin{itemize}
     \item Board: \textit{Raspberry Pi 5}~\cite{rpi5_specs}
     \item Architecture: \textit{ARM64}
     \item Operating System: \textit{Raspberry Pi OS (reference 2024-11-19)}~\cite{pi_os}
 \end{itemize}
 
-\textbf{Peripheral Configuration:}
+\textbf{\acrshort{i2c} Target Configuration:}
 \begin{itemize}
     \item Board: \textit{Arduino Uno R3 (ATmega328P)}~\cite{uno_specs}
-    \item Peripheral Address: \textit{0x09}
+    \item \acrshort{i2c} Address: \textit{0x09}
     \item Serial Interface: \textit{USB serial for correctness verification (disabled during performance tests)}
 \end{itemize}
 
@@ -83,10 +83,10 @@ The experimental testbed consists of a Raspberry Pi acting as the I2C controller
 Two firmware versions were developed for different evaluation phases:
 
 \subsubsection{Correctness Verification Firmware}
-This firmware implements echo functionality for debugging. All I2C transactions are logged via USB serial, enabling transaction verification.
+This firmware implements echo functionality for debugging. All \acrshort{i2c} transactions are logged via USB serial, enabling transaction verification.
 
 \subsubsection{Performance Testing Firmware}
-For performance benchmarks, an optimized firmware version was deployed that eliminates serial communication overhead. Upon receiving any I2C write request, the Arduino responds with a fixed ``hello'' message (\texttt{0x68, 0x65, 0x6c, 0x6c, 0x6f}) for one subsequent read operation. This approach minimizes Arduino-side processing variability and keeps extra overhead to a minimum.
+For performance benchmarks, an optimized firmware version was deployed that eliminates serial communication overhead. Upon receiving any \acrshort{i2c} write request, the Arduino responds with a fixed ``hello'' message (\texttt{0x68, 0x65, 0x6c, 0x6c, 0x6f}) for one subsequent read operation. This approach minimizes Arduino-side processing variability and keeps extra overhead to a minimum.
 
 \subsection{Methodology}
 \label{subsec:eval-setup-bench}
@@ -94,14 +94,14 @@ For performance benchmarks, an optimized firmware version was deployed that elim
 The evaluation follows a three-phase methodology to ensure correctness and robust measurement of latency and memory utilization.
 
 \subsubsection{Phase 1: Correctness Verification}
-Prior to profiling, functional correctness is verified by executing ping-pong operations across all implementations and confirming successful I2C transactions via Arduino serial monitor output.
+Prior to profiling, functional correctness is verified by executing ping-pong operations across all implementations and confirming successful \acrshort{i2c} transactions via Arduino serial monitor output.
 
 \subsubsection{Phase 2: Performance Measurement}
 Performance evaluation employs \textbf{Criterion.rs}, a statistical benchmarking framework that provides automatic outlier detection, distribution plotting, calculates achievable sample size prior to measurements during a warm-up phase and provides statistical insights post measurements~\cite{criterion_docs}. The intermediary tool \texttt{cargo-criterion}~\cite{cargo_criterion_docs} is an extension to Cargo and provides machine-readable JSON output of those measurements, which allows us to also perform manual analysis and visualizations using Python/Jupyter.
 
 The benchmark is divided into three different measurements, referred to as \textbf{Groups}. Each runtime gets evaluated over 100 samples according to the group's implementation:
 \begin{itemize}
-    \item \textbf{Runtime Setup:} Time to initialize runtime and prepare for I2C operations
+    \item \textbf{Runtime Setup:} Time to initialize runtime and prepare for \acrshort{i2c} operations
     \item \textbf{Cold Execution:} A single ping-pong operation after a new runtime initialization
     \item \textbf{Hot Execution:} Repeated ping-pong operations in steady state
 \end{itemize}
@@ -114,7 +114,7 @@ A single binary is built to run memory utilization profiling across all the diff
 
 Runtime initialization represents a critical performance dimension, particularly for embedded devices deployed in scenarios where Time-to-First-Execution is crucial. This section analyzes the setup overhead for each runtime and discusses the implications for practical deployment scenarios.
 
-While the native implementation is categorized under Runtime Setup, it does not involve any runtime initialization. Instead, it establishes a performance baseline by measuring the Linux I2C Stack overhead for opening the \texttt{/dev/i2c-1} device file. Since the \acrshort{wasm} implementations utilize the same underlying Linux I2C software stack, this baseline enables quantification of the additional overhead introduced purely by runtime instantiation when compared against the \acrshort{wasm} implementations.
+While the native implementation is categorized under Runtime Setup, it does not involve any runtime initialization. Instead, it establishes a performance baseline by measuring the Linux \acrshort{i2c} Stack overhead for opening the \texttt{/dev/i2c-1} device file. Since the \acrshort{wasm} implementations utilize the same underlying Linux \acrshort{i2c} software stack, this baseline enables quantification of the additional overhead introduced purely by runtime instantiation when compared against the \acrshort{wasm} implementations.
 
 Table~\ref{tab:wasm-setup} presents the initialization overhead for \acrshort{wamr} and Wasmtime implementations compared to the Native baseline. Figure~\ref{fig:wasm-setup-distribution} gives a visual representation.
 
@@ -164,7 +164,7 @@ These setup time characteristics have profound implications for embedded deploym
 \section{Performance Analysis: Ping-Pong Execution}
 \label{sec:eval-execution}
 
-With runtime initialization complete, this section examines the steady-state execution performance for I2C operations, comparing cold (first-execution) and hot (repeated-execution) characteristics.
+With runtime initialization complete, this section examines the steady-state execution performance for \acrshort{i2c} operations, comparing cold (first-execution) and hot (repeated-execution) characteristics.
 
 Table~\ref{tab:wasm-execution} compares execution performance between WAMR, Wasmtime, and Native for both Cold and Hot Routine Executions.
 
@@ -314,7 +314,7 @@ Table~\ref{tab:memory-execution} presents memory allocation characteristics duri
 
 Both runtimes demonstrate remarkable efficiency: WAMR requires \SIi{327}{\byte} across 6 allocations, while Wasmtime uses \SIi{416}{\byte} across 10 allocations --- a negligible \SIi{89}{\byte} difference despite their architectural disparities. Compared to the \SIi{16}{\byte} native baseline, this represents approximately \SIrange[round-precision=0]{20}{26}{\times} overhead respectively, primarily attributable to WASI interface marshalling and guest-host communication buffers.
 
-The minimal peak-to-total allocation differences (WAMR: \SI[round-precision=0]{5}{\percent}, Wasmtime: \SI[round-precision=0]{17}{\percent}) indicate stable execution without memory leaks or excessive temporary allocations. This efficiency validates both runtimes for long-running embedded applications where thousands of I2C operations must execute within constrained memory budgets.
+The minimal peak-to-total allocation differences (WAMR: \SI[round-precision=0]{5}{\percent}, Wasmtime: \SI[round-precision=0]{17}{\percent}) indicate stable execution without memory leaks or excessive temporary allocations. This efficiency validates both runtimes for long-running embedded applications where thousands of \acrshort{i2c} operations must execute within constrained memory budgets.
 
 Critically, these results demonstrate that the substantial initialization costs --- particularly Wasmtime's \SI{14.25}{\mega\byte} --- do not translate to proportional execution overhead. Once initialized, both runtimes operate within hundreds of bytes, making the initialization cost a one-time investment that can be amortized across the application lifetime.
 
@@ -326,18 +326,18 @@ Binary size represents a critical deployment consideration for embedded systems,
 Table~\ref{tab:binary-sizes} presents the binary size characteristics across all implementations, including both standard and optimized variants. The optimized variants employ aggressive size reduction techniques, including Link Time Optimization (LTO), optimization level \texttt{-Oz} (optimize for size), and \texttt{no\_std} compilation strategies that eliminate the standard library overhead. For every host implementation, the \texttt{aarch64-unknown-linux-musl} target was used. Musl is a lightweight implementation of the C standard library, specifically designed for embedded environments~\cite{musl}. It uses static linking out of the box, making sure the binary files include everything they need to execute successfully.
 
 \begin{table}[H]
-\centering
-\caption{Binary Size Comparison Across Implementation Variants}
-\label{tab:binary-sizes}
-\begin{tabular}{lrrr}
-\toprule
-\textbf{Implementation} & \textbf{Standard Build (MB)} & \textbf{Optimized Build (KB)} & \textbf{Size Reduction (\%)} \\
-\midrule
-Native              & 7.23  & 348   & 95.2 \\
-WAMR                & 10.44 & 660   & 93.7 \\
-Wasmtime            & 12.20 & 3,609 & 70.4 \\
-\bottomrule
-\end{tabular}
+    \centering
+    \caption{Binary Size Comparison Across Implementation Variants}
+    \label{tab:binary-sizes}
+    \begin{tabular}{lrrr}
+    \toprule
+    \textbf{Implementation} & \textbf{Standard Build (MB)} & \textbf{Optimized Build (KB)} & \textbf{Size Reduction (\%)} \\
+    \midrule
+    Native              & 7.23  & 348   & 95.2 \\
+    WAMR                & 10.44 & 660   & 93.7 \\
+    Wasmtime            & 12.20 & 3,609 & 70.4 \\
+    \bottomrule
+    \end{tabular}
 \end{table}
 
 The standard builds include full runtime initialization capabilities with debugging support and standard library linking, while optimized builds embed the guest module directly within the host binary and apply comprehensive size reduction optimizations. For the WAMR implementation, the Preview 1 guest module contributes \SIi{38}{\kilo\byte} in standard builds and \SIi{4.8}{\kilo\byte} in optimized builds. The Wasmtime Preview 2 component remains at \SIi{16.2}{\kilo\byte} on its own, as \texttt{no\_std} compilation is not compatible with runtime binding generation tools providing Preview 2 support. Manual interference could solve that issue, but it defeats the desire for the enhanced developer experience.
@@ -351,3 +351,6 @@ Wasmtime's more modest \SI[round-precision=1]{70.4}{\percent} reduction to \SI{3
 \textbf{Embedded Systems Deployment Implications:} The binary size analysis reveals a clear architectural trade-off between feature sophistication and deployment flexibility. WAMR's optimized \SIi{660}{\kilo\byte} footprint remains viable for moderately constrained embedded systems, while still providing WebAssembly isolation and portability benefits. Wasmtime's \SI{3.609}{\mega\byte} minimum requirement restricts itself to deployment on more capable embedded platforms with sufficient flash storage.
 
 The dramatic size reduction potential (\SI[round-precision=1]{93.7}{\percent} for WAMR) demonstrates that embedded WebAssembly deployments can achieve reasonable footprints when unnecessary debugging infrastructure and standard library dependencies are eliminated. However, these optimizations require careful consideration of development workflow impacts, as debugging capabilities are significantly reduced in size-optimized builds.
+
+\section*{Reproducibility}
+All experimental code and benchmarks are available at: \url{https://github.com/idlab-discover/wamr-wasi-i2c}. The repository includes automated setup scripts enabling complete reproduction with the \texttt{Just} tool.

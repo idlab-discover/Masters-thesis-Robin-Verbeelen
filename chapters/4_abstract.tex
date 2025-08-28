@@ -2,12 +2,23 @@
 \chaptermark{Abstract}
 \addcontentsline{toc}{chapter}{Abstract}  
 
-This chapter should contain three things.
+% This chapter should contain three things.
 
-\begin{itemize}
-    \item A copy of all the information on the title page of your master's thesis. This includes things like the name of your master's thesis and your advisors.
-    \item A one-paragraph description of your master's thesis. This should be 15 to 20 lines long. This should include the context of your master's thesis, the problem statement of your master's thesis. The results of your master's thesis, and the evaluation of the work.
-    \item Five keywords that describe the subject best.
-\end{itemize}
+% \begin{itemize}
+%     \item A copy of all the information on the title page of your master's thesis. This includes things like the name of your master's thesis and your advisors.
+%     \item A one-paragraph description of your master's thesis. This should be 15 to 20 lines long. This should include the context of your master's thesis, the problem statement of your master's thesis. The results of your master's thesis, and the evaluation of the work.
+%     \item Five keywords that describe the subject best.
+% \end{itemize}
 
-The chapter should be one page at most.
+% The chapter should be one page at most.
+
+
+
+
+
+
+
+\textit{Abstract}---Resource-constrained embedded systems face critical challenges adopting WebAssembly (Wasm) technologies for hardware communication. The current \acrshort{i2c} Proposal for WebAssembly System Interface (WASI) depends on Preview 2’s sophisticated component model architectures, creating deployment barriers for embedded environments. This work develops a comprehensive WASI Preview 1 implementation  that eliminates these constraints. Manual Rust bindings translate WIT-defined interface semantics to Preview 1 function calls, enabling WebAssembly Micro Runtime (WAMR) integration on constrained platforms. Comparative evaluation against Wasmtime’s Preview 2 approach demonstrates that Preview 1 implementations achieve embedded compatibility while maintaining functional equivalence with Preview 2 specifications. WAMR delivers 77 × faster startup times (253 μs vs 19,559 μs) and dramatically lower memory requirements (10 kB vs 2.7 MB peak usage) than Wasmtime. Hardware validation through Raspberry Pi and Arduino testbeds confirms practical \acrshort{i2c} communication, establishing performance baselines for embedded WebAssembly deployment.
+
+\textit{Index Terms}---WebAssembly, WASI, \acrshort{i2c}, Embedded, IoT,
+WAMR, Wasmtime

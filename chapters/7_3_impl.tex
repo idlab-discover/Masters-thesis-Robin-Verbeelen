@@ -10,7 +10,7 @@ The implementation serves as an exploration of how the \acrshort{wasi} \acrshort
 
 \subsection{Implementation Context and Scope}
 
-The development effort encompasses five core projects that collectively demonstrate Preview~1 \acrshort{i2c} interface feasibility. Each project plays a specific role in the ecosystem:  
+The development effort encompasses five core projects that collectively demonstrate Preview~1 \acrshort{i2c} interface feasibility. Each project plays a specific role in the kit:  
 \begin{itemize}
     \item \textbf{wasip1-i2c-lib:} provides hand-written bindings for \acrshort{wasi} Preview~1.  
     \item \textbf{wasip1-i2c-guest:} is a guest module compiled to \texttt{wasm32-wasip1}, intended for execution in \acrshort{wamr}.  
@@ -19,7 +19,7 @@ The development effort encompasses five core projects that collectively demonstr
     \item \textbf{wasmtime\_impl:} provides a Preview~2 host implementation using Wasmtime.
 \end{itemize}
 
-All implementations in this ecosystem, including the Preview~2 component and the Wasmtime host, represent original contributions developed specifically for this research~\cite{wamr-wasi-i2c}. The system design enables direct comparison between Preview~1 and Preview~2 approaches while maintaining functional equivalence in \acrshort{i2c} communication capabilities.
+All implementations in this kit, including the Preview~2 component and the Wasmtime host, represent original contributions developed specifically for this research~\cite{wamr-wasi-i2c}. The system design enables direct comparison between Preview~1 and Preview~2 approaches while maintaining functional equivalence in \acrshort{i2c} communication capabilities.
 
 \autoref{fig:project_schema} showcases how different projects rely on or interact with each other, representing the complete infrastructure used for this research.
 \begin{figure}[H]
@@ -82,7 +82,7 @@ Code Fragments \ref{lst:official-i2c-interface} and \ref{lst:simplified-i2c-inte
         }
     }
     \end{minted}
-    \caption{Simplified I2C interface providing core read and write functionality}
+    \caption{Simplified \acrshort{i2c} interface providing core read and write functionality}
     \label{lst:simplified-i2c-interface}
 \end{listing}
 
@@ -181,7 +181,7 @@ The WebAssembly Component Model defines a Canonical \acrfull{abi} that specifies
 
 \subsection{Context-Driven ABI Design Decisions}
 
-Rather than indicating a limitation or incompatibility, the departure from strict Canonical ABI compliance represents a deliberate design choice based on the specific context and constraints of embedded I2C communication. Understanding the application domain enables targeted optimizations that would not be possible with a generic ABI approach.
+Rather than indicating a limitation or incompatibility, the departure from strict Canonical ABI compliance represents a deliberate design choice based on the specific context and constraints of embedded \acrshort{i2c} communication. Understanding the application domain enables targeted optimizations that would not be possible with a generic ABI approach.
 
 \textbf{Error Handling Optimization}: The Canonical ABI represents errors using a discriminated union approach, where the error type discriminant and error-specific data (such as NoAcknowledgeSource) would be stored in separate fields, similar to C union structures. The Preview 1 implementation consolidates this information into a single byte using bit manipulation, providing an errno-like interface that reduces memory usage and simplifies error propagation in resource-constrained environments.
 
@@ -191,7 +191,7 @@ Rather than indicating a limitation or incompatibility, the departure from stric
 
 \textbf{Advantages of Custom Approach}:
 \begin{itemize}
-    \item \textbf{Embedded Optimization}: Targeted optimizations for I2C communication patterns reduce memory usage and improve predictability for embedded deployment scenarios.
+    \item \textbf{Embedded Optimization}: Targeted optimizations for \acrshort{i2c} communication patterns reduce memory usage and improve predictability for embedded deployment scenarios.
     \item \textbf{Simplified Error Model}: The errno-style error reporting aligns with embedded programming conventions and reduces complexity in error handling logic.
     \item \textbf{Resource Efficiency}: Compact error encoding and optimized memory patterns minimize overhead in resource-constrained environments.
     \item \textbf{Deterministic Behavior}: Context-specific optimizations enable more predictable performance characteristics suitable for real-time embedded applications.
@@ -205,7 +205,7 @@ Rather than indicating a limitation or incompatibility, the departure from stric
     \item \textbf{Limited Reusability}: Context-specific optimizations may not transfer to other use cases or interface types.
 \end{itemize}
 
-The decision to deviate from the Canonical ABI represents a conscious trade-off between universal compatibility and context-specific optimization. While the Canonical ABI could be fully implemented for this use case, the specific constraints and patterns of embedded I2C communication justify targeted optimizations that provide benefits in the target deployment environment.
+The decision to deviate from the Canonical ABI represents a conscious trade-off between universal compatibility and context-specific optimization. While the Canonical ABI could be fully implemented for this use case, the specific constraints and patterns of embedded \acrshort{i2c} communication justify targeted optimizations that provide benefits in the target deployment environment.
 
 \section{WASI Preview 1 Bindings Implementation}
 \label{sec:wasip1-bindings}
@@ -349,7 +349,7 @@ The guest-side resource management system provides lifecycle management based on
         }
     }
     \end{minted}
-    \caption{Foreign function interface declarations and \acrshort{raii}-based resource management implementation providing automatic lifecycle control for I2C handles}
+    \caption{Foreign function interface declarations and \acrshort{raii}-based resource management implementation providing automatic lifecycle control for \acrshort{i2c} handles}
     \label{lst:guest-ffi-declarations}
 \end{listing}
 
@@ -388,11 +388,11 @@ The guest-side resource management system provides lifecycle management based on
         }
     }
     \end{minted}
-    \caption{Function bindings required by a I2C resource, with ``\texttt{read}'' showcasing guest-managed heap allocation}
+    \caption{Function bindings required by a \acrshort{i2c} resource, with ``\texttt{read}'' showcasing guest-managed heap allocation}
     \label{lst:guest-resource-management}
 \end{listing}
 
-The \acrshort{raii} pattern, showcased in \autoref{lst:guest-ffi-declarations}, ensures that I2C resources are automatically cleaned up when they go out of scope, preventing resource leaks that could be particularly problematic in embedded environments where resource recovery might be limited. Both the write and read functions --- imported from the host as \acrfull{ffi}~\cite{ffi_wiki} --- return a \texttt{u8} value, representing the earlier discussed experimental \texttt{ErrorCode} optimization.
+The \acrshort{raii} pattern, showcased in \autoref{lst:guest-ffi-declarations}, ensures that \acrshort{i2c} resources are automatically cleaned up when they go out of scope, preventing resource leaks that could be particularly problematic in embedded environments where resource recovery might be limited. Both the write and read functions --- imported from the host as \acrfull{ffi}~\cite{ffi_wiki} --- return a \texttt{u8} value, representing the earlier discussed experimental \texttt{ErrorCode} optimization.
 
 In \autoref{lst:guest-resource-management}, guest functions use the return value to get feedback from the host about the success or failure of their request. The guest \texttt{read} function also showcases guest-managed heap allocation behind the scenes through the use of \texttt{Vec::with\_capacity}. This, again, derives from the Canonical ABI specification to showcase the flexibility allowed by Preview 1.
 
@@ -401,7 +401,7 @@ In \autoref{lst:guest-resource-management}, guest functions use the return value
 
 \subsection{Preview 1 Module}
 
-The Preview 1 guest implementation (\texttt{wasip1-i2c-guest}) represents a carefully optimized approach designed specifically for resource-constrained embedded environments. This implementation prioritizes minimal binary size and runtime overhead while maintaining full functional compatibility with the I2C interface specification.
+The Preview 1 guest implementation (\texttt{wasip1-i2c-guest}) represents a carefully optimized approach designed specifically for resource-constrained embedded environments. This implementation prioritizes minimal binary size and runtime overhead while maintaining full functional compatibility with the \acrshort{i2c} interface specification.
 
 \subsubsection{No-Standard Library Configuration and Binary Size Impact}
 
@@ -442,13 +442,13 @@ The \texttt{no\_std} configuration requires explicit provision of memory allocat
     #[unsafe(no_mangle)]
     pub extern "C" fn _start() {
         let data = [0x68u8, 0x65, 0x6c, 0x6c, 0x6f]; // ASCII "hello"
-        let slave_addr: I2cAddress = 0x0009;
+        let target_addr: I2cAddress = 0x0009;
         let device = I2cResource::new();
-        let _ = device.write(slave_addr, &data);
-        let _ = device.read(slave_addr, data.len());
+        let _ = device.write(target_addr, &data);
+        let _ = device.read(target_addr, data.len());
     }
     \end{minted}
-    \caption{Complete I2C Ping-Pong implementation demonstrating resource creation, bidirectional communication, and automatic cleanup}
+    \caption{Complete \acrshort{i2c} Ping-Pong implementation demonstrating resource creation, bidirectional communication, and automatic cleanup}
     \label{lst:preview1-main-functionality}
 \end{listing}
 
@@ -467,15 +467,15 @@ WAMR supports multiple heap management approaches~\cite{wamr_heaps}, each with d
 
 The \textbf{Canonical ABI} specification recommends \textbf{host-managed memory allocation} for several reasons: enhanced security through centralized memory control, improved resource monitoring capabilities, and simplified garbage collection integration. Host-managed approaches provide the runtime with complete visibility into memory usage patterns and enable sophisticated memory protection mechanisms.
 
-\textbf{Rationale for Guest-Managed Allocation}: The decision to implement guest-managed heap allocation was driven by the specific characteristics of I2C read operations and experimental objectives rather than inherent performance benefits:
+\textbf{Rationale for Guest-Managed Allocation}: The decision to implement guest-managed heap allocation was driven by the specific characteristics of \acrshort{i2c} read operations and experimental objectives rather than inherent performance benefits:
 
 \begin{itemize}
-    \item \textbf{Predictable Buffer Sizing}: I2C read operations require the guest to specify the expected number of bytes in advance. Guest-managed allocation allows the buffer to be pre-allocated based on this known size before initiating the host function call.
-    \item \textbf{Error Handling Considerations}: When I2C operations fail, guest-managed allocation results in pre-allocated buffers that cannot be used, representing wasted allocation effort. This trade-off was accepted to explore the guest-managed approach.
-    \item \textbf{Implementation Simplicity}: For the specific case of I2C communication, guest-managed allocation simplifies the host-side implementation by eliminating the need for complex memory allocation coordination.
+    \item \textbf{Predictable Buffer Sizing}: \acrshort{i2c} read operations require the guest to specify the expected number of bytes in advance. Guest-managed allocation allows the buffer to be pre-allocated based on this known size before initiating the host function call.
+    \item \textbf{Error Handling Considerations}: When \acrshort{i2c} operations fail, guest-managed allocation results in pre-allocated buffers that cannot be used, representing wasted allocation effort. This trade-off was accepted to explore the guest-managed approach.
+    \item \textbf{Implementation Simplicity}: For the specific case of \acrshort{i2c} communication, guest-managed allocation simplifies the host-side implementation by eliminating the need for complex memory allocation coordination.
 \end{itemize}
 
-The pure experimental nature of this choice provides valuable insights into the flexibility of Preview 1 memory management strategies while maintaining compatibility with the broader I2C interface semantics.
+The pure experimental nature of this choice provides valuable insights into the flexibility of Preview 1 memory management strategies while maintaining compatibility with the broader \acrshort{i2c} interface semantics.
 
 \subsection{Preview 2 Component: Automated Binding Generation}
 
@@ -510,7 +510,7 @@ The Preview 2 implementation utilizes \texttt{cargo-component}, a specialized bu
     \label{lst:preview2-guest}
 \end{listing}
 
-The \texttt{cargo-component} tool simulates a future ecosystem where WebAssembly components can declare their WASI interface dependencies in the same declarative manner as traditional Rust dependencies. This approach eliminates the need for manual binding generation and provides automatic type safety guarantees between component interfaces.
+The \texttt{cargo-component} tool simulates a future where WebAssembly components can declare their WASI interface dependencies in the same declarative manner as traditional Rust dependencies. This approach eliminates the need for manual binding generation and provides automatic type safety guarantees between component interfaces.
 
 \begin{listing}[H]
 \begin{minted}[breaklines]{toml}
@@ -536,26 +536,6 @@ The component configuration metadata demonstrates how WASI interfaces could be m
 Unlike the Preview 1 implementation, Preview 2 components cannot utilize \texttt{\#![no\_std]} configuration due to fundamental dependencies within the \texttt{wit-bindgen} runtime system. The component model's automatic binding generation relies on standard library facilities for memory management, error handling, and runtime reflection capabilities that are incompatible with \texttt{no\_std} environments.
 
 This architectural limitation means that Preview 2 components inherently require larger binary sizes and more sophisticated runtime environments, making them less suitable for the most resource-constrained embedded applications. The trade-off provides significant development productivity improvements and automatic correctness guarantees at the cost of increased resource requirements. Optimizations are discussed later, but they take away from the advanced developer experience that Preview 2 aims to provide.
-
-\subsection{Compilation Process}
-
-\begin{listing}[H]
-\begin{minted}[breaklines]{bash}
-# Preview 1 compilation: produces minimal WebAssembly Module
-cd wasip1-i2c-guest && cargo build --target wasm32-wasip1 --release
-\end{minted}
-\caption{Preview 1 compilation producing resource-efficient WebAssembly module with built-in support from the Rust compiler}
-\label{lst:preview1-compilation}
-\end{listing}
-
-\begin{listing}[H]
-\begin{minted}[breaklines]{bash}
-# Preview 2 compilation: produces feature-rich WebAssembly Component
-cd wasip2-i2c-guest && cargo component build --target wasm32-wasip2 --release
-\end{minted}
-\caption{Preview 2 compilation via external tool \texttt{cargo-component} producing a comprehensive WebAssembly component}
-\label{lst:preview2-compilation}
-\end{listing}
 
 \section{Host Runtime Integration}
 \label{sec:host-runtime-integration}
@@ -621,7 +601,7 @@ In \autoref{lst:wamr-structure}, the structure field ordering is critical for pr
 
 \subsubsection{Memory Translation and Safety Boundaries}
 
-\autoref{lst:wamr-host-function-pt1} showcases the first part of the registered host function: \texttt{write}. Notice how the first parameter \texttt{exec\_env} is not actually defined anywhere by our interface in \acrshort{ffi} bindings defined in \autoref{lst:guest-ffi-declarations}. This parameter is automatically filled through WAMR's stack calling system~\cite{wamr_stacks}. The \sloppy\texttt{wasm\_runtime\_get\_module\_inst(exec\_env)} call allows the host function to find out what module instance called it. The capability-based security system on the host uses this information to validate if the calling instance has access to the (handle of the) I2C resource. If it does, next, the host checks if it has the required permissions for the requested operation.
+\autoref{lst:wamr-host-function-pt1} showcases the first part of the registered host function: \texttt{write}. Notice how the first parameter \texttt{exec\_env} is not actually defined anywhere by our interface in \acrshort{ffi} bindings defined in \autoref{lst:guest-ffi-declarations}. This parameter is automatically filled through WAMR's stack calling system~\cite{wamr_stacks}. The \sloppy\texttt{wasm\_runtime\_get\_module\_inst(exec\_env)} call allows the host function to find out what module instance called it. The capability-based security system on the host uses this information to validate if the calling instance has access to the (handle of the) \acrshort{i2c} resource. If it does, next, the host checks if it has the required permissions for the requested operation.
 
 \begin{listing}[H]
     \begin{minted}[breaklines]{rust}
@@ -696,7 +676,7 @@ A pointer used by a WebAssembly module instance just represents the offset from 
 
 \subsubsection{Capability-Based Security and Permission Management}
 
-The implementation includes a sophisticated permission management system designed to demonstrate capability-based security principles while supporting multiple concurrent module instances. This system represents a foundational approach to how fine-grained access control could be implemented in future I2C interface versions.
+The implementation includes a sophisticated permission management system designed to demonstrate capability-based security principles while supporting multiple concurrent module instances. This system represents a foundational approach to how fine-grained access control could be implemented in future \acrshort{i2c} interface versions.
 
 \begin{listing}[H]
     \begin{minted}{rust}
@@ -717,7 +697,7 @@ The implementation includes a sophisticated permission management system designe
         next_handle: I2cResourceHandle,
     }
     \end{minted}
-    \caption{Capability-based security infrastructure providing foundation for fine-grained I2C access control}
+    \caption{Capability-based security infrastructure providing foundation for fine-grained \acrshort{i2c} access control}
     \label{lst:permission-structures}
 \end{listing}
 
@@ -763,20 +743,20 @@ impl I2cPermissionsManager {
 \label{lst:permission-implementation}
 \end{listing}
 
-This permission system demonstrates the foundation for capability-based security in I2C interfaces. The current implementation provides basic read/write permissions as an example of how access control could be structured. Future implementations could extend this system to support:
+This permission system demonstrates the foundation for capability-based security in \acrshort{i2c} interfaces. The current implementation provides basic read/write permissions as an example of how access control could be structured. Future implementations could extend this system to support:
 
 \begin{itemize}
-    \item \textbf{Address-Specific Permissions}: Restricting access to specific I2C device addresses
-    \item \textbf{Transfer Size Limits}: Preventing resource exhaustion through large I2C transactions
-    \item \textbf{Rate Limiting}: Controlling the frequency of I2C operations per module
-    \item \textbf{Resource Passing}: Enabling secure transfer of I2C handles between components
+    \item \textbf{Address-Specific Permissions}: Restricting access to specific \acrshort{i2c} device addresses
+    \item \textbf{Transfer Size Limits}: Preventing resource exhaustion through large \acrshort{i2c} transactions
+    \item \textbf{Rate Limiting}: Controlling the frequency of \acrshort{i2c} operations per module
+    \item \textbf{Resource Passing}: Enabling secure transfer of \acrshort{i2c} handles between components
 \end{itemize}
 
 \textbf{Note}: The current ACL features serve as architectural examples demonstrating how capability-based security could be implemented. They have not been extensively tested in production scenarios and represent a foundation for future security policy development rather than a complete security solution.
 
 \subsection{Wasmtime Implementation: Component Model Integration}
 
-The Wasmtime implementation serves as both a reference point for functional comparison and a demonstration of how the same I2C interface semantics can be expressed through different WebAssembly runtime architectures:
+The Wasmtime implementation serves as both a reference point for functional comparison and a demonstration of how the same \acrshort{i2c} interface semantics can be expressed through different WebAssembly runtime architectures:
 
 \begin{listing}[H]
     \begin{minted}[breaklines]{rust}

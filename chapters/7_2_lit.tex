@@ -217,7 +217,7 @@ The protocol operates over two bidirectional signal lines: the \textbf{Serial Da
 
 \acrfull{hal}s provide portable interfaces to access hardware peripherals, abstracting device-specific details behind generic \acrshort{api}s. This decoupling allows driver code to operate across different microcontroller families and platforms~\cite{hal}.  
 
-In the Rust ecosystem, the \texttt{embedded-hal} crate~\cite{embedded_hal_crate} has become the de facto standard, defining traits for common peripherals such as I2C, SPI, GPIO, and UART. Numerous driver crates build on these traits, ensuring cross-platform portability. Platform-specific implementations include \texttt{linux-embedded-hal}~\cite{linux_embedded_hal_crate} for Linux systems and other crates targeting Raspberry Pi~\cite{rppal_crate} or STM32 microcontrollers~\cite{stm_hal_crate}.
+In the Rust ecosystem, the \texttt{embedded-hal} crate~\cite{embedded_hal_crate} has become the de facto standard, defining traits for common peripherals such as \acrshort{i2c}, SPI, GPIO, and UART. Numerous driver crates build on these traits, ensuring cross-platform portability. Platform-specific implementations include \texttt{linux-embedded-hal}~\cite{linux_embedded_hal_crate} for Linux systems and other crates targeting Raspberry Pi~\cite{rppal_crate} or STM32 microcontrollers~\cite{stm_hal_crate}.
 
 \section{WASI I2C Standardization Proposal}
 \label{sec:wasi-i2c-proposal}
@@ -227,7 +227,7 @@ In the Rust ecosystem, the \texttt{embedded-hal} crate~\cite{embedded_hal_crate}
 
 The \acrshort{wasi} \acrshort{i2c} proposal is part of the ongoing effort to standardize hardware communication interfaces within the \acrshort{wasi} specification~\cite{wasi_i2c_proposal}. Standardization in the \acrshort{wasi} subgroup follows a structured process with multiple phases: conceptual start (Phase 0), exploratory design (Phase 1), prototyping and specification drafting (Phase 2), implementation and integration (Phase 3), and final standardization (Phase 4-5).  
 
-The I2C proposal is currently in Phase~2, focusing on prototyping, implementation feasibility, and iterative design refinement. To advance to Phase~3, it must demonstrate comprehensive test coverage, resolve open design questions, and show multiple independent implementations.
+The \acrshort{i2c} proposal is currently in Phase~2, focusing on prototyping, implementation feasibility, and iterative design refinement. To advance to Phase~3, it must demonstrate comprehensive test coverage, resolve open design questions, and show multiple independent implementations.
 
 \subsection{Proposal Architecture and Design}
 \label{subsec:i2c-proposal-design}

@@ -4,13 +4,40 @@
 \refstepcounter{chapter}
 \label{chap:ethics}
 
-% TODO: Duurzaamheidsreflectie kan bespreken dat het gebruik van wasm oudere hardware terug leven kan geven omdat deze techniek minder kost resources nodig heeft dan andere virtualisatie methoden. Maar uitgebreid onderzoek doen naar resultaten van andere onderzoeken die aanwijzen hoeveel dedicated virtualisatietechnieken voor embedded/contraint devices inhoudt.
+This research on WebAssembly-based \acrshort{i2c} interfaces for embedded systems extends far beyond technical standardization, touching on fundamental challenges facing our increasingly connected society. As billions of IoT devices permeate critical infrastructure, consumer products, and industrial systems, the choices we make about their software architecture have profound implications for sustainability, security, and technological equity.
 
-This chapter is only for the engineering technology ("industrieel ingenieur") students. It contains a societal reflection of one to three pages. You can interpret this very broadly. For example, this chapter can include one or more of the following.
+\section*{Extending Device Lifespans and Combating Electronic Waste}
 
-\begin{itemize}
-    \item Placing the work in a broader societal context. For example, how does this work impact or contribute to recent societal change such as digital transformation or the AI revolution?
-    \item Explaining how the work contributes to the implementation of the United Nations (UN) Sustainable Development Goals (SDGs). For more information, see \url{https://en.wikipedia.org/wiki/Sustainable_Development_Goals} and \url{https://www.sdgs.be/nl/sdgs}.
-    \item Reflecting on the ethical impact of this thesis or the used datasets. For example, how does this impact people's privacy? Is there bias available in the datasets? Could this be used for military or dual-use purposes?
-    \item Investigating how the resulting work conforms to relevant laws or technical standards such as the GDPR, AI act and the CRA.
-\end{itemize}
+One of the most compelling societal benefits of this work lies in its potential to extend the operational lifespan of existing embedded hardware. Traditional embedded systems suffer from rigid, monolithic firmware that becomes increasingly difficult to update as hardware ages and development toolchains evolve. This technical obsolescence drives premature device replacement, contributing significantly to the growing global electronic waste crisis.
+
+WebAssembly's hardware abstraction capabilities offer a compelling alternative. Other research demonstrates that WASM can enable older microcontrollers and embedded platforms to run modern applications with efficiency comparable to traditional approaches~\cite{wagner_energy, xiong_energy}. The experimental results from this thesis show that WAMR achieves only 2× performance overhead compared to native implementations while providing complete hardware abstraction and security isolation. This overhead is acceptable for many embedded applications, particularly when weighed against the environmental cost of device replacement.
+
+More critically, the standardized nature of WASI interfaces means that software developed today can continue running on hardware designed years or decades ago, provided a compatible runtime exists. This "write once, run anywhere" paradigm could fundamentally alter the economics of embedded system lifecycle management, making software updates economically viable even for decade-old hardware installations.
+
+\section*{Contributions to UN Sustainable Development Goals}
+
+This research directly supports several United Nations Sustainable Development Goals through multiple pathways. Digital technologies have been identified as directly benefiting 70\% of all SDG targets~\cite{ITUUNDPJoin}, with embedded systems playing a crucial role in this digital transformation.
+
+\textbf{SDG 9 - Industry, Innovation and Infrastructure:} The standardization of hardware interfaces through WASI directly promotes innovation by reducing barriers to embedded software development. By enabling developers to write portable code that works across diverse hardware platforms, this work democratizes embedded systems development and reduces the specialized knowledge required for hardware-specific programming.
+
+\textbf{SDG 12 - Responsible Consumption and Production:} The ability to extend device lifespans through software updates addresses the core challenge of sustainable consumption. Rather than replacing entire systems when software becomes obsolete, WASM-based architectures enable continuous software evolution while maintaining hardware compatibility. This approach aligns with circular economy principles by maximizing resource utilization and minimizing waste.
+
+\textbf{SDG 13 - Climate Action:} The environmental impact operates through multiple channels. Extended device lifespans directly reduce the carbon footprint associated with manufacturing replacement hardware, which typically represents 70-80\% of a device's lifetime environmental impact~\cite{tankEmbeddedCarbonHidden2023}. Additionally, the ability to deploy efficient, optimized software updates can improve energy efficiency in deployed systems, as demonstrated by smart grid and building automation applications.
+
+However, this contribution comes with important caveats. The 2× performance overhead observed in this research translates directly to increased energy consumption during operation. For battery-powered IoT devices, this overhead must be carefully weighed against the environmental benefits of extended device lifespans. Research on WASM energy consumption across different programming languages and runtimes shows significant variation, with some implementations achieving near-native efficiency while others impose substantial energy penalties~\cite{wagner_energy, xiong_energy}.
+
+\section*{Security and Digital Resilience}
+
+The European Union's Cyber Resilience Act mandates that manufacturers provide security updates throughout a product's expected lifespan, fundamentally altering the economics of embedded system security. Traditional firmware update mechanisms are often complex, risky, and expensive to deploy, particularly for resource-constrained devices deployed in remote locations.
+
+WebAssembly's sandboxed execution model and capability-based security provide a robust foundation for secure, updatable embedded systems. The capability-based access control demonstrated in this thesis enables fine-grained permission management, allowing system administrators to precisely control which hardware resources each software component can access. This approach supports the principle of least privilege, reducing the attack surface and containing potential security breaches.
+
+The ability to deploy security updates as WASM modules rather than full firmware replacements significantly reduces update complexity and risk. This capability becomes particularly important for critical infrastructure systems where update-related downtime can have serious safety implications. The automotive industry's adoption of over-the-air updates exemplifies this trend, where the ability to rapidly deploy security patches without requiring physical vehicle access has become essential. Vehicle \acrshort{ota} updates illustrate how WebAssembly research could have an immediate positive impact on civilian safety.
+
+However, the security benefits must be weighed against new attack vectors. The additional complexity of WASM runtimes creates new potential vulnerabilities, and the networking capabilities required for remote updates introduce additional security considerations. The dual-use potential of these capabilities also warrants consideration—the same technologies that enable beneficial security updates could potentially be exploited for unauthorized remote access or surveillance.
+
+\section*{Technological Equity and Development Accessibility}
+
+WebAssembly's promise of hardware abstraction has profound implications for technological equity, particularly in developing regions where access to cutting-edge hardware may be limited. By enabling modern software to run efficiently on older or less powerful hardware, WASM can help bridge the digital divide and ensure that technological innovations remain accessible even in resource-constrained environments.
+
+The performance characteristics demonstrated in this research suggest that WASM can make sophisticated embedded applications viable on hardware that would otherwise be considered obsolete. This capability is particularly relevant for educational institutions, small businesses, and developing regions where hardware replacement cycles are extended due to economic constraints.

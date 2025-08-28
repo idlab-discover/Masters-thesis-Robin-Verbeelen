@@ -4,22 +4,28 @@
 \refstepcounter{chapter}
 \label{chap:future-work}
 
-
-%TODO: uitbreiding naar nog andere runtimes? Wasmer?, JCO?, ...
-
-This thesis establishes Preview 1 I2C interface compatibility and provides performance benchmarks for WAMR and Wasmtime implementations. Several research directions emerge from this foundation.
+This thesis establishes Preview 1 \acrshort{i2c} interface compatibility and provides performance benchmarks for WAMR and Wasmtime implementations. Several research directions emerge from this foundation.
 
 \section*{Standardization and Testing}
 \label{sec:standardization-testing}
 
-\textbf{Phase 3 standardization} requires comprehensive test suites and examples beyond the current simplified interface implementation. Developing tests for the complete WASI I2C specification, including error handling scenarios and realistic I2C peripheral examples, would support the proposal's advancement.
+\textbf{Phase 3 standardization} requires comprehensive test suites and examples beyond the current simplified interface implementation. Developing tests for the complete WASI \acrshort{i2c} specification, including error handling scenarios and realistic \acrshort{i2c} peripheral examples, would support the proposal's advancement.
 
-Testing in \textbf{more realistic environments} would reveal practical deployment characteristics. This includes evaluating larger message sizes, examining error conditions and recovery mechanisms, and validating how different types of I2C transactions perform under WebAssembly constraints.
+Testing in \textbf{more realistic environments} would reveal practical deployment characteristics. This includes evaluating larger message sizes, examining error conditions and recovery mechanisms, and validating how different types of \acrshort{i2c} transactions perform under WebAssembly constraints.
+
+\section*{Preview 1 Bindings Generation}
+\label{sec:fw-p1-bindgen}
+
+Developing a binding generator capable of producing Preview 1 compatible bindings from WIT files could provide significant value to the embedded WebAssembly ecosystem. The uncertainty surrounding whether resource-efficient WebAssembly runtimes will eventually provide component model support raises concerns about the long-term viability of using WASI standardized interfaces in resource-constrained environments.
+
+A Preview 1 compatible binding generator would enable resource-efficient runtimes focused on Preview 1 WASI support (such as WAMR) to directly utilize WIT-defined WASI interfaces without requiring manual binding implementation. This approach would substantially reduce developer overhead when interface specifications evolve, eliminating the need to manually adapt Preview 1 bindings each time the underlying interfaces change.
+
+Such a tool would bridge the gap between the sophisticated interface definition capabilities of the component model and the practical deployment requirements of embedded systems. It would allow the embedded community to benefit from standardized WASI interface development while maintaining compatibility with lightweight runtimes optimized for resource-constrained environments. This could accelerate adoption of emerging WASI interfaces in embedded applications and ensure that the embedded ecosystem remains aligned with broader WebAssembly standardization efforts.
 
 \section*{Preview 3 Integration}
 \label{sec:preview3-integration}
 
-\textbf{WASI 0.3} development, expected by November 2025, introduces native \textbf{async support} through stream<T> and future<T> types. Investigating how far async development has progressed and preparing the I2C interface for these capabilities could benefit embedded applications requiring asynchronous I2C operations.
+\textbf{WASI 0.3} development, expected by November 2025, introduces native \textbf{async support} through stream<T> and future<T> types. Investigating how far async development has progressed and preparing the \acrshort{i2c} interface for these capabilities could benefit embedded applications requiring asynchronous \acrshort{i2c} operations.
 
 \section*{Runtime Optimization}
 \label{sec:runtime-optimization}
@@ -33,24 +39,25 @@ The impact of \textbf{host-managed versus guest-managed heap} implementations re
 
 The current implementation's relationship to \textbf{Canonical ABI compliance} warrants investigation. Determining whether Canonical ABI compatibility can be achieved while maintaining embedded optimizations would improve interoperability when other components/modules interact with the interface.
 
-Re-evaluating the current definition of the I2C interface could bring additional functionality or reduce developer overhead. For example, \textbf{expanding the interface} to include \textbf{I2C resource allocation} mechanisms would remove the need for manually defining a function in WIT-files for acquiring an I2C resource. This could enhance capability-based security implementation by providing the developer with best-practice suggestions through optional parameters and provide fine-grained access control.
+Re-evaluating the current definition of the \acrshort{i2c} interface could bring additional functionality or reduce developer overhead. For example, \textbf{expanding the interface} to include \textbf{\acrshort{i2c} resource acquisition} would remove the need for manually defining a function in WIT-files for acquiring an \acrshort{i2c} resource. This could enhance capability-based security implementation by providing the developer with best-practice suggestions through optional parameters and provide fine-grained access control.
 
 \section*{Performance and Compatibility Analysis}
 \label{sec:performance-compatibility}
 
 \textbf{Distinguishing pure Preview 1 versus Preview 2 performance characteristics}, independent of runtime choice, would clarify whether observed differences stem from WASI version capabilities or runtime implementation strategies. WAMR only supports Preview 1 features and Wasmtime's internal architecture uses Preview 2 techniques even when loading Preview 1 modules~\cite{wasmtime_and_cranelift_2023}~\cite{wasmtime_p1_crate_docs}~\cite{wasmtime_p2_crate_docs}, making this distinction valuable but also difficult to achieve.
 
-\textbf{Comparative benchmarking across different WASI interfaces} would establish whether I2C performance patterns generalize to other hardware interfaces or represent interface-specific characteristics.
+\textbf{Comparative benchmarking across different WASI interfaces} would establish whether \acrshort{i2c} performance patterns generalize to other hardware interfaces or represent interface-specific characteristics.
 
 \section*{Security and Hardware Validation}
 \label{sec:security-hardware}
 
 \textbf{Security implementation} and analysis represent an underdeveloped aspect of embedded WebAssembly deployment. Examining capability-based security models for hardware interfaces could establish deployment best practices. This could be even more important with the upcoming async-ready Preview 3.
 
-\textbf{Hardware-level validation} using oscilloscopes to measure electrical signals and verify I2C protocol compliance would confirm that WebAssembly implementations produce correct hardware behavior. This could determine whether peripheral connectivity issues stem from software implementation problems or hardware limitations. In addition, performance of the I2C peripheral could be measured and subtracted from the total latency. This would give more insight into the overhead only caused by the I2C controller, thus achieving even more accurate WebAssembly overhead measurements.
+\textbf{Hardware-level validation} using oscilloscopes to measure electrical signals and verify \acrshort{i2c} protocol compliance would confirm that WebAssembly implementations produce correct hardware behavior. This could determine whether peripheral connectivity issues stem from software implementation problems or hardware limitations. In addition, performance of the \acrshort{i2c} Target could be measured and subtracted from the total latency. This would give more insight into the overhead only caused by the \acrshort{i2c} controller, thus achieving even more accurate WebAssembly overhead measurements.
 
+\section*{Other WebAssembly Runtimes}
 
-
+Research can be extended to other WebAssembly Runtimes, like Wasmer~\cite{wasmer_git}. What do they do differently? What is their take on WASI? What problems do they address? How does their performance relate to other runtimes when using the WASI \acrshort{i2c} interface?
 
 
 
